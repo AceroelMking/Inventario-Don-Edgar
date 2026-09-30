@@ -1,0 +1,183 @@
+@startuml ERD_Don_Edgar
+
+left to right direction
+
+skinparam backgroundColor white
+skinparam shadowing false
+
+skinparam rectangle {
+    BackgroundColor #E8F0FB
+    BorderColor #3D6EA8
+}
+
+skinparam usecase {
+    BackgroundColor #F5F9FE
+    BorderColor #5B82B2
+}
+
+' =====================================================
+' ENTIDADES
+' =====================================================
+
+rectangle "CATEGORIA" as CATEGORIA
+rectangle "PRODUCTO" as PRODUCTO
+rectangle "LOTE" as LOTE
+rectangle "VENTA" as VENTA
+rectangle "DETALLE_VENTA" as DETALLE_VENTA
+rectangle "ALERTA" as ALERTA
+
+
+' =====================================================
+' ATRIBUTOS - CATEGORIA
+' =====================================================
+
+usecase "id_categoria (PK)" as CAT_ID
+usecase "nombre" as CAT_NOMBRE
+
+CATEGORIA -- CAT_ID
+CATEGORIA -- CAT_NOMBRE
+
+
+' =====================================================
+' ATRIBUTOS - PRODUCTO
+' =====================================================
+
+usecase "id_producto (PK)" as PROD_ID
+usecase "codigo_barras" as PROD_CODIGO
+usecase "nombre" as PROD_NOMBRE
+usecase "marca" as PROD_MARCA
+usecase "cantidad" as PROD_CANTIDAD
+usecase "unidad_medida" as PROD_UNIDAD
+usecase "unidad_agrupada" as PROD_AGRUPADA
+usecase "precio_venta" as PROD_PRECIO
+usecase "existencias" as PROD_EXISTENCIAS
+usecase "existencias_minimas" as PROD_MINIMAS
+
+PRODUCTO -- PROD_ID
+PRODUCTO -- PROD_CODIGO
+PRODUCTO -- PROD_NOMBRE
+PRODUCTO -- PROD_MARCA
+PRODUCTO -- PROD_CANTIDAD
+PRODUCTO -- PROD_UNIDAD
+PRODUCTO -- PROD_AGRUPADA
+PRODUCTO -- PROD_PRECIO
+PRODUCTO -- PROD_EXISTENCIAS
+PRODUCTO -- PROD_MINIMAS
+
+
+' =====================================================
+' ATRIBUTOS - LOTE
+' =====================================================
+
+usecase "id_lote (PK)" as LOTE_ID
+usecase "numero_lote" as LOTE_NUMERO
+usecase "fecha_registro" as LOTE_FECHA_REG
+usecase "fecha_vencimiento" as LOTE_FECHA_VENC
+usecase "cantidad_entrada" as LOTE_CANTIDAD
+usecase "precio_compra" as LOTE_PRECIO
+
+LOTE -- LOTE_ID
+LOTE -- LOTE_NUMERO
+LOTE -- LOTE_FECHA_REG
+LOTE -- LOTE_FECHA_VENC
+LOTE -- LOTE_CANTIDAD
+LOTE -- LOTE_PRECIO
+
+
+' =====================================================
+' ATRIBUTOS - VENTA
+' =====================================================
+
+usecase "id_venta (PK)" as VENTA_ID
+usecase "total" as VENTA_TOTAL
+usecase "fecha" as VENTA_FECHA
+usecase "hora" as VENTA_HORA
+usecase "pago" as VENTA_PAGO
+
+VENTA -- VENTA_ID
+VENTA -- VENTA_TOTAL
+VENTA -- VENTA_FECHA
+VENTA -- VENTA_HORA
+VENTA -- VENTA_PAGO
+
+
+' =====================================================
+' ATRIBUTOS - DETALLE_VENTA
+' =====================================================
+
+usecase "venta_id (FK)" as DET_VENTA_ID
+usecase "producto_id (FK)" as DET_PRODUCTO_ID
+usecase "cantidad" as DET_CANTIDAD
+usecase "valor_individual" as DET_VALOR
+
+DETALLE_VENTA -- DET_VENTA_ID
+DETALLE_VENTA -- DET_PRODUCTO_ID
+DETALLE_VENTA -- DET_CANTIDAD
+DETALLE_VENTA -- DET_VALOR
+
+
+' =====================================================
+' ATRIBUTOS - ALERTA
+' =====================================================
+
+usecase "id_alerta (PK)" as ALERTA_ID
+usecase "titulo" as ALERTA_TITULO
+usecase "cuerpo" as ALERTA_CUERPO
+
+ALERTA -- ALERTA_ID
+ALERTA -- ALERTA_TITULO
+ALERTA -- ALERTA_CUERPO
+
+
+' =====================================================
+' RELACIONES
+' =====================================================
+
+usecase "CLASIFICA" as R_CLASIFICA
+usecase "TIENE" as R_TIENE
+usecase "INCLUYE" as R_INCLUYE
+usecase "CONTIENE" as R_CONTIENE
+usecase "GENERA" as R_GENERA
+
+
+' =====================================================
+' CATEGORIA - PRODUCTO
+' =====================================================
+
+CATEGORIA "1" -- R_CLASIFICA
+R_CLASIFICA -- "N" PRODUCTO
+
+
+' =====================================================
+' PRODUCTO - LOTE
+' =====================================================
+
+PRODUCTO "1" -- R_TIENE
+R_TIENE -- "N" LOTE
+
+
+' =====================================================
+' PRODUCTO - DETALLE_VENTA
+' =====================================================
+
+PRODUCTO "1" -- R_INCLUYE
+R_INCLUYE -- "N" DETALLE_VENTA
+
+
+' =====================================================
+' VENTA - DETALLE_VENTA
+' =====================================================
+
+VENTA "1" -- R_CONTIENE
+R_CONTIENE -- "N" DETALLE_VENTA
+
+
+' =====================================================
+' PRODUCTO - ALERTA
+' =====================================================
+
+PRODUCTO "1" -- R_GENERA
+R_GENERA -- "N" ALERTA
+
+
+@enduml

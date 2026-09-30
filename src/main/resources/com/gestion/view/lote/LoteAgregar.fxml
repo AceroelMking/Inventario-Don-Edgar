@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="20.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gestion.controller.producto.ProductoFormularioControlador">
+   <children>
+      <Label alignment="TOP_CENTER" text="Agregar movimiento de inventario">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <HBox alignment="CENTER" maxHeight="50.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Lote" textAlignment="CENTER" />
+                  <TextField fx:id="txtLote" minWidth="200.0" promptText="Numero de lote">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </TextField>
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Producto" textAlignment="CENTER" />
+                  <ComboBox fx:id="txtProducto" editable="true" minWidth="200.0" promptText="Producto" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" maxHeight="50.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Fecha de expedicion" textAlignment="CENTER" />
+                  <DatePicker fx:id="txtFechaExpedicion" minWidth="200.0" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Fecha de vencimiento" textAlignment="CENTER" />
+                  <DatePicker fx:id="txtFechaVencimiento" minWidth="200.0" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" maxHeight="50.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Fecha de registro" textAlignment="CENTER" />
+                  <DatePicker fx:id="txtFechaRegistro" disable="true" minWidth="200.0" promptText="%key.unspecified" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Volumen de movimiento" textAlignment="CENTER" />
+                  <TextField fx:id="txtVolumen" minWidth="200.0" promptText="Cantidad">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" maxHeight="50.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Valor de la transaccion" textAlignment="CENTER" />
+                  <TextField fx:id="txtValor" minWidth="200.0" promptText="Valor monetario">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Motivo" textAlignment="CENTER" />
+                  <ChoiceBox fx:id="seleccionMotivo" minWidth="200.0" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" maxHeight="45.0" spacing="20.0">
+         <children>
+            <Button fx:id="botonAceptar" mnemonicParsing="false" onAction="#aceptar" text="Aceptar" />
+            <Button fx:id="botonCancelar" mnemonicParsing="false" onAction="#cancelar" text="Cancelar" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>

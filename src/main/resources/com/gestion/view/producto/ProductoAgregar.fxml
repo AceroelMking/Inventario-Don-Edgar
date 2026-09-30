@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="20.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gestion.controller.producto.ProductoFormularioControlador">
+   <children>
+      <Label alignment="TOP_CENTER" text="Agregar producto">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <HBox alignment="CENTER" maxHeight="50.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Codigo de barras" textAlignment="CENTER" />
+                  <TextField fx:id="txtCodigoBarras" minWidth="200.0" promptText="Codigo de barras">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </TextField>
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Nombre del producto" textAlignment="CENTER" />
+                  <TextField fx:id="txtNombreProducto" minWidth="200.0" promptText="Nombre del producto">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" maxHeight="50.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Marca o distribuidor" textAlignment="CENTER" />
+                  <TextField fx:id="txtMarca" minWidth="200.0" promptText="Marca o distribuidor">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Categoria de producto" textAlignment="CENTER" />
+                  <ChoiceBox fx:id="seleccionCategoria" minWidth="200.0" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" maxHeight="50.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Precio" textAlignment="CENTER" />
+                  <TextField fx:id="txtPrecio" minWidth="200.0" promptText="Precio">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Cantidad de producto" textAlignment="CENTER" />
+                  <TextField fx:id="txtCantidadProducto" minWidth="200.0" promptText="Cantidad de producto">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" maxHeight="50.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <RadioButton fx:id="unidadMedida" mnemonicParsing="false" selected="true" text="Unidad de medida">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="grupoTipoUnidad" />
+                     </toggleGroup>
+                  </RadioButton>
+                  <ChoiceBox fx:id="seleccionUnidadMedida" minWidth="200.0" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <RadioButton fx:id="unidadAgrupada" mnemonicParsing="false" text="Unidad agrupada" toggleGroup="$grupoTipoUnidad" />
+                  <ComboBox fx:id="txtUnidadAgrupada" disable="true" editable="true" minWidth="200.0" promptText="Unidad agrupada" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" maxHeight="50.0" spacing="20.0">
+         <children>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Existencias" textAlignment="CENTER" />
+                  <TextField fx:id="txtExistencias" disable="true" minWidth="200.0" promptText="Existencias">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <Label text="Minimo de existencias" textAlignment="CENTER" />
+                  <TextField fx:id="txtMinimoExistencias" minWidth="200.0" promptText="Minimo de existencias">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" maxHeight="45.0" spacing="20.0">
+         <children>
+            <Button fx:id="botonAceptar" mnemonicParsing="false" onAction="#aceptar" text="Aceptar" />
+            <Button fx:id="botonCancelar" mnemonicParsing="false" onAction="#cancelar" text="Cancelar" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>

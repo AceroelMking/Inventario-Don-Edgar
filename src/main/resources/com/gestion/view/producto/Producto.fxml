@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gestion.controller.producto.ProductoControlador">
+   <children>
+      <GridPane alignment="TOP_CENTER">
+         <columnConstraints>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Label text="Productos" textAlignment="CENTER" GridPane.columnIndex="1">
+               <font>
+                  <Font size="30.0" />
+               </font>
+            </Label>
+            <Button fx:id="botonAgregar" contentDisplay="CENTER" mnemonicParsing="false" onAction="#abrirFormularioAgregar" text="Agregar producto" textAlignment="CENTER" GridPane.columnIndex="2" />
+            <Button fx:id="botonCategorias" mnemonicParsing="false" onAction="#abrirCategorias" text="Categorias de productos" textAlignment="CENTER" />
+         </children>
+      </GridPane>
+      <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+         <children>
+            <HBox alignment="TOP_CENTER" spacing="10.0">
+               <children>
+                  <ComboBox fx:id="filtroCodigoBarras" editable="true" promptText="Codigo de barras" />
+                  <ComboBox fx:id="filtroNombre" editable="true" promptText="Nombre de producto" />
+                  <ComboBox fx:id="filtroMarca" editable="true" promptText="Marca/Distribuidor" />
+                  <ComboBox fx:id="filtroNombreCategoria" editable="true" promptText="Categoria" />
+               </children>
+            </HBox>
+            <TableView fx:id="tablaProductos">
+               <columns>
+                  <TableColumn fx:id="columnaCodigo" text="Codigo" />
+                  <TableColumn fx:id="columnaNombre" text="Nombre" />
+                  <TableColumn fx:id="columnaMarca" text="Marca/Distribuidor" />
+                  <TableColumn fx:id="columnaCategoria" prefWidth="75.0" text="Categoria" />
+                  <TableColumn fx:id="columnaCantidad" text="Cantidad" />
+                  <TableColumn fx:id="columnaUnidadMedida" text="Unidad medida" />
+                  <TableColumn fx:id="columnaProductoPadre" text="Unidad agrupada" />
+                  <TableColumn fx:id="columnaPrecio" text="Precio" />
+                  <TableColumn fx:id="columnaExistencias" text="Existencias" />
+                  <TableColumn fx:id="columnaMinimoExistencias" text="Min existencias" />
+                  <TableColumn fx:id="columnaEditar" text="Editar" />
+               </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </children>
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+</VBox>
