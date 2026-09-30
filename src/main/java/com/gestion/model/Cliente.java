@@ -4,7 +4,7 @@ public class Cliente {
     private int id;
     private Persona persona = new Persona();
     private String correoElectronico;
-    private int telefono;
+    private String telefono;
     private Double saldo;
 
     // Getters
@@ -20,7 +20,7 @@ public class Cliente {
       return correoElectronico; 
     }
 
-    public int conseguirTelefono() {
+    public String conseguirTelefono() {
       return telefono; 
     }
 
@@ -41,7 +41,7 @@ public class Cliente {
       this.correoElectronico = correoElectronico; 
     }
 
-    public void colocarTelefono(int telefono) { 
+    public void colocarTelefono(String telefono) { 
       this.telefono = telefono; 
     }
 
@@ -51,4 +51,4 @@ public class Cliente {
     
     // Metodos
 
-}
+    }

@@ -270,9 +270,32 @@ public class ProductoRepositorio {
     }
 
     //UNICOS
-    public Producto consultarCodigoBarrasUnico(int codigoBarras) {
-        return consultarProducto(codigoBarras, CONSULTA_PRODUCTO_CODIGO_BARRAS);
+
+public Producto consultarCodigoBarrasUnico(String codigoBarras) {
+    Producto producto = new Producto();
+
+    try (
+        Connection conexion = ConexionBaseDatos.conectar();
+        PreparedStatement sentenciaPreparada =
+            conexion.prepareStatement(CONSULTA_PRODUCTO_CODIGO_BARRAS)
+    ) {
+
+        sentenciaPreparada.setString(1, codigoBarras);
+
+        try (ResultSet conjuntoResultados = sentenciaPreparada.executeQuery()) {
+            if (conjuntoResultados.next()) {
+                producto = convertirProducto(conjuntoResultados);
+            }
+        }
+
+    } catch (SQLException e) {
+        throw new RuntimeException(
+            "Error al consultar producto por código de barras", e
+        );
     }
+
+    return producto;
+}
 
     public Producto consultarProductoDesactivado(int id) {
         return consultarProducto(id, CONSULTA_PRODUCTO_DESACTIVADO);

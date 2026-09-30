@@ -33,7 +33,7 @@ public class MenuLateralControlador {
     @FXML
     private void abrirProductos() {
         try {
-            cargarVista("/producto/Producto.fxml");
+            cargarVista("producto/Producto.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,9 +42,17 @@ public class MenuLateralControlador {
     @FXML
     private void abrirLotes() {
         try {
-            cargarVista("/producto/Producto.fxml");
+            cargarVista("lote/Lote.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    @FXML
+    private void abrirClientes() {
+    try {
+        cargarVista("cliente/Cliente.fxml");
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
     }
 }

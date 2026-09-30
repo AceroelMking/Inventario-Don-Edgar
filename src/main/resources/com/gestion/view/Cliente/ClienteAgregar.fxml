@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="520.0"
+      spacing="20"
+      stylesheets="@../css/estilos.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gestion.controller.cliente.ClienteFormularioControlador">
+
+    <padding>
+        <Insets top="30" right="35" bottom="30" left="35"/>
+    </padding>
+
+    <VBox spacing="5">
+        <Label text="Nuevo cliente"
+               styleClass="titulo-formulario"/>
+
+        <Label text="Registra la información básica del cliente."
+               styleClass="texto-ayuda"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Nombre completo"
+               styleClass="titulo-tarjeta"/>
+
+        <TextField fx:id="txtNombre"
+                   promptText="Ej. Juan Pérez"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Número de identificación"
+               styleClass="titulo-tarjeta"/>
+
+        <TextField fx:id="txtIdentificacion"
+                   promptText="Ej. 1020304050"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Teléfono"
+               styleClass="titulo-tarjeta"/>
+
+        <TextField fx:id="txtTelefono"
+                   promptText="Ej. 3001234567"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Correo electrónico"
+               styleClass="titulo-tarjeta"/>
+
+        <TextField fx:id="txtCorreo"
+                   promptText="Ej. cliente@correo.com"/>
+    </VBox>
+
+    <Region prefHeight="5"/>
+
+    <HBox alignment="CENTER_RIGHT"
+          spacing="10">
+
+        <Button fx:id="botonCancelar"
+                text="Cancelar"
+                onAction="#cancelar"
+                styleClass="boton-secundario"/>
+
+        <Button text="Guardar cliente"
+                onAction="#guardar"
+                styleClass="boton-principal"/>
+
+    </HBox>
+
+</VBox>
