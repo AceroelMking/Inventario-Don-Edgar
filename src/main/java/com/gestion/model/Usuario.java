@@ -1,63 +1,67 @@
 package com.gestion.model;
 
 public class Usuario {
+
+    private Integer id;
     private Persona persona = new Persona();
     private String nombreUsuario;
     private String correoElectronico;
-    // private String rol;
-    private int telefono;
+    private String telefono;
     private String contrasena;
 
-    // Getters
-    public Persona conseguirPersona() { 
-      return persona; 
+    public Integer conseguirId() {
+        return id;
     }
 
-    public String conseguirNombreUsuario() { 
-      return nombreUsuario; 
+    public Persona conseguirPersona() {
+        return persona;
     }
 
-    public String conseguirCorreoElectronico() { 
-      return correoElectronico; 
+    public String conseguirNombreUsuario() {
+        return nombreUsuario;
     }
 
-    /*public String conseguirRol() { 
-      return rol; 
-    }*/
+    public String conseguirCorreoElectronico() {
+        return correoElectronico;
+    }
 
-    public int conseguirTelefono() {
-      return telefono; 
+    public String conseguirTelefono() {
+        return telefono;
     }
 
     public String conseguirContrasena() {
-      return contrasena; 
+        return contrasena;
     }
 
-    // Setters
-    public void colocarNombre(Persona persona) { 
-      this.persona = persona; 
+    public void colocarId(Integer id) {
+        this.id = id;
     }
 
-    public void colocarNombreUsuario(String nombreUsuario) { 
-      this.nombreUsuario = nombreUsuario; 
+    public void colocarNombre(Persona persona) {
+        this.persona = persona;
     }
 
-    public void colocarCorreoElectronico(String correoElectronico) { 
-      this.correoElectronico = correoElectronico; 
+    public void colocarNombreUsuario(
+        String nombreUsuario
+    ) {
+        this.nombreUsuario = nombreUsuario;
     }
 
-    /*public void colocarRol(String rol) { 
-      this.rol = rol; 
-    }*/
-
-    public void colocarTelefono(int telefono) { 
-      this.telefono = telefono; 
-    }
-    
-    public void colocarContrasena(String contrasena) { 
-      this.contrasena = contrasena; 
+    public void colocarCorreoElectronico(
+        String correoElectronico
+    ) {
+        this.correoElectronico = correoElectronico;
     }
 
-    // Metodos
+    public void colocarTelefono(
+        String telefono
+    ) {
+        this.telefono = telefono;
+    }
 
+    public void colocarContrasena(
+        String contrasena
+    ) {
+        this.contrasena = contrasena;
+    }
 }

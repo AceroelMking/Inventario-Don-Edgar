@@ -808,24 +808,65 @@ public class ClienteControlador {
 
     private void eliminarCliente(
         Cliente cliente
-    ) {
+        ) {
+
+        if (cliente == null) {
+            return;
+        }
+
+        double saldoPendiente =
+            cliente.conseguirSaldo() == null
+                ? 0.0
+                : cliente.conseguirSaldo();
+
+        /*
+        * No permitir eliminar clientes
+        * que todavía tengan deuda.
+        */
+        if (saldoPendiente > 0) {
+
+            Alert alerta =
+                new Alert(
+                    Alert.AlertType.WARNING
+                );
+
+            alerta.setTitle(
+                "Cliente con saldo pendiente"
+            );
+
+            alerta.setHeaderText(
+                "No se puede eliminar este cliente."
+            );
+
+            alerta.setContentText(
+                "El cliente todavía tiene un saldo pendiente de $"
+                + String.format(
+                    "%,.0f",
+                    saldoPendiente
+                )
+                + ".\n\n"
+                + "Debe registrar los abonos correspondientes "
+                + "hasta dejar el saldo en cero antes de eliminarlo."
+            );
+
+            alerta.showAndWait();
+
+            return;
+        }
 
         String nombre =
             cliente
                 .conseguirPersona()
                 .conseguirNombre();
 
-
         Alert confirmacion =
             new Alert(
                 Alert.AlertType.CONFIRMATION
             );
 
-
         confirmacion.setTitle(
             "Eliminar cliente"
         );
-
 
         confirmacion.setHeaderText(
             "¿Desea eliminar al cliente "
@@ -833,12 +874,10 @@ public class ClienteControlador {
             + "?"
         );
 
-
         confirmacion.setContentText(
             "El cliente dejará de estar disponible, "
             + "pero su historial de ventas se conservará."
         );
-
 
         ButtonType respuesta =
             confirmacion
@@ -847,11 +886,9 @@ public class ClienteControlador {
                     ButtonType.CANCEL
                 );
 
-
         if (respuesta != ButtonType.OK) {
             return;
         }
-
 
         try {
 
@@ -859,15 +896,12 @@ public class ClienteControlador {
                 cliente.conseguirId()
             );
 
-
             cargarClientes();
-
 
             new Alert(
                 Alert.AlertType.INFORMATION,
                 "Cliente eliminado correctamente."
             ).showAndWait();
-
 
         } catch (RuntimeException e) {
 

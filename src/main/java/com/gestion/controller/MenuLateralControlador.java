@@ -6,6 +6,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 public class MenuLateralControlador {
 
@@ -109,6 +111,54 @@ public class MenuLateralControlador {
 
         } catch (IOException e) {
 
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void abrirConfiguracionUsuario() {
+
+        try {
+            cargarVista(
+                "ConfiguracionUsuario.fxml"
+            );
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void cerrarSesion() {
+
+        try {
+
+            FXMLLoader loader =
+                new FXMLLoader(
+                    getClass().getResource(
+                        "/com/gestion/view/Acceso.fxml"
+                    )
+                );
+
+            Parent acceso =
+                loader.load();
+
+            Stage stage =
+                (Stage) panelBordes
+                    .getScene()
+                    .getWindow();
+
+            stage.setScene(
+                new Scene(acceso)
+            );
+
+            stage.setTitle(
+                "Víveres y Cárnicos Don Edgar - Acceso"
+            );
+
+            stage.centerOnScreen();
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

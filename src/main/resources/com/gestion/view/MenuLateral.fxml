@@ -104,6 +104,14 @@
                     alignment="CENTER_LEFT"
                     styleClass="boton-menu"/>
 
+            <!-- CONFIGURACIÓN -->
+
+            <Button text="Cambiar credenciales"
+                    onAction="#abrirConfiguracionUsuario"
+                    maxWidth="Infinity"
+                    alignment="CENTER_LEFT"
+                    styleClass="boton-menu"/>    
+
 
             <!-- ESPACIO -->
 
@@ -113,6 +121,7 @@
             <!-- CERRAR SESIÓN -->
 
             <Button text="Cerrar sesión"
+                    onAction="#cerrarSesion"
                     maxWidth="Infinity"
                     alignment="CENTER_LEFT"
                     styleClass="boton-menu"/>

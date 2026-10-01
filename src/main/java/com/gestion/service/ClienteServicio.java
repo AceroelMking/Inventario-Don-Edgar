@@ -116,12 +116,40 @@ public class ClienteServicio {
 
     public void eliminarCliente(int idCliente) {
 
-    if (idCliente <= 0) {
-        throw new IllegalArgumentException(
-            "El ID del cliente no es válido."
-        );
-    }
+        if (idCliente <= 0) {
+            throw new IllegalArgumentException(
+                "El ID del cliente no es válido."
+            );
+        }
 
-    clienteRepositorio.eliminarCliente(idCliente);
+        Cliente cliente =
+            clienteRepositorio.consultarCliente(idCliente);
+
+        if (cliente == null) {
+            throw new IllegalArgumentException(
+                "El cliente no existe."
+            );
+        }
+
+        double saldoPendiente =
+            cliente.conseguirSaldo() == null
+                ? 0.0
+                : cliente.conseguirSaldo();
+
+        if (saldoPendiente > 0) {
+            throw new IllegalArgumentException(
+                "No se puede eliminar el cliente porque "
+                + "tiene un saldo pendiente de $"
+                + String.format(
+                    "%,.0f",
+                    saldoPendiente
+                )
+                + "."
+            );
+        }
+
+        clienteRepositorio.eliminarCliente(
+            idCliente
+        );
     }
 }
