@@ -82,14 +82,16 @@
                     styleClass="boton-menu"/>
 
             <Button text="Ventas"
+                    onAction="#abrirVentas"
                     maxWidth="Infinity"
                     alignment="CENTER_LEFT"
                     styleClass="boton-menu"/>
 
             <Button text="Reportes"
-                    maxWidth="Infinity"
-                    alignment="CENTER_LEFT"
-                    styleClass="boton-menu"/>
+                     onAction="#abrirReportes"
+                     maxWidth="Infinity"
+                     alignment="CENTER_LEFT"
+                     styleClass="boton-menu"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 

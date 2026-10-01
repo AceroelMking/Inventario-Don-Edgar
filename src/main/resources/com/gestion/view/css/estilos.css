@@ -277,3 +277,15 @@
 .boton-editar:hover {
     -fx-background-color: #dce8df;
 }
+
+.total-venta {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #315c40;
+}
+
+.saldo-venta {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #8a5a32;
+}

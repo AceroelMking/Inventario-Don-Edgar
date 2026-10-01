@@ -14,15 +14,16 @@ import javafx.collections.ObservableList;
 
 public class ClienteRepositorio {
 
-    private static final String CREAR_TABLA =
-        "CREATE TABLE IF NOT EXISTS cliente ("
-        + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-        + "nombre TEXT NOT NULL, "
-        + "numero_identidad TEXT NOT NULL UNIQUE, "
-        + "correo_electronico TEXT, "
-        + "telefono TEXT, "
-        + "saldo REAL NOT NULL DEFAULT 0"
-        + ");";
+   private static final String CREAR_TABLA =
+      "CREATE TABLE IF NOT EXISTS cliente ("
+      + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+      + "nombre TEXT NOT NULL, "
+      + "numero_identidad TEXT NOT NULL UNIQUE, "
+      + "correo_electronico TEXT, "
+      + "telefono TEXT, "
+      + "saldo REAL NOT NULL DEFAULT 0, "
+      + "activo INTEGER NOT NULL DEFAULT 1"
+      + ");";
 
     private static final String INSERTAR =
         "INSERT INTO cliente "
@@ -31,7 +32,8 @@ public class ClienteRepositorio {
 
     private static final String CONSULTAR_TODO =
         "SELECT id, nombre, numero_identidad, correo_electronico, "
-        + "telefono, saldo FROM cliente ORDER BY nombre;";
+        + "telefono, saldo FROM cliente "
+        + "WHERE activo = 1 ORDER BY nombre;";
 
     private static final String CONSULTAR_ID =
         "SELECT id, nombre, numero_identidad, correo_electronico, "
@@ -46,23 +48,36 @@ public class ClienteRepositorio {
         + "saldo = ? "
         + "WHERE id = ?;";
 
+    private static final String ELIMINAR_CLIENTE =
+        "UPDATE cliente SET activo = 0 WHERE id = ?;";
+
+    private static final String AGREGAR_COLUMNA_ACTIVO =
+        "ALTER TABLE cliente ADD COLUMN activo INTEGER NOT NULL DEFAULT 1;";
+
     public ClienteRepositorio() {
         generarTabla();
     }
 
     private void generarTabla() {
-        try (
-            Connection conexion = ConexionBaseDatos.conectar();
-            Statement sentencia = conexion.createStatement()
-        ) {
-            sentencia.execute(CREAR_TABLA);
+    try (
+        Connection conexion = ConexionBaseDatos.conectar();
+        Statement sentencia = conexion.createStatement()
+    ) {
+        sentencia.execute(CREAR_TABLA);
 
+        try {
+            sentencia.execute(AGREGAR_COLUMNA_ACTIVO);
         } catch (SQLException e) {
-            throw new RuntimeException(
-                "No se pudo crear la tabla cliente", e
-            );
+            // La columna ya existe.
         }
+
+    } catch (SQLException e) {
+        throw new RuntimeException(
+            "No se pudo crear o actualizar la tabla cliente",
+            e
+        );
     }
+} 
 
     public void agregarCliente(Cliente cliente) {
         try (
@@ -263,4 +278,30 @@ public class ClienteRepositorio {
 
         return cliente;
     }
+
+    public void eliminarCliente(int idCliente) {
+
+    try (
+        Connection conexion = ConexionBaseDatos.conectar();
+        PreparedStatement sentencia =
+            conexion.prepareStatement(ELIMINAR_CLIENTE)
+    ) {
+
+        sentencia.setInt(1, idCliente);
+
+        int filas = sentencia.executeUpdate();
+
+        if (filas == 0) {
+            throw new RuntimeException(
+                "No se encontró el cliente."
+            );
+        }
+
+    } catch (SQLException e) {
+        throw new RuntimeException(
+            "No se pudo eliminar el cliente.",
+            e
+        );
+    }
+}
 }

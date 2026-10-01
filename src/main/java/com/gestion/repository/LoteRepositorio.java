@@ -159,17 +159,116 @@ public class LoteRepositorio {
     }
 
     public void agregarLote(Lote lote) {
+
+    String actualizarExistencias =
+        "UPDATE producto "
+        + "SET existencias = COALESCE(existencias, 0) + ? "
+        + "WHERE id = ?;";
+
+    Connection conexion = null;
+
+    try {
+
+        conexion = ConexionBaseDatos.conectar();
+
+        conexion.setAutoCommit(false);
+
+        /*
+         * 1. Registrar el lote
+         */
         try (
-            Connection conexion = ConexionBaseDatos.conectar();
-            PreparedStatement sentenciaPreparada = conexion.prepareStatement(CONSULTA_INSERTAR)
+            PreparedStatement sentenciaLote =
+                conexion.prepareStatement(CONSULTA_INSERTAR)
         ) {
-            actualizarTablaLote(sentenciaPreparada, lote);
-            sentenciaPreparada.executeUpdate();
-        } catch (SQLException e) {
-            System.out.print("ERROR SQL: " + e);
-            throw new RuntimeException("No se pudo agregar lote ", e);
+
+            actualizarTablaLote(
+                sentenciaLote,
+                lote
+            );
+
+            sentenciaLote.executeUpdate();
+        }
+
+
+        /*
+         * 2. Aumentar las existencias
+         * del producto.
+         */
+        try (
+            PreparedStatement sentenciaExistencias =
+                conexion.prepareStatement(
+                    actualizarExistencias
+                )
+        ) {
+
+            sentenciaExistencias.setDouble(
+                1,
+                lote.conseguirCantidadMovimiento()
+            );
+
+            sentenciaExistencias.setInt(
+                2,
+                lote
+                    .conseguirProducto()
+                    .conseguirId()
+            );
+
+            int filasActualizadas =
+                sentenciaExistencias.executeUpdate();
+
+            if (filasActualizadas == 0) {
+
+                throw new SQLException(
+                    "No se encontró el producto asociado al lote."
+                );
+            }
+        }
+
+
+        /*
+         * Si ambas operaciones funcionan,
+         * confirmamos la transacción.
+         */
+        conexion.commit();
+
+
+    } catch (SQLException e) {
+
+        if (conexion != null) {
+
+            try {
+
+                conexion.rollback();
+
+            } catch (SQLException rollbackError) {
+
+                rollbackError.printStackTrace();
+            }
+        }
+
+        throw new RuntimeException(
+            "No se pudo registrar la entrada de inventario.",
+            e
+        );
+
+
+    } finally {
+
+        if (conexion != null) {
+
+            try {
+
+                conexion.setAutoCommit(true);
+
+                conexion.close();
+
+            } catch (SQLException e) {
+
+                e.printStackTrace();
+            }
         }
     }
+}
 
     // Read
 

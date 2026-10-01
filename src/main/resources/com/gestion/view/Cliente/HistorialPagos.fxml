@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox
+    xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.gestion.controller.cliente.HistorialPagosControlador"
+    spacing="15"
+    prefWidth="700"
+    prefHeight="500">
+
+    <padding>
+        <Insets
+            top="20"
+            right="20"
+            bottom="20"
+            left="20"/>
+    </padding>
+
+    <Label
+        text="Historial de abonos"
+        style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+
+    <HBox spacing="8">
+
+        <Label
+            text="Cliente:"
+            style="-fx-font-weight: bold;"/>
+
+        <Label
+            fx:id="lblCliente"/>
+
+    </HBox>
+
+    <HBox spacing="8">
+
+        <Label
+            text="Saldo pendiente:"
+            style="-fx-font-weight: bold;"/>
+
+        <Label
+            fx:id="lblSaldo"/>
+
+    </HBox>
+
+    <TableView
+        fx:id="tablaPagos"
+        VBox.vgrow="ALWAYS">
+
+        <columns>
+
+            <TableColumn
+                fx:id="columnaFecha"
+                text="Fecha"
+                prefWidth="170"/>
+
+            <TableColumn
+                fx:id="columnaMonto"
+                text="Monto"
+                prefWidth="130"/>
+
+            <TableColumn
+                fx:id="columnaObservacion"
+                text="Observación"
+                prefWidth="340"/>
+
+        </columns>
+
+        <placeholder>
+            <Label
+                text="El cliente todavía no tiene abonos registrados."/>
+        </placeholder>
+
+    </TableView>
+
+    <HBox
+        alignment="CENTER_RIGHT">
+
+        <Button
+            text="Cerrar"
+            onAction="#cerrar"/>
+
+    </HBox>
+
+</VBox>

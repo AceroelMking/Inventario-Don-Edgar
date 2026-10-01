@@ -110,7 +110,10 @@ public class ProductoControlador {
         columnaPrecio.setCellValueFactory(
             celda -> new SimpleObjectProperty<>(celda.getValue().conseguirPrecio()));
         columnaExistencias.setCellValueFactory(
-            celda -> new SimpleObjectProperty<>(celda.getValue().conseguirExistencias()));
+            celda -> new SimpleObjectProperty<>(
+        celda.getValue().conseguirExistencias()
+    )
+);
         columnaMinimoExistencias.setCellValueFactory(
             celda -> new SimpleObjectProperty<>(celda.getValue().conseguirMinimoExistencias()));
     }
@@ -284,5 +287,11 @@ public class ProductoControlador {
             alerta.setContentText(e.getMessage());
             alerta.showAndWait();
         }
+    }
+
+    @FXML
+    private void actualizarProductos() {
+        cargarProductos();
+        tablaProductos.refresh();
     }
 }

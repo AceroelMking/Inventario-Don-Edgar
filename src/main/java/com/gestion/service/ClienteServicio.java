@@ -113,4 +113,15 @@ public class ClienteServicio {
             );
         }
     }
+
+    public void eliminarCliente(int idCliente) {
+
+    if (idCliente <= 0) {
+        throw new IllegalArgumentException(
+            "El ID del cliente no es válido."
+        );
+    }
+
+    clienteRepositorio.eliminarCliente(idCliente);
+    }
 }

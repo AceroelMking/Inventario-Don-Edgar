@@ -355,7 +355,9 @@ public class ProductoFormularioControlador {
             return;
         }
 ///////////// Validacion Exixtencias //////////////////////////////////////////////////////////
-        producto.colocarExistencias(0.0); // ¡NO SE PUEDE MODIFICAR ESTE CAMPO DESDE ESTA TABLA, SOLO DESDE LOTES!
+        if (producto.conseguirId() == null) {
+         producto.colocarExistencias(0.0);
+        } // ¡NO SE PUEDE MODIFICAR ESTE CAMPO DESDE ESTA TABLA, SOLO DESDE LOTES!
 ///////////// Validacion Minimo de existencias //////////////////////////////////////////////////////////
         if (txtMinimoExistencias.getText() == null || txtMinimoExistencias.getText().isBlank()) {
             new Alert(

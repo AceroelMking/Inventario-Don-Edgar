@@ -9,50 +9,107 @@ import javafx.scene.layout.BorderPane;
 
 public class MenuLateralControlador {
 
-    @FXML private BorderPane panelBordes;
-
-    /*
     @FXML
-    public void initialize() {
-        try {
-            cargarVista("");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    */
+    private BorderPane panelBordes;
 
-    private void cargarVista(String archivo) throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-            getClass().getResource("/com/gestion/view/" + archivo)
+
+    private void cargarVista(
+        String archivo
+    ) throws IOException {
+
+        FXMLLoader loader =
+            new FXMLLoader(
+                getClass().getResource(
+                    "/com/gestion/view/"
+                    + archivo
+                )
+            );
+
+        Parent vista =
+            loader.load();
+
+        panelBordes.setCenter(
+            vista
         );
-        Parent vista = loader.load();
-        panelBordes.setCenter(vista);
     }
+
 
     @FXML
     private void abrirProductos() {
+
         try {
-            cargarVista("producto/Producto.fxml");
+
+            cargarVista(
+                "producto/Producto.fxml"
+            );
+
         } catch (IOException e) {
+
             e.printStackTrace();
         }
     }
 
+
     @FXML
     private void abrirLotes() {
+
         try {
-            cargarVista("lote/Lote.fxml");
+
+            cargarVista(
+                "lote/Lote.fxml"
+            );
+
         } catch (IOException e) {
+
             e.printStackTrace();
         }
     }
+
+
     @FXML
     private void abrirClientes() {
-    try {
-        cargarVista("cliente/Cliente.fxml");
-    } catch (IOException e) {
-        e.printStackTrace();
+
+        try {
+
+            cargarVista(
+                "cliente/Cliente.fxml"
+            );
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
     }
+
+
+    @FXML
+    private void abrirVentas() {
+
+        try {
+
+            cargarVista(
+                "venta/Venta.fxml"
+            );
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+    }
+
+
+    @FXML
+    private void abrirReportes() {
+
+        try {
+
+            cargarVista(
+                "reporte/ReporteVentas.fxml"
+            );
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
     }
 }
