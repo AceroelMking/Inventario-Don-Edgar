@@ -25,14 +25,18 @@
     </padding>
 
 
+    <!-- ================================= -->
+    <!-- TÍTULO -->
+    <!-- ================================= -->
+
     <HBox alignment="CENTER_LEFT"
           spacing="10">
 
         <VBox spacing="5">
 
-            <Label text="Reporte de ventas"/>
+            <Label text="Reportes"/>
 
-            <Label text="Consulta y exportación de ventas registradas"/>
+            <Label text="Consulta y exportación de información"/>
 
         </VBox>
 
@@ -48,6 +52,28 @@
 
     </HBox>
 
+
+    <!-- ================================= -->
+    <!-- TIPOS DE REPORTE -->
+    <!-- ================================= -->
+
+    <HBox alignment="CENTER_LEFT"
+          spacing="10">
+
+        <Label text="Tipo de reporte:"/>
+
+        <Button text="Ventas"
+                disable="true"/>
+
+        <Button text="Inventario"
+                onAction="#abrirInventario"/>
+
+    </HBox>
+
+
+    <!-- ================================= -->
+    <!-- FILTROS -->
+    <!-- ================================= -->
 
     <HBox alignment="CENTER_LEFT"
           spacing="10">
@@ -73,6 +99,10 @@
 
     </HBox>
 
+
+    <!-- ================================= -->
+    <!-- TABLA -->
+    <!-- ================================= -->
 
     <TableView fx:id="tablaVentas"
                VBox.vgrow="ALWAYS">
@@ -125,8 +155,12 @@
     </TableView>
 
 
+    <!-- ================================= -->
+    <!-- RESUMEN -->
+    <!-- ================================= -->
+
     <HBox alignment="CENTER_LEFT"
-          spacing="30">
+          spacing="40">
 
         <VBox spacing="5">
 

@@ -1,6 +1,7 @@
 package com.gestion.controller.reporte;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,12 +17,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -33,10 +37,8 @@ public class ReporteVentasControlador {
     private final ReportePdfServicio reportePdfServicio =
         new ReportePdfServicio();
 
-
     private final ObservableList<Venta> ventas =
         FXCollections.observableArrayList();
-
 
     private final FilteredList<Venta> ventasFiltradas =
         new FilteredList<>(
@@ -105,6 +107,12 @@ public class ReporteVentasControlador {
         cargarVentas();
     }
 
+
+    /*
+     * =====================================================
+     * CONFIGURACIÓN DE LA TABLA
+     * =====================================================
+     */
 
     private void configurarTabla() {
 
@@ -189,6 +197,12 @@ public class ReporteVentasControlador {
     }
 
 
+    /*
+     * =====================================================
+     * FILTROS
+     * =====================================================
+     */
+
     private void configurarFiltros() {
 
         cmbMetodoPago
@@ -234,6 +248,12 @@ public class ReporteVentasControlador {
     }
 
 
+    /*
+     * =====================================================
+     * CARGAR VENTAS
+     * =====================================================
+     */
+
     private void cargarVentas() {
 
         try {
@@ -256,6 +276,12 @@ public class ReporteVentasControlador {
         }
     }
 
+
+    /*
+     * =====================================================
+     * APLICAR FILTROS
+     * =====================================================
+     */
 
     @FXML
     private void aplicarFiltros() {
@@ -303,6 +329,10 @@ public class ReporteVentasControlador {
         ventasFiltradas.setPredicate(
             venta -> {
 
+                /*
+                 * FILTRO POR MÉTODO DE PAGO
+                 */
+
                 if (
                     metodo != null
                     && !metodo.equalsIgnoreCase(
@@ -332,15 +362,39 @@ public class ReporteVentasControlador {
                 }
 
 
+                /*
+                 * CONVERTIR FECHA
+                 */
+
                 LocalDate fechaVenta =
                     convertirFecha(
                         venta.conseguirFecha()
                     );
 
 
+                /*
+                 * SI EXISTE FILTRO DE FECHA
+                 * PERO LA FECHA NO ES VÁLIDA
+                 */
+
+                if (
+                    (
+                        desde != null
+                        || hasta != null
+                    )
+                    && fechaVenta == null
+                ) {
+
+                    return false;
+                }
+
+
+                /*
+                 * FECHA DESDE
+                 */
+
                 if (
                     desde != null
-                    && fechaVenta != null
                     && fechaVenta.isBefore(
                         desde
                     )
@@ -350,29 +404,15 @@ public class ReporteVentasControlador {
                 }
 
 
+                /*
+                 * FECHA HASTA
+                 */
+
                 if (
                     hasta != null
-                    && fechaVenta != null
                     && fechaVenta.isAfter(
                         hasta
                     )
-                ) {
-
-                    return false;
-                }
-
-
-                /*
-                 * Si hay filtro de fecha y no
-                 * podemos interpretar la fecha
-                 * almacenada, no mostramos la venta.
-                 */
-                if (
-                    (
-                        desde != null
-                        || hasta != null
-                    )
-                    && fechaVenta == null
                 ) {
 
                     return false;
@@ -389,6 +429,12 @@ public class ReporteVentasControlador {
         tablaVentas.refresh();
     }
 
+
+    /*
+     * =====================================================
+     * CONVERTIR FECHA
+     * =====================================================
+     */
 
     private LocalDate convertirFecha(
         String fecha
@@ -442,11 +488,22 @@ public class ReporteVentasControlador {
     }
 
 
+    /*
+     * =====================================================
+     * ACTUALIZAR TOTALES
+     * =====================================================
+     */
+
     private void actualizarTotales() {
 
-        double totalVendido = 0.0;
-        double totalPagado = 0.0;
-        double totalPendiente = 0.0;
+        double totalVendido =
+            0.0;
+
+        double totalPagado =
+            0.0;
+
+        double totalPendiente =
+            0.0;
 
 
         for (
@@ -456,7 +513,8 @@ public class ReporteVentasControlador {
 
             totalVendido +=
                 valorSeguro(
-                    venta.conseguirTotal()
+                    venta
+                        .conseguirTotal()
                 );
 
 
@@ -504,6 +562,12 @@ public class ReporteVentasControlador {
     }
 
 
+    /*
+     * =====================================================
+     * LIMPIAR FILTROS
+     * =====================================================
+     */
+
     @FXML
     private void limpiarFiltros() {
 
@@ -524,12 +588,68 @@ public class ReporteVentasControlador {
     }
 
 
+    /*
+     * =====================================================
+     * ACTUALIZAR
+     * =====================================================
+     */
+
     @FXML
     private void actualizar() {
 
         cargarVentas();
     }
 
+
+    /*
+     * =====================================================
+     * ABRIR REPORTE DE INVENTARIO
+     * =====================================================
+     */
+
+    @FXML
+    private void abrirInventario() {
+
+        try {
+
+            FXMLLoader loader =
+                new FXMLLoader(
+                    getClass().getResource(
+                        "/com/gestion/view/reporte/ReporteInventario.fxml"
+                    )
+                );
+
+
+            Parent vista =
+                loader.load();
+
+
+            BorderPane panelPrincipal =
+                (BorderPane) tablaVentas
+                    .getScene()
+                    .getRoot();
+
+
+            panelPrincipal.setCenter(
+                vista
+            );
+
+
+        } catch (IOException e) {
+
+            mostrarError(
+                "No se pudo abrir el reporte de inventario.",
+                e
+            );
+        }
+    }
+
+
+    /*
+     * =====================================================
+     * EXPORTAR PDF
+     * =====================================================
+     */
 
     @FXML
     private void exportarPdf() {
@@ -543,17 +663,21 @@ public class ReporteVentasControlador {
                     Alert.AlertType.WARNING
                 );
 
+
             alerta.setTitle(
                 "Reporte vacío"
             );
+
 
             alerta.setHeaderText(
                 null
             );
 
+
             alerta.setContentText(
                 "No existen ventas para exportar."
             );
+
 
             alerta.showAndWait();
 
@@ -597,11 +721,18 @@ public class ReporteVentasControlador {
             );
 
 
-        if (archivo == null) {
+        if (
+            archivo == null
+        ) {
 
             return;
         }
 
+
+        /*
+         * AGREGAR .PDF SI EL USUARIO
+         * NO LO ESCRIBIÓ
+         */
 
         if (
             !archivo
@@ -636,18 +767,22 @@ public class ReporteVentasControlador {
                     Alert.AlertType.INFORMATION
                 );
 
+
             alerta.setTitle(
                 "Reporte generado"
             );
+
 
             alerta.setHeaderText(
                 null
             );
 
+
             alerta.setContentText(
                 "El reporte PDF fue generado "
                 + "correctamente."
             );
+
 
             alerta.showAndWait();
 
@@ -662,6 +797,12 @@ public class ReporteVentasControlador {
     }
 
 
+    /*
+     * =====================================================
+     * OBTENER VENTAS FILTRADAS
+     * =====================================================
+     */
+
     private ObservableList<Venta>
         conseguirVentasFiltradas() {
 
@@ -671,6 +812,12 @@ public class ReporteVentasControlador {
             );
     }
 
+
+    /*
+     * =====================================================
+     * OBTENER NOMBRE DEL CLIENTE
+     * =====================================================
+     */
 
     private String conseguirNombreCliente(
         Venta venta
@@ -704,11 +851,19 @@ public class ReporteVentasControlador {
     }
 
 
+    /*
+     * =====================================================
+     * VALOR SEGURO
+     * =====================================================
+     */
+
     private double valorSeguro(
         Double valor
     ) {
 
-        if (valor == null) {
+        if (
+            valor == null
+        ) {
 
             return 0.0;
         }
@@ -718,11 +873,19 @@ public class ReporteVentasControlador {
     }
 
 
+    /*
+     * =====================================================
+     * TEXTO SEGURO
+     * =====================================================
+     */
+
     private String textoSeguro(
         String texto
     ) {
 
-        if (texto == null) {
+        if (
+            texto == null
+        ) {
 
             return "";
         }
@@ -731,6 +894,12 @@ public class ReporteVentasControlador {
         return texto;
     }
 
+
+    /*
+     * =====================================================
+     * FORMATO DE DINERO
+     * =====================================================
+     */
 
     private String formatoDinero(
         double valor
@@ -743,6 +912,12 @@ public class ReporteVentasControlador {
             );
     }
 
+
+    /*
+     * =====================================================
+     * MOSTRAR ERROR
+     * =====================================================
+     */
 
     private void mostrarError(
         String mensaje,
@@ -769,19 +944,23 @@ public class ReporteVentasControlador {
                 Alert.AlertType.ERROR
             );
 
+
         alerta.setTitle(
             "Error"
         );
 
+
         alerta.setHeaderText(
             null
         );
+
 
         alerta.setContentText(
             mensaje
             + "\n"
             + detalle
         );
+
 
         alerta.showAndWait();
 
