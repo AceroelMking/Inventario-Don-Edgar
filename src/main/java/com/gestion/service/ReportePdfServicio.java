@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import com.gestion.model.Cliente;
 import com.gestion.model.Producto;
 import com.gestion.model.Venta;
 import com.lowagie.text.Document;
@@ -29,30 +30,23 @@ public class ReportePdfServicio {
      */
 
     public void generarReporteVentas(
-        File archivo,
-        ObservableList<Venta> ventas,
-        LocalDate fechaDesde,
-        LocalDate fechaHasta,
-        String metodoPago
-    ) {
+            File archivo,
+            ObservableList<Venta> ventas,
+            LocalDate fechaDesde,
+            LocalDate fechaHasta,
+            String metodoPago) {
 
         if (archivo == null) {
-
             throw new IllegalArgumentException(
                 "Debe seleccionar un archivo."
             );
         }
 
-        if (
-            ventas == null
-            || ventas.isEmpty()
-        ) {
-
+        if (ventas == null || ventas.isEmpty()) {
             throw new IllegalArgumentException(
                 "No existen ventas para generar el reporte."
             );
         }
-
 
         Document documento =
             new Document(
@@ -63,19 +57,14 @@ public class ReportePdfServicio {
                 30
             );
 
-
         try {
 
             PdfWriter.getInstance(
                 documento,
-                new FileOutputStream(
-                    archivo
-                )
+                new FileOutputStream(archivo)
             );
 
-
             documento.open();
-
 
             Font fuenteTitulo =
                 FontFactory.getFont(
@@ -83,13 +72,11 @@ public class ReportePdfServicio {
                     18
                 );
 
-
             Font fuenteSubtitulo =
                 FontFactory.getFont(
                     FontFactory.HELVETICA_BOLD,
                     13
                 );
-
 
             Font fuenteNormal =
                 FontFactory.getFont(
@@ -97,16 +84,14 @@ public class ReportePdfServicio {
                     10
                 );
 
-
             Font fuenteEncabezado =
                 FontFactory.getFont(
                     FontFactory.HELVETICA_BOLD,
                     9
                 );
 
-
             /*
-             * TÍTULO DE LA EMPRESA
+             * EMPRESA
              */
 
             Paragraph empresa =
@@ -115,19 +100,14 @@ public class ReportePdfServicio {
                     fuenteTitulo
                 );
 
-
             empresa.setAlignment(
                 Element.ALIGN_CENTER
             );
 
-
-            documento.add(
-                empresa
-            );
-
+            documento.add(empresa);
 
             /*
-             * TÍTULO DEL REPORTE
+             * TÍTULO
              */
 
             Paragraph tituloReporte =
@@ -136,21 +116,13 @@ public class ReportePdfServicio {
                     fuenteSubtitulo
                 );
 
-
             tituloReporte.setAlignment(
                 Element.ALIGN_CENTER
             );
 
+            tituloReporte.setSpacingAfter(20);
 
-            tituloReporte.setSpacingAfter(
-                20
-            );
-
-
-            documento.add(
-                tituloReporte
-            );
-
+            documento.add(tituloReporte);
 
             /*
              * PERIODO
@@ -165,16 +137,9 @@ public class ReportePdfServicio {
                     fuenteNormal
                 );
 
+            periodo.setSpacingAfter(5);
 
-            periodo.setSpacingAfter(
-                5
-            );
-
-
-            documento.add(
-                periodo
-            );
-
+            documento.add(periodo);
 
             /*
              * MÉTODO DE PAGO
@@ -186,24 +151,15 @@ public class ReportePdfServicio {
                 ? "Todos"
                 : metodoPago;
 
-
             Paragraph metodoSeleccionado =
                 new Paragraph(
-                    "Método de pago: "
-                    + metodo,
+                    "Método de pago: " + metodo,
                     fuenteNormal
                 );
 
+            metodoSeleccionado.setSpacingAfter(15);
 
-            metodoSeleccionado.setSpacingAfter(
-                15
-            );
-
-
-            documento.add(
-                metodoSeleccionado
-            );
-
+            documento.add(metodoSeleccionado);
 
             /*
              * TABLA
@@ -212,11 +168,7 @@ public class ReportePdfServicio {
             PdfPTable tabla =
                 new PdfPTable(7);
 
-
-            tabla.setWidthPercentage(
-                100
-            );
-
+            tabla.setWidthPercentage(100);
 
             tabla.setWidths(
                 new float[] {
@@ -230,13 +182,11 @@ public class ReportePdfServicio {
                 }
             );
 
-
             agregarEncabezado(
                 tabla,
                 "ID",
                 fuenteEncabezado
             );
-
 
             agregarEncabezado(
                 tabla,
@@ -244,13 +194,11 @@ public class ReportePdfServicio {
                 fuenteEncabezado
             );
 
-
             agregarEncabezado(
                 tabla,
                 "Cliente",
                 fuenteEncabezado
             );
-
 
             agregarEncabezado(
                 tabla,
@@ -258,13 +206,11 @@ public class ReportePdfServicio {
                 fuenteEncabezado
             );
 
-
             agregarEncabezado(
                 tabla,
                 "Total",
                 fuenteEncabezado
             );
-
 
             agregarEncabezado(
                 tabla,
@@ -272,32 +218,17 @@ public class ReportePdfServicio {
                 fuenteEncabezado
             );
 
-
             agregarEncabezado(
                 tabla,
                 "Pendiente",
                 fuenteEncabezado
             );
 
+            double totalVendido = 0.0;
+            double totalPagado = 0.0;
+            double totalPendiente = 0.0;
 
-            double totalVendido =
-                0.0;
-
-            double totalPagado =
-                0.0;
-
-            double totalPendiente =
-                0.0;
-
-
-            /*
-             * RECORRER LAS VENTAS
-             */
-
-            for (
-                Venta venta
-                : ventas
-            ) {
+            for (Venta venta : ventas) {
 
                 String idVenta =
                     venta.conseguirId() == null
@@ -306,13 +237,11 @@ public class ReportePdfServicio {
                         venta.conseguirId()
                     );
 
-
                 agregarCelda(
                     tabla,
                     idVenta,
                     fuenteNormal
                 );
-
 
                 agregarCelda(
                     tabla,
@@ -322,7 +251,6 @@ public class ReportePdfServicio {
                     fuenteNormal
                 );
 
-
                 agregarCelda(
                     tabla,
                     conseguirNombreCliente(
@@ -331,81 +259,53 @@ public class ReportePdfServicio {
                     fuenteNormal
                 );
 
-
                 agregarCelda(
                     tabla,
                     textoSeguro(
-                        venta
-                            .conseguirMetodoPago()
+                        venta.conseguirMetodoPago()
                     ),
                     fuenteNormal
                 );
-
 
                 double total =
                     valorSeguro(
                         venta.conseguirTotal()
                     );
 
-
                 double pagado =
                     valorSeguro(
-                        venta
-                            .conseguirMontoPagado()
+                        venta.conseguirMontoPagado()
                     );
-
 
                 double pendiente =
                     valorSeguro(
-                        venta
-                            .conseguirSaldoPendiente()
+                        venta.conseguirSaldoPendiente()
                     );
 
-
                 agregarCelda(
                     tabla,
-                    formatoDinero(
-                        total
-                    ),
+                    formatoDinero(total),
                     fuenteNormal
                 );
 
-
                 agregarCelda(
                     tabla,
-                    formatoDinero(
-                        pagado
-                    ),
+                    formatoDinero(pagado),
                     fuenteNormal
                 );
 
-
                 agregarCelda(
                     tabla,
-                    formatoDinero(
-                        pendiente
-                    ),
+                    formatoDinero(pendiente),
                     fuenteNormal
                 );
 
-
-                totalVendido +=
-                    total;
-
-
-                totalPagado +=
-                    pagado;
-
-
-                totalPendiente +=
-                    pendiente;
+                totalVendido += total;
+                totalPagado += pagado;
+                totalPendiente += pendiente;
             }
 
-
-            documento.add(
-                tabla
-            );
-
+            documento.add(tabla);
 
             /*
              * RESUMEN
@@ -417,11 +317,7 @@ public class ReportePdfServicio {
                     fuenteNormal
                 );
 
-
-            resumen.setSpacingBefore(
-                20
-            );
-
+            resumen.setSpacingBefore(20);
 
             resumen.add(
                 new Phrase(
@@ -431,7 +327,6 @@ public class ReportePdfServicio {
                     fuenteNormal
                 )
             );
-
 
             resumen.add(
                 new Phrase(
@@ -444,7 +339,6 @@ public class ReportePdfServicio {
                 )
             );
 
-
             resumen.add(
                 new Phrase(
                     "Total pagado: "
@@ -456,7 +350,6 @@ public class ReportePdfServicio {
                 )
             );
 
-
             resumen.add(
                 new Phrase(
                     "Saldo pendiente generado: "
@@ -467,11 +360,7 @@ public class ReportePdfServicio {
                 )
             );
 
-
-            documento.add(
-                resumen
-            );
-
+            documento.add(resumen);
 
         } catch (Exception e) {
 
@@ -480,18 +369,13 @@ public class ReportePdfServicio {
                 e
             );
 
-
         } finally {
 
-            if (
-                documento.isOpen()
-            ) {
-
+            if (documento.isOpen()) {
                 documento.close();
             }
         }
     }
-
 
     /*
      * =========================================================
@@ -500,28 +384,20 @@ public class ReportePdfServicio {
      */
 
     public void generarReporteInventario(
-        File archivo,
-        ObservableList<Producto> productos
-    ) {
+            File archivo,
+            ObservableList<Producto> productos) {
 
         if (archivo == null) {
-
             throw new IllegalArgumentException(
                 "Debe seleccionar un archivo."
             );
         }
 
-
-        if (
-            productos == null
-            || productos.isEmpty()
-        ) {
-
+        if (productos == null || productos.isEmpty()) {
             throw new IllegalArgumentException(
                 "No existen productos para generar el reporte."
             );
         }
-
 
         Document documento =
             new Document(
@@ -532,19 +408,14 @@ public class ReportePdfServicio {
                 30
             );
 
-
         try {
 
             PdfWriter.getInstance(
                 documento,
-                new FileOutputStream(
-                    archivo
-                )
+                new FileOutputStream(archivo)
             );
 
-
             documento.open();
-
 
             Font fuenteTitulo =
                 FontFactory.getFont(
@@ -552,13 +423,11 @@ public class ReportePdfServicio {
                     18
                 );
 
-
             Font fuenteSubtitulo =
                 FontFactory.getFont(
                     FontFactory.HELVETICA_BOLD,
                     13
                 );
-
 
             Font fuenteNormal =
                 FontFactory.getFont(
@@ -566,16 +435,14 @@ public class ReportePdfServicio {
                     9
                 );
 
-
             Font fuenteEncabezado =
                 FontFactory.getFont(
                     FontFactory.HELVETICA_BOLD,
                     9
                 );
 
-
             /*
-             * TÍTULO DE LA EMPRESA
+             * EMPRESA
              */
 
             Paragraph empresa =
@@ -584,19 +451,14 @@ public class ReportePdfServicio {
                     fuenteTitulo
                 );
 
-
             empresa.setAlignment(
                 Element.ALIGN_CENTER
             );
 
-
-            documento.add(
-                empresa
-            );
-
+            documento.add(empresa);
 
             /*
-             * TÍTULO DEL REPORTE
+             * TÍTULO
              */
 
             Paragraph titulo =
@@ -605,34 +467,22 @@ public class ReportePdfServicio {
                     fuenteSubtitulo
                 );
 
-
             titulo.setAlignment(
                 Element.ALIGN_CENTER
             );
 
+            titulo.setSpacingAfter(20);
 
-            titulo.setSpacingAfter(
-                20
-            );
-
-
-            documento.add(
-                titulo
-            );
-
+            documento.add(titulo);
 
             /*
-             * TABLA DE INVENTARIO
+             * TABLA
              */
 
             PdfPTable tabla =
                 new PdfPTable(8);
 
-
-            tabla.setWidthPercentage(
-                100
-            );
-
+            tabla.setWidthPercentage(100);
 
             tabla.setWidths(
                 new float[] {
@@ -647,17 +497,11 @@ public class ReportePdfServicio {
                 }
             );
 
-
-            /*
-             * ENCABEZADOS
-             */
-
             agregarEncabezado(
                 tabla,
                 "Código",
                 fuenteEncabezado
             );
-
 
             agregarEncabezado(
                 tabla,
@@ -665,13 +509,11 @@ public class ReportePdfServicio {
                 fuenteEncabezado
             );
 
-
             agregarEncabezado(
                 tabla,
                 "Marca",
                 fuenteEncabezado
             );
-
 
             agregarEncabezado(
                 tabla,
@@ -679,13 +521,11 @@ public class ReportePdfServicio {
                 fuenteEncabezado
             );
 
-
             agregarEncabezado(
                 tabla,
                 "Existencias",
                 fuenteEncabezado
             );
-
 
             agregarEncabezado(
                 tabla,
@@ -693,13 +533,11 @@ public class ReportePdfServicio {
                 fuenteEncabezado
             );
 
-
             agregarEncabezado(
                 tabla,
                 "Unidad",
                 fuenteEncabezado
             );
-
 
             agregarEncabezado(
                 tabla,
@@ -707,54 +545,28 @@ public class ReportePdfServicio {
                 fuenteEncabezado
             );
 
+            int stockBajo = 0;
+            int sinExistencias = 0;
 
-            int stockBajo =
-                0;
-
-
-            int sinExistencias =
-                0;
-
-
-            /*
-             * RECORRER LOS PRODUCTOS
-             */
-
-            for (
-                Producto producto
-                : productos
-            ) {
+            for (Producto producto : productos) {
 
                 double existencias =
                     valorSeguro(
-                        producto
-                            .conseguirExistencias()
+                        producto.conseguirExistencias()
                     );
-
 
                 double minimo =
                     valorSeguro(
-                        producto
-                            .conseguirMinimoExistencias()
+                        producto.conseguirMinimoExistencias()
                     );
 
-
-                /*
-                 * CATEGORÍA
-                 */
-
-                String categoria =
-                    "";
-
+                String categoria = "";
 
                 if (
-                    producto
-                        .conseguirCategoria()
-                    != null
+                    producto.conseguirCategoria() != null
                     && producto
                         .conseguirCategoria()
-                        .conseguirNombre()
-                    != null
+                        .conseguirNombre() != null
                 ) {
 
                     categoria =
@@ -763,84 +575,55 @@ public class ReportePdfServicio {
                             .conseguirNombre();
                 }
 
-
-                /*
-                 * ESTADO DEL STOCK
-                 */
-
                 String estado;
 
+                if (existencias <= 0) {
 
-                if (
-                    existencias <= 0
-                ) {
-
-                    estado =
-                        "Sin existencias";
-
-
+                    estado = "Sin existencias";
                     sinExistencias++;
-
 
                 } else if (
                     minimo > 0
                     && existencias <= minimo
                 ) {
 
-                    estado =
-                        "Stock bajo";
-
-
+                    estado = "Stock bajo";
                     stockBajo++;
-
 
                 } else {
 
-                    estado =
-                        "Disponible";
+                    estado = "Disponible";
                 }
 
-
-                /*
-                 * AGREGAR FILA
-                 */
-
                 agregarCelda(
                     tabla,
                     textoSeguro(
-                        producto
-                            .conseguirCodigoBarras()
+                        producto.conseguirCodigoBarras()
                     ),
                     fuenteNormal
                 );
 
-
                 agregarCelda(
                     tabla,
                     textoSeguro(
-                        producto
-                            .conseguirNombre()
+                        producto.conseguirNombre()
                     ),
                     fuenteNormal
                 );
 
-
                 agregarCelda(
                     tabla,
                     textoSeguro(
-                        producto
-                            .conseguirMarca()
+                        producto.conseguirMarca()
                     ),
                     fuenteNormal
                 );
-
 
                 agregarCelda(
                     tabla,
                     categoria,
                     fuenteNormal
                 );
-
 
                 agregarCelda(
                     tabla,
@@ -850,7 +633,6 @@ public class ReportePdfServicio {
                     fuenteNormal
                 );
 
-
                 agregarCelda(
                     tabla,
                     formatoCantidad(
@@ -859,16 +641,13 @@ public class ReportePdfServicio {
                     fuenteNormal
                 );
 
-
                 agregarCelda(
                     tabla,
                     textoSeguro(
-                        producto
-                            .conseguirUnidadMedida()
+                        producto.conseguirUnidadMedida()
                     ),
                     fuenteNormal
                 );
-
 
                 agregarCelda(
                     tabla,
@@ -877,14 +656,10 @@ public class ReportePdfServicio {
                 );
             }
 
-
-            documento.add(
-                tabla
-            );
-
+            documento.add(tabla);
 
             /*
-             * RESUMEN DEL INVENTARIO
+             * RESUMEN
              */
 
             Paragraph resumen =
@@ -893,11 +668,7 @@ public class ReportePdfServicio {
                     fuenteNormal
                 );
 
-
-            resumen.setSpacingBefore(
-                20
-            );
-
+            resumen.setSpacingBefore(20);
 
             resumen.add(
                 new Phrase(
@@ -908,7 +679,6 @@ public class ReportePdfServicio {
                 )
             );
 
-
             resumen.add(
                 new Phrase(
                     "Productos con stock bajo: "
@@ -918,7 +688,6 @@ public class ReportePdfServicio {
                 )
             );
 
-
             resumen.add(
                 new Phrase(
                     "Productos sin existencias: "
@@ -927,11 +696,7 @@ public class ReportePdfServicio {
                 )
             );
 
-
-            documento.add(
-                resumen
-            );
-
+            documento.add(resumen);
 
         } catch (Exception e) {
 
@@ -940,18 +705,303 @@ public class ReportePdfServicio {
                 e
             );
 
-
         } finally {
 
-            if (
-                documento.isOpen()
-            ) {
-
+            if (documento.isOpen()) {
                 documento.close();
             }
         }
     }
 
+    /*
+     * =========================================================
+     * REPORTE DE CUENTAS POR COBRAR
+     * =========================================================
+     */
+
+    public void generarReporteCuentasCobrar(
+            File archivo,
+            ObservableList<Cliente> clientes) {
+
+        if (archivo == null) {
+            throw new IllegalArgumentException(
+                "Debe seleccionar un archivo."
+            );
+        }
+
+        if (clientes == null || clientes.isEmpty()) {
+            throw new IllegalArgumentException(
+                "No existen cuentas por cobrar para generar el reporte."
+            );
+        }
+
+        Document documento =
+            new Document(
+                PageSize.A4.rotate(),
+                30,
+                30,
+                30,
+                30
+            );
+
+        try {
+
+            PdfWriter.getInstance(
+                documento,
+                new FileOutputStream(archivo)
+            );
+
+            documento.open();
+
+            Font fuenteTitulo =
+                FontFactory.getFont(
+                    FontFactory.HELVETICA_BOLD,
+                    18
+                );
+
+            Font fuenteSubtitulo =
+                FontFactory.getFont(
+                    FontFactory.HELVETICA_BOLD,
+                    13
+                );
+
+            Font fuenteNormal =
+                FontFactory.getFont(
+                    FontFactory.HELVETICA,
+                    10
+                );
+
+            Font fuenteEncabezado =
+                FontFactory.getFont(
+                    FontFactory.HELVETICA_BOLD,
+                    9
+                );
+
+            /*
+             * EMPRESA
+             */
+
+            Paragraph empresa =
+                new Paragraph(
+                    "VÍVERES Y CÁRNICOS DON EDGAR",
+                    fuenteTitulo
+                );
+
+            empresa.setAlignment(
+                Element.ALIGN_CENTER
+            );
+
+            documento.add(empresa);
+
+            /*
+             * TÍTULO
+             */
+
+            Paragraph titulo =
+                new Paragraph(
+                    "REPORTE DE CUENTAS POR COBRAR",
+                    fuenteSubtitulo
+                );
+
+            titulo.setAlignment(
+                Element.ALIGN_CENTER
+            );
+
+            titulo.setSpacingAfter(20);
+
+            documento.add(titulo);
+
+            /*
+             * TABLA
+             */
+
+            PdfPTable tabla =
+                new PdfPTable(6);
+
+            tabla.setWidthPercentage(100);
+
+            tabla.setWidths(
+                new float[] {
+                    1.4f,
+                    2.0f,
+                    1.3f,
+                    2.2f,
+                    1.4f,
+                    1.1f
+                }
+            );
+
+            agregarEncabezado(
+                tabla,
+                "Identificación",
+                fuenteEncabezado
+            );
+
+            agregarEncabezado(
+                tabla,
+                "Cliente",
+                fuenteEncabezado
+            );
+
+            agregarEncabezado(
+                tabla,
+                "Teléfono",
+                fuenteEncabezado
+            );
+
+            agregarEncabezado(
+                tabla,
+                "Correo",
+                fuenteEncabezado
+            );
+
+            agregarEncabezado(
+                tabla,
+                "Saldo pendiente",
+                fuenteEncabezado
+            );
+
+            agregarEncabezado(
+                tabla,
+                "Estado",
+                fuenteEncabezado
+            );
+
+            double totalCobrar = 0.0;
+
+            for (Cliente cliente : clientes) {
+
+                String identificacion = "";
+                String nombre = "";
+
+                if (cliente.conseguirPersona() != null) {
+
+                    identificacion =
+                        textoSeguro(
+                            cliente
+                                .conseguirPersona()
+                                .conseguirNumeroIdentidad()
+                        );
+
+                    nombre =
+                        textoSeguro(
+                            cliente
+                                .conseguirPersona()
+                                .conseguirNombre()
+                        );
+                }
+
+                String telefono =
+                    textoSeguro(
+                        cliente.conseguirTelefono()
+                    );
+
+                String correo =
+                    textoSeguro(
+                        cliente
+                            .conseguirCorreoElectronico()
+                    );
+
+                double saldo =
+                    valorSeguro(
+                        cliente.conseguirSaldo()
+                    );
+
+                String estado =
+                    saldo > 0
+                    ? "Pendiente"
+                    : "Al día";
+
+                agregarCelda(
+                    tabla,
+                    identificacion,
+                    fuenteNormal
+                );
+
+                agregarCelda(
+                    tabla,
+                    nombre,
+                    fuenteNormal
+                );
+
+                agregarCelda(
+                    tabla,
+                    telefono,
+                    fuenteNormal
+                );
+
+                agregarCelda(
+                    tabla,
+                    correo,
+                    fuenteNormal
+                );
+
+                agregarCelda(
+                    tabla,
+                    formatoDinero(
+                        saldo
+                    ),
+                    fuenteNormal
+                );
+
+                agregarCelda(
+                    tabla,
+                    estado,
+                    fuenteNormal
+                );
+
+                totalCobrar += saldo;
+            }
+
+            documento.add(tabla);
+
+            /*
+             * RESUMEN
+             */
+
+            Paragraph resumen =
+                new Paragraph(
+                    "",
+                    fuenteNormal
+                );
+
+            resumen.setSpacingBefore(20);
+
+            resumen.add(
+                new Phrase(
+                    "Clientes con deuda: "
+                    + clientes.size()
+                    + "\n",
+                    fuenteNormal
+                )
+            );
+
+            resumen.add(
+                new Phrase(
+                    "Total por cobrar: "
+                    + formatoDinero(
+                        totalCobrar
+                    ),
+                    fuenteNormal
+                )
+            );
+
+            documento.add(resumen);
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(
+                "No se pudo generar el reporte de cuentas por cobrar.",
+                e
+            );
+
+        } finally {
+
+            if (documento.isOpen()) {
+                documento.close();
+            }
+        }
+    }
 
     /*
      * =========================================================
@@ -959,81 +1009,56 @@ public class ReportePdfServicio {
      * =========================================================
      */
 
-
     private void agregarEncabezado(
-        PdfPTable tabla,
-        String texto,
-        Font fuente
-    ) {
+            PdfPTable tabla,
+            String texto,
+            Font fuente) {
 
         PdfPCell celda =
             new PdfPCell(
                 new Phrase(
-                    textoSeguro(
-                        texto
-                    ),
+                    textoSeguro(texto),
                     fuente
                 )
             );
-
 
         celda.setHorizontalAlignment(
             Element.ALIGN_CENTER
         );
 
-
         celda.setVerticalAlignment(
             Element.ALIGN_MIDDLE
         );
 
+        celda.setPadding(7);
 
-        celda.setPadding(
-            7
-        );
-
-
-        tabla.addCell(
-            celda
-        );
+        tabla.addCell(celda);
     }
 
-
     private void agregarCelda(
-        PdfPTable tabla,
-        String texto,
-        Font fuente
-    ) {
+            PdfPTable tabla,
+            String texto,
+            Font fuente) {
 
         PdfPCell celda =
             new PdfPCell(
                 new Phrase(
-                    textoSeguro(
-                        texto
-                    ),
+                    textoSeguro(texto),
                     fuente
                 )
             );
-
 
         celda.setVerticalAlignment(
             Element.ALIGN_MIDDLE
         );
 
+        celda.setPadding(6);
 
-        celda.setPadding(
-            6
-        );
-
-
-        tabla.addCell(
-            celda
-        );
+        tabla.addCell(celda);
     }
 
-
     private String conseguirNombreCliente(
-        Venta venta
-    ) {
+            Venta venta) {
 
         if (
             venta == null
@@ -1055,49 +1080,34 @@ public class ReportePdfServicio {
             return "Venta de contado";
         }
 
-
         return venta
             .conseguirCliente()
             .conseguirPersona()
             .conseguirNombre();
     }
 
-
     private double valorSeguro(
-        Double valor
-    ) {
+            Double valor) {
 
-        if (
-            valor == null
-        ) {
-
+        if (valor == null) {
             return 0.0;
         }
-
 
         return valor;
     }
 
-
     private String textoSeguro(
-        String texto
-    ) {
+            String texto) {
 
-        if (
-            texto == null
-        ) {
-
+        if (texto == null) {
             return "";
         }
-
 
         return texto;
     }
 
-
     private String formatoDinero(
-        double valor
-    ) {
+            double valor) {
 
         return "$"
             + String.format(
@@ -1106,16 +1116,12 @@ public class ReportePdfServicio {
             );
     }
 
-
     private String formatoCantidad(
-        double cantidad
-    ) {
+            double cantidad) {
 
         if (
             cantidad
-            == Math.floor(
-                cantidad
-            )
+            == Math.floor(cantidad)
         ) {
 
             return String.format(
@@ -1124,24 +1130,20 @@ public class ReportePdfServicio {
             );
         }
 
-
         return String.format(
             "%.2f",
             cantidad
         );
     }
 
-
     private String construirPeriodo(
-        LocalDate desde,
-        LocalDate hasta
-    ) {
+            LocalDate desde,
+            LocalDate hasta) {
 
         DateTimeFormatter formato =
             DateTimeFormatter.ofPattern(
                 "dd/MM/yyyy"
             );
-
 
         if (
             desde == null
@@ -1151,37 +1153,24 @@ public class ReportePdfServicio {
             return "Periodo: Todas las ventas";
         }
 
-
         if (
             desde != null
             && hasta != null
         ) {
 
             return "Periodo: "
-                + desde.format(
-                    formato
-                )
+                + desde.format(formato)
                 + " - "
-                + hasta.format(
-                    formato
-                );
+                + hasta.format(formato);
         }
 
-
-        if (
-            desde != null
-        ) {
+        if (desde != null) {
 
             return "Periodo: Desde "
-                + desde.format(
-                    formato
-                );
+                + desde.format(formato);
         }
 
-
         return "Periodo: Hasta "
-            + hasta.format(
-                formato
-            );
+            + hasta.format(formato);
     }
 }

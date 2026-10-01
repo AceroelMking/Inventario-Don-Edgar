@@ -503,6 +503,39 @@ public class ReporteInventarioControlador {
         }
     }
 
+    @FXML
+    private void abrirCuentasCobrar() {
+
+        try {
+
+            FXMLLoader loader =
+                new FXMLLoader(
+                    getClass().getResource(
+                        "/com/gestion/view/reporte/ReporteCuentasCobrar.fxml"
+                    )
+                );
+
+            Parent vista =
+                loader.load();
+
+            BorderPane panelPrincipal =
+                (BorderPane) tablaInventario
+                    .getScene()
+                    .getRoot();
+
+            panelPrincipal.setCenter(
+                vista
+            );
+
+        } catch (IOException e) {
+
+            mostrarError(
+                "No se pudo abrir el reporte de cuentas por cobrar.",
+                e
+            );
+        }
+    }
+
 
     /*
      * EXPORTAR INVENTARIO A PDF

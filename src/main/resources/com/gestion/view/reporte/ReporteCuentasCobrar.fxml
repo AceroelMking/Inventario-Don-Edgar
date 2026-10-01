@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gestion.controller.reporte.ReporteCuentasCobrarControlador"
+      spacing="15">
+
+    <padding>
+        <Insets top="20"
+                right="20"
+                bottom="20"
+                left="20"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT"
+          spacing="10">
+
+        <VBox spacing="5">
+
+            <Label text="Reportes"/>
+
+            <Label text="Consulta y exportación de información"/>
+
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button text="Actualizar"
+                onAction="#actualizar"/>
+
+        <Button text="Exportar PDF"
+                onAction="#exportarPdf"/>
+
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT"
+          spacing="10">
+
+        <Label text="Tipo de reporte:"/>
+
+        <Button text="Ventas"
+                onAction="#abrirVentas"/>
+
+        <Button text="Inventario"
+                onAction="#abrirInventario"/>
+
+        <Button text="Cuentas por cobrar"
+                disable="true"/>
+
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT"
+          spacing="10">
+
+        <Label text="Buscar"/>
+
+        <TextField fx:id="txtBuscar"
+                   promptText="Identificación, cliente, teléfono o correo"
+                   prefWidth="400"/>
+
+        <Button text="Limpiar"
+                onAction="#limpiarBusqueda"/>
+
+    </HBox>
+
+    <TableView fx:id="tablaCuentas"
+               VBox.vgrow="ALWAYS">
+
+        <columns>
+
+            <TableColumn fx:id="columnaIdentificacion"
+                         text="Identificación"
+                         prefWidth="130"/>
+
+            <TableColumn fx:id="columnaNombre"
+                         text="Cliente"
+                         prefWidth="190"/>
+
+            <TableColumn fx:id="columnaTelefono"
+                         text="Teléfono"
+                         prefWidth="130"/>
+
+            <TableColumn fx:id="columnaCorreo"
+                         text="Correo"
+                         prefWidth="220"/>
+
+            <TableColumn fx:id="columnaSaldo"
+                         text="Saldo pendiente"
+                         prefWidth="140"/>
+
+            <TableColumn fx:id="columnaEstado"
+                         text="Estado"
+                         prefWidth="110"/>
+
+        </columns>
+
+        <placeholder>
+            <Label text="No hay cuentas por cobrar"/>
+        </placeholder>
+
+    </TableView>
+
+    <HBox alignment="CENTER_LEFT"
+          spacing="40">
+
+        <VBox spacing="5">
+
+            <Label text="Clientes con deuda"/>
+
+            <Label fx:id="lblCantidadClientes"
+                   text="0"/>
+
+        </VBox>
+
+        <VBox spacing="5">
+
+            <Label text="Total por cobrar"/>
+
+            <Label fx:id="lblTotalCobrar"
+                   text="0"/>
+
+        </VBox>
+
+    </HBox>
+
+</VBox>

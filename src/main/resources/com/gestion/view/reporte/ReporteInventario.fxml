@@ -48,7 +48,7 @@
     <!-- NAVEGACIÓN ENTRE REPORTES -->
 
     <HBox alignment="CENTER_LEFT"
-          spacing="10">
+        spacing="10">
 
         <Label text="Tipo de reporte:"/>
 
@@ -57,6 +57,9 @@
 
         <Button text="Inventario"
                 disable="true"/>
+
+        <Button text="Cuentas por cobrar"
+                onAction="#abrirCuentasCobrar"/>
 
     </HBox>
 
