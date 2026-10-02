@@ -6,86 +6,169 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox
-    xmlns="http://javafx.com/javafx/21"
-    xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="com.gestion.controller.cliente.HistorialPagosControlador"
-    spacing="15"
-    prefWidth="700"
-    prefHeight="500">
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gestion.controller.cliente.HistorialPagosControlador"
+      prefWidth="760"
+      prefHeight="540"
+      spacing="14"
+      styleClass="modulo-contenido"
+      stylesheets="@../css/estilos.css">
 
     <padding>
-        <Insets
-            top="20"
-            right="20"
-            bottom="20"
-            left="20"/>
+        <Insets top="22"
+                right="25"
+                bottom="22"
+                left="25"/>
     </padding>
 
-    <Label
-        text="Historial de abonos"
-        style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+    <!-- ENCABEZADO -->
 
-    <HBox spacing="8">
+    <VBox spacing="3">
 
-        <Label
-            text="Cliente:"
-            style="-fx-font-weight: bold;"/>
+        <Label text="Historial de abonos"
+               styleClass="titulo-pagina"/>
 
-        <Label
-            fx:id="lblCliente"/>
+        <Label text="Consulte los pagos registrados y el saldo pendiente del cliente."
+               styleClass="subtitulo-pagina"/>
 
-    </HBox>
+    </VBox>
 
-    <HBox spacing="8">
+    <!-- RESUMEN DEL CLIENTE -->
 
-        <Label
-            text="Saldo pendiente:"
-            style="-fx-font-weight: bold;"/>
+    <VBox spacing="12"
+          styleClass="formulario-tarjeta">
 
-        <Label
-            fx:id="lblSaldo"/>
+        <padding>
+            <Insets top="15"
+                    right="18"
+                    bottom="15"
+                    left="18"/>
+        </padding>
 
-    </HBox>
+        <Label text="Resumen de la cuenta"
+               styleClass="formulario-seccion-titulo"/>
 
-    <TableView
-        fx:id="tablaPagos"
-        VBox.vgrow="ALWAYS">
+        <HBox spacing="25"
+              alignment="CENTER_LEFT">
 
-        <columns>
+            <!-- CLIENTE -->
 
-            <TableColumn
-                fx:id="columnaFecha"
-                text="Fecha"
-                prefWidth="170"/>
+            <VBox spacing="3"
+                  HBox.hgrow="ALWAYS">
 
-            <TableColumn
-                fx:id="columnaMonto"
-                text="Monto"
-                prefWidth="130"/>
+                <Label text="Cliente"
+                       styleClass="campo-label"/>
 
-            <TableColumn
-                fx:id="columnaObservacion"
-                text="Observación"
-                prefWidth="340"/>
+                <Label fx:id="lblCliente"
+                       text="-"
+                       wrapText="true"/>
 
-        </columns>
+            </VBox>
 
-        <placeholder>
-            <Label
-                text="El cliente todavía no tiene abonos registrados."/>
-        </placeholder>
+            <!-- SALDO -->
 
-    </TableView>
+            <VBox spacing="3"
+                  minWidth="170">
 
-    <HBox
-        alignment="CENTER_RIGHT">
+                <Label text="Saldo pendiente"
+                       styleClass="campo-label"/>
 
-        <Button
-            text="Cerrar"
-            onAction="#cerrar"/>
+                <Label fx:id="lblSaldo"
+                       text="-"
+                       styleClass="etiqueta-estado"/>
+
+            </VBox>
+
+        </HBox>
+
+    </VBox>
+
+    <!-- HISTORIAL -->
+
+    <VBox spacing="10"
+          VBox.vgrow="ALWAYS"
+          styleClass="tarjeta-tabla">
+
+        <padding>
+            <Insets top="15"
+                    right="15"
+                    bottom="15"
+                    left="15"/>
+        </padding>
+
+        <HBox alignment="CENTER_LEFT">
+
+            <VBox spacing="2">
+
+                <Label text="Abonos registrados"
+                       styleClass="tabla-titulo"/>
+
+                <Label text="Movimientos realizados para reducir el saldo pendiente."
+                       styleClass="tabla-descripcion"/>
+
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Historial"
+                   styleClass="etiqueta-estado"/>
+
+        </HBox>
+
+        <TableView fx:id="tablaPagos"
+                   VBox.vgrow="ALWAYS">
+
+            <columns>
+
+                <TableColumn fx:id="columnaFecha"
+                             text="Fecha"
+                             prefWidth="180"/>
+
+                <TableColumn fx:id="columnaMonto"
+                             text="Monto"
+                             prefWidth="150"/>
+
+                <TableColumn fx:id="columnaObservacion"
+                             text="Observación"
+                             prefWidth="350"/>
+
+            </columns>
+
+            <placeholder>
+
+                <VBox alignment="CENTER"
+                      spacing="5">
+
+                    <Label text="Sin abonos registrados"
+                           styleClass="tabla-vacia-titulo"/>
+
+                    <Label text="Este cliente todavía no tiene pagos registrados."
+                           styleClass="tabla-vacia-texto"/>
+
+                </VBox>
+
+            </placeholder>
+
+        </TableView>
+
+    </VBox>
+
+    <!-- ACCIONES -->
+
+    <HBox alignment="CENTER_RIGHT">
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button text="Cerrar"
+                mnemonicParsing="false"
+                onAction="#cerrar"
+                prefWidth="110"
+                prefHeight="36"
+                styleClass="boton-secundario"/>
 
     </HBox>
 

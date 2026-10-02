@@ -393,16 +393,133 @@ public class LoteRepositorio {
 
     // Update
 
-    public void editarLote(Lote lote) {
+   public void editarLote(Lote lote) {
+
+        if (lote == null || lote.conseguirId() == null) {
+            throw new IllegalArgumentException(
+                "El lote no es válido."
+            );
+        }
+
+        String consultarOriginal =
+            "SELECT id_producto, cantidad_movimiento "
+            + "FROM lote "
+            + "WHERE id = ?;";
+
+        String actualizar =
+            "UPDATE lote SET "
+            + "lote = ?, "
+            + "fecha_registro = ?, "
+            + "fecha_expedicion = ?, "
+            + "fecha_vencimiento = ?, "
+            + "valor_movimiento = ?, "
+            + "motivo = ? "
+            + "WHERE id = ?;";
+
         try (
-            Connection conexion = ConexionBaseDatos.conectar();
-            PreparedStatement sentenciaPreparada = conexion.prepareStatement(CONSULTA_ACTUALIZAR)
+            Connection conexion =
+                ConexionBaseDatos.conectar()
         ) {
-            actualizarTablaLote(sentenciaPreparada, lote);
-            sentenciaPreparada.setInt(9, lote.conseguirId());
-            sentenciaPreparada.executeUpdate();
+
+            /*
+            * Primero comprobamos que el lote
+            * realmente exista.
+            */
+            try (
+                PreparedStatement consulta =
+                    conexion.prepareStatement(
+                        consultarOriginal
+                    )
+            ) {
+
+                consulta.setInt(
+                    1,
+                    lote.conseguirId()
+                );
+
+                try (
+                    ResultSet resultado =
+                        consulta.executeQuery()
+                ) {
+
+                    if (!resultado.next()) {
+                        throw new IllegalArgumentException(
+                            "El lote no existe."
+                        );
+                    }
+                }
+            }
+
+            /*
+            * Solo modificamos información
+            * descriptiva del lote.
+            *
+            * NO se modifica:
+            *
+            * id_producto
+            * cantidad_movimiento
+            *
+            * porque ambos afectan directamente
+            * el inventario.
+            */
+            try (
+                PreparedStatement sentencia =
+                    conexion.prepareStatement(
+                        actualizar
+                    )
+            ) {
+
+                sentencia.setString(
+                    1,
+                    lote.conseguirLote()
+                );
+
+                sentencia.setString(
+                    2,
+                    lote.conseguirFechaRegistro()
+                );
+
+                sentencia.setString(
+                    3,
+                    lote.conseguirFechaExpedicion()
+                );
+
+                sentencia.setString(
+                    4,
+                    lote.conseguirFechaVencimiento()
+                );
+
+                sentencia.setObject(
+                    5,
+                    lote.conseguirValorMovimiento()
+                );
+
+                sentencia.setString(
+                    6,
+                    lote.conseguirMotivo()
+                );
+
+                sentencia.setInt(
+                    7,
+                    lote.conseguirId()
+                );
+
+                int filas =
+                    sentencia.executeUpdate();
+
+                if (filas == 0) {
+                    throw new RuntimeException(
+                        "No se pudo actualizar el lote."
+                    );
+                }
+            }
+
         } catch (SQLException e) {
-            throw new RuntimeException("Error al editar lote ", e);
+
+            throw new RuntimeException(
+                "Error al editar el lote.",
+                e
+            );
         }
     }
 

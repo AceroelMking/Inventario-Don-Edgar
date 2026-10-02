@@ -5,205 +5,397 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.gestion.controller.reporte.ReporteVentasControlador"
-      spacing="15">
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gestion.controller.reporte.ReporteVentasControlador"
+            stylesheets="@../css/estilos.css"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            pannable="true"
+            styleClass="formulario-scroll">
 
-    <padding>
-        <Insets top="20"
-                right="20"
-                bottom="20"
-                left="20"/>
-    </padding>
+    <content>
+
+        <VBox styleClass="modulo-contenido"
+              spacing="9"
+              fillWidth="true">
+
+            <padding>
+                <Insets top="14"
+                        right="18"
+                        bottom="18"
+                        left="18"/>
+            </padding>
 
 
-    <!-- ================================= -->
-    <!-- TÍTULO -->
-    <!-- ================================= -->
+            <!-- ENCABEZADO -->
 
-    <HBox alignment="CENTER_LEFT"
-          spacing="10">
+            <HBox alignment="CENTER_LEFT"
+                  spacing="10">
 
-        <VBox spacing="5">
+                <VBox spacing="1">
 
-            <Label text="Reportes"/>
+                    <Label text="Reportes"
+                           styleClass="titulo-pagina"/>
 
-            <Label text="Consulta y exportación de información"/>
+                    <Label text="Consulta y analiza la información registrada en el sistema."
+                           styleClass="subtitulo-pagina"/>
+
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="Actualizar"
+                        onAction="#actualizar"
+                        styleClass="boton-secundario"/>
+
+                <Button text="Exportar PDF"
+                        onAction="#exportarPdf"
+                        styleClass="boton-primario"/>
+
+            </HBox>
+
+
+            <!-- NAVEGACIÓN -->
+
+            <HBox spacing="8"
+                  alignment="CENTER_LEFT"
+                  styleClass="tarjeta-filtros">
+
+                <Button text="Ventas"
+                        disable="true"
+                        styleClass="boton-primario"/>
+
+                <Button text="Inventario"
+                        onAction="#abrirInventario"
+                        styleClass="boton-secundario"/>
+
+                <Button text="Cuentas por cobrar"
+                        onAction="#abrirCuentasCobrar"
+                        styleClass="boton-secundario"/>
+
+            </HBox>
+
+
+            <!-- FILTROS -->
+
+            <VBox spacing="5"
+                  styleClass="tarjeta-filtros">
+
+                <Label text="Filtros del reporte"
+                       styleClass="filtro-titulo"/>
+
+                <HBox spacing="12"
+                      alignment="BOTTOM_LEFT">
+
+                    <VBox spacing="2"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Desde"
+                               styleClass="campo-label"/>
+
+                        <DatePicker fx:id="fechaDesde"
+                                    maxWidth="Infinity"/>
+
+                    </VBox>
+
+                    <VBox spacing="2"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Hasta"
+                               styleClass="campo-label"/>
+
+                        <DatePicker fx:id="fechaHasta"
+                                    maxWidth="Infinity"/>
+
+                    </VBox>
+
+                    <VBox spacing="2"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Método de pago"
+                               styleClass="campo-label"/>
+
+                        <ComboBox fx:id="cmbMetodoPago"
+                                  promptText="Todos"
+                                  maxWidth="Infinity"/>
+
+                    </VBox>
+
+                    <Button text="Limpiar filtros"
+                            onAction="#limpiarFiltros"
+                            styleClass="boton-secundario"/>
+
+                </HBox>
+
+            </VBox>
+
+
+            <!-- TABLA -->
+
+            <VBox spacing="4"
+                  styleClass="tarjeta-tabla">
+
+                <HBox alignment="CENTER_LEFT">
+
+                    <VBox spacing="1">
+
+                        <Label text="Ventas registradas"
+                               styleClass="tabla-titulo"/>
+
+                        <Label text="Detalle de las ventas que cumplen con los filtros seleccionados."
+                               styleClass="tabla-descripcion"/>
+
+                    </VBox>
+
+                </HBox>
+
+                <TableView fx:id="tablaVentas"
+                           minHeight="250"
+                           prefHeight="285"
+                           maxHeight="285">
+
+                    <columns>
+
+                        <TableColumn fx:id="columnaId"
+                                     text="ID"
+                                     prefWidth="55"/>
+
+                        <TableColumn fx:id="columnaFecha"
+                                     text="Fecha"
+                                     prefWidth="170"/>
+
+                        <TableColumn fx:id="columnaCliente"
+                                     text="Cliente"
+                                     prefWidth="220"/>
+
+                        <TableColumn fx:id="columnaMetodo"
+                                     text="Método"
+                                     prefWidth="135"/>
+
+                        <TableColumn fx:id="columnaTotal"
+                                     text="Total"
+                                     prefWidth="145"/>
+
+                        <TableColumn fx:id="columnaPagado"
+                                     text="Pagado al vender"
+                                     prefWidth="160"/>
+
+                        <TableColumn fx:id="columnaPendiente"
+                                     text="Crédito generado"
+                                     prefWidth="155"/>
+
+                    </columns>
+
+                    <placeholder>
+
+                        <VBox alignment="CENTER"
+                              spacing="4">
+
+                            <Label text="No hay ventas para mostrar"
+                                   styleClass="tabla-vacia-titulo"/>
+
+                            <Label text="Modifica los filtros o registra una nueva venta."
+                                   styleClass="tabla-vacia-texto"/>
+
+                        </VBox>
+
+                    </placeholder>
+
+                </TableView>
+
+            </VBox>
+
+
+            <!-- RESUMEN DE VENTAS -->
+
+            <VBox spacing="5">
+
+                <Label text="Resumen de ventas"
+                       styleClass="tabla-titulo"/>
+
+                <GridPane hgap="20"
+                          styleClass="tarjeta-filtros">
+
+                    <columnConstraints>
+
+                        <ColumnConstraints percentWidth="33.33"
+                                           hgrow="ALWAYS"/>
+
+                        <ColumnConstraints percentWidth="33.33"
+                                           hgrow="ALWAYS"/>
+
+                        <ColumnConstraints percentWidth="33.34"
+                                           hgrow="ALWAYS"/>
+
+                    </columnConstraints>
+
+
+                    <VBox GridPane.columnIndex="0"
+                          spacing="1">
+
+                        <Label fx:id="lblCantidadVentas"
+                               text="0"
+                               style="-fx-font-size: 20px;
+                                      -fx-font-weight: bold;"/>
+
+                        <Label text="Ventas"
+                               styleClass="campo-label"/>
+
+                    </VBox>
+
+
+                    <VBox GridPane.columnIndex="1"
+                          spacing="1">
+
+                        <Label fx:id="lblTotalVendido"
+                               text="0"
+                               style="-fx-font-size: 20px;
+                                      -fx-font-weight: bold;"/>
+
+                        <Label text="Total vendido"
+                               styleClass="campo-label"/>
+
+                    </VBox>
+
+
+                    <VBox GridPane.columnIndex="2"
+                          spacing="1">
+
+                        <Label fx:id="lblTotalPagado"
+                               text="0"
+                               style="-fx-font-size: 20px;
+                                      -fx-font-weight: bold;"/>
+
+                        <Label text="Pagado al vender"
+                               styleClass="campo-label"/>
+
+                    </VBox>
+
+                </GridPane>
+
+            </VBox>
+
+
+            <!-- ESTADO DEL CRÉDITO -->
+
+            <VBox spacing="7"
+                  styleClass="tarjeta-filtros">
+
+                <HBox alignment="CENTER_LEFT">
+
+                    <Label text="Estado del crédito"
+                           styleClass="tabla-titulo"/>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <VBox alignment="CENTER_RIGHT"
+                          spacing="0">
+
+                        <Label fx:id="lblPorcentajeRecuperado"
+                               text="0 %"
+                               style="-fx-font-size: 20px;
+                                      -fx-font-weight: bold;"/>
+
+                        <Label text="recuperado"
+                               styleClass="campo-label"/>
+
+                    </VBox>
+
+                </HBox>
+
+
+                <GridPane hgap="20">
+
+                    <columnConstraints>
+
+                        <ColumnConstraints percentWidth="33.33"
+                                           hgrow="ALWAYS"/>
+
+                        <ColumnConstraints percentWidth="33.33"
+                                           hgrow="ALWAYS"/>
+
+                        <ColumnConstraints percentWidth="33.34"
+                                           hgrow="ALWAYS"/>
+
+                    </columnConstraints>
+
+
+                    <VBox GridPane.columnIndex="0"
+                          spacing="1">
+
+                        <Label text="Crédito generado"
+                               styleClass="campo-label"/>
+
+                        <Label fx:id="lblTotalPendiente"
+                               text="0"
+                               style="-fx-font-size: 18px;
+                                      -fx-font-weight: bold;"/>
+
+                    </VBox>
+
+
+                    <VBox GridPane.columnIndex="1"
+                          spacing="1">
+
+                        <Label text="Crédito recuperado"
+                               styleClass="campo-label"/>
+
+                        <Label fx:id="lblCreditoRecuperado"
+                               text="0"
+                               style="-fx-font-size: 18px;
+                                      -fx-font-weight: bold;"/>
+
+                    </VBox>
+
+
+                    <VBox GridPane.columnIndex="2"
+                          spacing="1">
+
+                        <Label text="Crédito pendiente"
+                               styleClass="campo-label"/>
+
+                        <Label fx:id="lblCreditoPendiente"
+                               text="0"
+                               style="-fx-font-size: 18px;
+                                      -fx-font-weight: bold;"/>
+
+                    </VBox>
+
+                </GridPane>
+
+
+                <HBox alignment="CENTER_LEFT"
+                      spacing="10">
+
+                    <Label text="Recuperación"
+                           styleClass="campo-label"/>
+
+                    <ProgressBar fx:id="barraRecuperacion"
+                                 progress="0"
+                                 prefHeight="10"
+                                 maxWidth="Infinity"
+                                 HBox.hgrow="ALWAYS"/>
+
+                </HBox>
+
+            </VBox>
+
+            <Region prefHeight="5"/>
 
         </VBox>
 
+    </content>
 
-        <Region HBox.hgrow="ALWAYS"/>
-
-
-        <Button text="Actualizar"
-                onAction="#actualizar"/>
-
-        <Button text="Exportar PDF"
-                onAction="#exportarPdf"/>
-
-    </HBox>
-
-
-    <!-- ================================= -->
-    <!-- TIPOS DE REPORTE -->
-    <!-- ================================= -->
-
-   <HBox alignment="CENTER_LEFT"
-        spacing="10">
-
-        <Label text="Tipo de reporte:"/>
-
-        <Button text="Ventas"
-                disable="true"/>
-
-        <Button text="Inventario"
-                onAction="#abrirInventario"/>
-
-        <Button text="Cuentas por cobrar"
-                onAction="#abrirCuentasCobrar"/>
-
-    </HBox>
-
-
-    <!-- ================================= -->
-    <!-- FILTROS -->
-    <!-- ================================= -->
-
-    <HBox alignment="CENTER_LEFT"
-          spacing="10">
-
-        <Label text="Desde"/>
-
-        <DatePicker fx:id="fechaDesde"/>
-
-
-        <Label text="Hasta"/>
-
-        <DatePicker fx:id="fechaHasta"/>
-
-
-        <Label text="Método de pago"/>
-
-        <ComboBox fx:id="cmbMetodoPago"
-                  prefWidth="150"/>
-
-
-        <Button text="Limpiar"
-                onAction="#limpiarFiltros"/>
-
-    </HBox>
-
-
-    <!-- ================================= -->
-    <!-- TABLA -->
-    <!-- ================================= -->
-
-    <TableView fx:id="tablaVentas"
-               VBox.vgrow="ALWAYS">
-
-        <columns>
-
-            <TableColumn fx:id="columnaId"
-                         text="ID"
-                         prefWidth="60"/>
-
-
-            <TableColumn fx:id="columnaFecha"
-                         text="Fecha"
-                         prefWidth="160"/>
-
-
-            <TableColumn fx:id="columnaCliente"
-                         text="Cliente"
-                         prefWidth="180"/>
-
-
-            <TableColumn fx:id="columnaMetodo"
-                         text="Método"
-                         prefWidth="130"/>
-
-
-            <TableColumn fx:id="columnaTotal"
-                         text="Total"
-                         prefWidth="130"/>
-
-
-            <TableColumn fx:id="columnaPagado"
-                         text="Pagado"
-                         prefWidth="130"/>
-
-
-            <TableColumn fx:id="columnaPendiente"
-                         text="Pendiente"
-                         prefWidth="130"/>
-
-        </columns>
-
-
-        <placeholder>
-
-            <Label text="No hay ventas registradas"/>
-
-        </placeholder>
-
-    </TableView>
-
-
-    <!-- ================================= -->
-    <!-- RESUMEN -->
-    <!-- ================================= -->
-
-    <HBox alignment="CENTER_LEFT"
-          spacing="40">
-
-        <VBox spacing="5">
-
-            <Label text="Cantidad de ventas"/>
-
-            <Label fx:id="lblCantidadVentas"
-                   text="0"/>
-
-        </VBox>
-
-
-        <VBox spacing="5">
-
-            <Label text="Total vendido"/>
-
-            <Label fx:id="lblTotalVendido"
-                   text="0"/>
-
-        </VBox>
-
-
-        <VBox spacing="5">
-
-            <Label text="Total pagado"/>
-
-            <Label fx:id="lblTotalPagado"
-                   text="0"/>
-
-        </VBox>
-
-
-        <VBox spacing="5">
-
-            <Label text="Saldo pendiente"/>
-
-            <Label fx:id="lblTotalPendiente"
-                   text="0"/>
-
-        </VBox>
-
-    </HBox>
-
-</VBox>
+</ScrollPane>

@@ -7,154 +7,238 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.gestion.controller.reporte.ReporteInventarioControlador"
-      spacing="15">
+      stylesheets="@../css/estilos.css"
+      styleClass="modulo-contenido"
+      spacing="10">
 
     <padding>
-        <Insets top="20"
-                right="20"
-                bottom="20"
-                left="20"/>
+        <Insets top="14"
+                right="18"
+                bottom="14"
+                left="18"/>
     </padding>
+
 
     <!-- ENCABEZADO -->
 
     <HBox alignment="CENTER_LEFT"
           spacing="10">
 
-        <VBox spacing="5">
+        <VBox spacing="1">
 
-            <Label text="Reportes"/>
+            <Label text="Reportes"
+                   styleClass="titulo-pagina"/>
 
-            <Label text="Consulta y exportación de información"/>
+            <Label text="Consulta y analiza la información registrada en el sistema."
+                   styleClass="subtitulo-pagina"/>
 
         </VBox>
 
         <Region HBox.hgrow="ALWAYS"/>
 
         <Button text="Actualizar"
-                onAction="#actualizar"/>
+                onAction="#actualizar"
+                styleClass="boton-secundario"/>
 
         <Button text="Exportar PDF"
-                onAction="#exportarPdf"/>
+                onAction="#exportarPdf"
+                styleClass="boton-primario"/>
 
     </HBox>
 
-    <!-- NAVEGACIÓN ENTRE REPORTES -->
+
+    <!-- NAVEGACIÓN -->
 
     <HBox alignment="CENTER_LEFT"
-        spacing="10">
-
-        <Label text="Tipo de reporte:"/>
+          spacing="8"
+          styleClass="tarjeta-filtros">
 
         <Button text="Ventas"
-                onAction="#abrirVentas"/>
+                onAction="#abrirVentas"
+                styleClass="boton-secundario"/>
 
         <Button text="Inventario"
-                disable="true"/>
+                disable="true"
+                styleClass="boton-primario"/>
 
         <Button text="Cuentas por cobrar"
-                onAction="#abrirCuentasCobrar"/>
+                onAction="#abrirCuentasCobrar"
+                styleClass="boton-secundario"/>
 
     </HBox>
 
-    <!-- FILTROS -->
 
-    <HBox alignment="CENTER_LEFT"
-          spacing="10">
+    <!-- BÚSQUEDA -->
 
-        <Label text="Buscar"/>
+    <VBox spacing="6"
+          styleClass="tarjeta-filtros">
 
-        <TextField fx:id="txtBuscar"
-                   promptText="Código, producto, marca o categoría"
-                   prefWidth="350"/>
+        <HBox alignment="CENTER_LEFT"
+              spacing="12">
 
-        <Button text="Limpiar"
-                onAction="#limpiarBusqueda"/>
+            <VBox spacing="2">
 
-    </HBox>
+                <Label text="Inventario"
+                       styleClass="filtro-titulo"/>
+
+                <Label text="Busca productos por código, nombre, marca o categoría."
+                       styleClass="filtro-descripcion"/>
+
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <TextField fx:id="txtBuscar"
+                       promptText="Buscar producto..."
+                       prefWidth="360"/>
+
+            <Button text="Limpiar"
+                    onAction="#limpiarBusqueda"
+                    styleClass="boton-secundario"/>
+
+        </HBox>
+
+    </VBox>
+
 
     <!-- TABLA -->
 
-    <TableView fx:id="tablaInventario"
-               VBox.vgrow="ALWAYS">
+    <VBox spacing="5"
+          styleClass="tarjeta-tabla"
+          VBox.vgrow="ALWAYS">
 
-        <columns>
+        <HBox alignment="CENTER_LEFT">
 
-            <TableColumn fx:id="columnaCodigo"
-                         text="Código"
-                         prefWidth="130"/>
+            <VBox spacing="1">
 
-            <TableColumn fx:id="columnaNombre"
-                         text="Producto"
-                         prefWidth="180"/>
+                <Label text="Productos registrados"
+                       styleClass="tabla-titulo"/>
 
-            <TableColumn fx:id="columnaMarca"
-                         text="Marca"
-                         prefWidth="130"/>
+                <Label text="Estado actual de las existencias del inventario."
+                       styleClass="tabla-descripcion"/>
 
-            <TableColumn fx:id="columnaCategoria"
-                         text="Categoría"
-                         prefWidth="140"/>
+            </VBox>
 
-            <TableColumn fx:id="columnaExistencias"
-                         text="Existencias"
-                         prefWidth="100"/>
+        </HBox>
 
-            <TableColumn fx:id="columnaMinimo"
-                         text="Mínimo"
-                         prefWidth="90"/>
 
-            <TableColumn fx:id="columnaUnidad"
-                         text="Unidad"
-                         prefWidth="100"/>
+        <TableView fx:id="tablaInventario"
+                   VBox.vgrow="ALWAYS"
+                   minHeight="300">
 
-            <TableColumn fx:id="columnaEstado"
-                         text="Estado"
-                         prefWidth="130"/>
+            <columns>
 
-        </columns>
+                <TableColumn fx:id="columnaCodigo"
+                             text="Código"
+                             prefWidth="140"/>
 
-        <placeholder>
-            <Label text="No hay productos registrados"/>
-        </placeholder>
+                <TableColumn fx:id="columnaNombre"
+                             text="Producto"
+                             prefWidth="210"/>
 
-    </TableView>
+                <TableColumn fx:id="columnaMarca"
+                             text="Marca"
+                             prefWidth="150"/>
 
-    <!-- RESUMEN -->
+                <TableColumn fx:id="columnaCategoria"
+                             text="Categoría"
+                             prefWidth="160"/>
+
+                <TableColumn fx:id="columnaExistencias"
+                             text="Existencias"
+                             prefWidth="110"/>
+
+                <TableColumn fx:id="columnaMinimo"
+                             text="Mínimo"
+                             prefWidth="100"/>
+
+                <TableColumn fx:id="columnaUnidad"
+                             text="Unidad"
+                             prefWidth="120"/>
+
+                <TableColumn fx:id="columnaEstado"
+                             text="Estado"
+                             prefWidth="150"/>
+
+            </columns>
+
+            <placeholder>
+
+                <VBox alignment="CENTER"
+                      spacing="4">
+
+                    <Label text="No hay productos para mostrar"
+                           styleClass="tabla-vacia-titulo"/>
+
+                    <Label text="Registra productos o modifica la búsqueda."
+                           styleClass="tabla-vacia-texto"/>
+
+                </VBox>
+
+            </placeholder>
+
+        </TableView>
+
+    </VBox>
+
+
+    <!-- RESUMEN COMPACTO -->
 
     <HBox alignment="CENTER_LEFT"
-          spacing="40">
+          spacing="0"
+          styleClass="tarjeta-filtros">
 
-        <VBox spacing="5">
+        <!-- PRODUCTOS MOSTRADOS -->
 
-            <Label text="Productos mostrados"/>
+        <VBox spacing="2"
+              HBox.hgrow="ALWAYS"
+              maxWidth="Infinity">
+
+            <Label text="Productos mostrados"
+                   styleClass="campo-label"/>
 
             <Label fx:id="lblCantidadProductos"
-                   text="0"/>
+                   text="0"
+                   styleClass="total-venta"/>
 
         </VBox>
 
-        <VBox spacing="5">
 
-            <Label text="Productos con stock bajo"/>
+        <!-- STOCK BAJO -->
+
+        <VBox spacing="2"
+              HBox.hgrow="ALWAYS"
+              maxWidth="Infinity">
+
+            <Label text="Stock bajo"
+                   styleClass="campo-label"/>
 
             <Label fx:id="lblStockBajo"
-                   text="0"/>
+                   text="0"
+                   styleClass="saldo-venta"/>
 
         </VBox>
 
-        <VBox spacing="5">
 
-            <Label text="Productos sin existencias"/>
+        <!-- SIN EXISTENCIAS -->
+
+        <VBox spacing="2"
+              HBox.hgrow="ALWAYS"
+              maxWidth="Infinity">
+
+            <Label text="Sin existencias"
+                   styleClass="campo-label"/>
 
             <Label fx:id="lblSinExistencias"
-                   text="0"/>
+                   text="0"
+                   styleClass="saldo-venta"/>
 
         </VBox>
 

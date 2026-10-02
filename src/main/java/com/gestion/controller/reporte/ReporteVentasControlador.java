@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+import com.gestion.model.PagoCliente;
 import com.gestion.model.Venta;
+import com.gestion.repository.PagoClienteRepositorio;
 import com.gestion.service.ReportePdfServicio;
 import com.gestion.service.VentaServicio;
 
@@ -23,6 +25,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
@@ -31,11 +35,27 @@ import javafx.stage.Window;
 
 public class ReporteVentasControlador {
 
+    /*
+     * =====================================================
+     * SERVICIOS Y REPOSITORIOS
+     * =====================================================
+     */
+
     private final VentaServicio ventaServicio =
         new VentaServicio();
 
     private final ReportePdfServicio reportePdfServicio =
         new ReportePdfServicio();
+
+    private final PagoClienteRepositorio pagoClienteRepositorio =
+        new PagoClienteRepositorio();
+
+
+    /*
+     * =====================================================
+     * LISTAS
+     * =====================================================
+     */
 
     private final ObservableList<Venta> ventas =
         FXCollections.observableArrayList();
@@ -47,6 +67,12 @@ public class ReporteVentasControlador {
         );
 
 
+    /*
+     * =====================================================
+     * FILTROS
+     * =====================================================
+     */
+
     @FXML
     private DatePicker fechaDesde;
 
@@ -55,6 +81,13 @@ public class ReporteVentasControlador {
 
     @FXML
     private ComboBox<String> cmbMetodoPago;
+
+
+    /*
+     * =====================================================
+     * TABLA
+     * =====================================================
+     */
 
     @FXML
     private TableView<Venta> tablaVentas;
@@ -80,6 +113,13 @@ public class ReporteVentasControlador {
     @FXML
     private TableColumn<Venta, Double> columnaPendiente;
 
+
+    /*
+     * =====================================================
+     * RESUMEN DE VENTAS
+     * =====================================================
+     */
+
     @FXML
     private Label lblCantidadVentas;
 
@@ -89,9 +129,34 @@ public class ReporteVentasControlador {
     @FXML
     private Label lblTotalPagado;
 
+
+    /*
+     * =====================================================
+     * ESTADO DEL CRÉDITO
+     * =====================================================
+     */
+
     @FXML
     private Label lblTotalPendiente;
 
+    @FXML
+    private Label lblCreditoRecuperado;
+
+    @FXML
+    private Label lblCreditoPendiente;
+
+    @FXML
+    private Label lblPorcentajeRecuperado;
+
+    @FXML
+    private ProgressBar barraRecuperacion;
+
+
+    /*
+     * =====================================================
+     * INICIALIZAR
+     * =====================================================
+     */
 
     @FXML
     public void initialize() {
@@ -99,6 +164,12 @@ public class ReporteVentasControlador {
         configurarTabla();
 
         configurarFiltros();
+
+        /*
+         * Ajusta automáticamente las columnas
+         * al ancho disponible de la tabla.
+         */
+        configurarAnchoTabla();
 
         tablaVentas.setItems(
             ventasFiltradas
@@ -110,11 +181,15 @@ public class ReporteVentasControlador {
 
     /*
      * =====================================================
-     * CONFIGURACIÓN DE LA TABLA
+     * CONFIGURAR TABLA
      * =====================================================
      */
 
     private void configurarTabla() {
+
+        /*
+         * ID
+         */
 
         columnaId.setCellValueFactory(
             celda ->
@@ -125,6 +200,10 @@ public class ReporteVentasControlador {
                 )
         );
 
+
+        /*
+         * FECHA
+         */
 
         columnaFecha.setCellValueFactory(
             celda ->
@@ -138,6 +217,10 @@ public class ReporteVentasControlador {
         );
 
 
+        /*
+         * CLIENTE
+         */
+
         columnaCliente.setCellValueFactory(
             celda ->
                 new SimpleStringProperty(
@@ -147,6 +230,10 @@ public class ReporteVentasControlador {
                 )
         );
 
+
+        /*
+         * MÉTODO DE PAGO
+         */
 
         columnaMetodo.setCellValueFactory(
             celda ->
@@ -160,6 +247,10 @@ public class ReporteVentasControlador {
         );
 
 
+        /*
+         * TOTAL
+         */
+
         columnaTotal.setCellValueFactory(
             celda ->
                 new SimpleObjectProperty<>(
@@ -171,6 +262,10 @@ public class ReporteVentasControlador {
                 )
         );
 
+
+        /*
+         * PAGADO AL VENDER
+         */
 
         columnaPagado.setCellValueFactory(
             celda ->
@@ -184,6 +279,10 @@ public class ReporteVentasControlador {
         );
 
 
+        /*
+         * CRÉDITO GENERADO
+         */
+
         columnaPendiente.setCellValueFactory(
             celda ->
                 new SimpleObjectProperty<>(
@@ -194,12 +293,206 @@ public class ReporteVentasControlador {
                     )
                 )
         );
+
+
+        /*
+         * FORMATO DE DINERO
+         */
+
+        configurarColumnaDinero(
+            columnaTotal
+        );
+
+        configurarColumnaDinero(
+            columnaPagado
+        );
+
+        configurarColumnaDinero(
+            columnaPendiente
+        );
     }
 
 
     /*
      * =====================================================
-     * FILTROS
+     * AJUSTAR COLUMNAS AL ANCHO DE LA TABLA
+     * =====================================================
+     */
+
+    private void configurarAnchoTabla() {
+
+        tablaVentas
+            .widthProperty()
+            .addListener(
+                (
+                    observable,
+                    anchoAnterior,
+                    anchoNuevo
+                ) -> {
+
+                    ajustarAnchoColumnas(
+                        anchoNuevo.doubleValue()
+                    );
+                }
+            );
+
+
+        /*
+         * También intentamos realizar el ajuste
+         * cuando JavaFX termine de mostrar la tabla.
+         */
+
+        tablaVentas
+            .sceneProperty()
+            .addListener(
+                (
+                    observable,
+                    escenaAnterior,
+                    escenaNueva
+                ) -> {
+
+                    if (
+                        escenaNueva != null
+                    ) {
+
+                        tablaVentas.applyCss();
+                        tablaVentas.layout();
+
+                        ajustarAnchoColumnas(
+                            tablaVentas.getWidth()
+                        );
+                    }
+                }
+            );
+    }
+
+
+    /*
+     * =====================================================
+     * DISTRIBUIR ANCHO DE COLUMNAS
+     * =====================================================
+     */
+
+    private void ajustarAnchoColumnas(
+        double anchoTabla
+    ) {
+
+        if (
+            anchoTabla <= 0
+        ) {
+
+            return;
+        }
+
+
+        /*
+         * Dejamos un pequeño margen para la barra
+         * vertical, bordes y espacio interno de la tabla.
+         */
+
+        double disponible =
+            Math.max(
+                0,
+                anchoTabla - 30
+            );
+
+
+        /*
+         * DISTRIBUCIÓN:
+         *
+         * ID                 5 %
+         * Fecha             16 %
+         * Cliente           21 %
+         * Método            13 %
+         * Total             14 %
+         * Pagado            16 %
+         * Crédito           15 %
+         *
+         * TOTAL            100 %
+         */
+
+        columnaId.setPrefWidth(
+            disponible * 0.05
+        );
+
+        columnaFecha.setPrefWidth(
+            disponible * 0.16
+        );
+
+        columnaCliente.setPrefWidth(
+            disponible * 0.21
+        );
+
+        columnaMetodo.setPrefWidth(
+            disponible * 0.13
+        );
+
+        columnaTotal.setPrefWidth(
+            disponible * 0.14
+        );
+
+        columnaPagado.setPrefWidth(
+            disponible * 0.16
+        );
+
+        columnaPendiente.setPrefWidth(
+            disponible * 0.15
+        );
+    }
+
+
+    /*
+     * =====================================================
+     * FORMATEAR COLUMNAS DE DINERO
+     * =====================================================
+     */
+
+    private void configurarColumnaDinero(
+        TableColumn<Venta, Double> columna
+    ) {
+
+        columna.setCellFactory(
+            tabla ->
+                new TableCell<Venta, Double>() {
+
+                    @Override
+                    protected void updateItem(
+                        Double valor,
+                        boolean vacia
+                    ) {
+
+                        super.updateItem(
+                            valor,
+                            vacia
+                        );
+
+
+                        if (
+                            vacia
+                            || valor == null
+                        ) {
+
+                            setText(
+                                null
+                            );
+
+                        } else {
+
+                            setText(
+                                formatoDinero(
+                                    valor
+                                )
+                            );
+                        }
+                    }
+                }
+        );
+    }
+
+
+    /*
+     * =====================================================
+     * CONFIGURAR FILTROS
      * =====================================================
      */
 
@@ -220,10 +513,19 @@ public class ReporteVentasControlador {
         );
 
 
+        /*
+         * FILTRO POR MÉTODO
+         */
+
         cmbMetodoPago.setOnAction(
-            evento -> aplicarFiltros()
+            evento ->
+                aplicarFiltros()
         );
 
+
+        /*
+         * FILTRO DESDE
+         */
 
         fechaDesde
             .valueProperty()
@@ -232,9 +534,14 @@ public class ReporteVentasControlador {
                     observable,
                     anterior,
                     nuevo
-                ) -> aplicarFiltros()
+                ) ->
+                    aplicarFiltros()
             );
 
+
+        /*
+         * FILTRO HASTA
+         */
 
         fechaHasta
             .valueProperty()
@@ -243,7 +550,8 @@ public class ReporteVentasControlador {
                     observable,
                     anterior,
                     nuevo
-                ) -> aplicarFiltros()
+                ) ->
+                    aplicarFiltros()
             );
     }
 
@@ -267,7 +575,9 @@ public class ReporteVentasControlador {
             aplicarFiltros();
 
 
-        } catch (RuntimeException e) {
+        } catch (
+            RuntimeException e
+        ) {
 
             mostrarError(
                 "No se pudieron cargar las ventas.",
@@ -296,16 +606,23 @@ public class ReporteVentasControlador {
             cmbMetodoPago.getValue();
 
 
+        /*
+         * VALIDAR RANGO
+         */
+
         if (
             desde != null
             && hasta != null
-            && desde.isAfter(hasta)
+            && desde.isAfter(
+                hasta
+            )
         ) {
 
             Alert alerta =
                 new Alert(
                     Alert.AlertType.WARNING
                 );
+
 
             alerta.setTitle(
                 "Fechas incorrectas"
@@ -330,7 +647,9 @@ public class ReporteVentasControlador {
             venta -> {
 
                 /*
-                 * FILTRO POR MÉTODO DE PAGO
+                 * ===============================
+                 * MÉTODO DE PAGO
+                 * ===============================
                  */
 
                 if (
@@ -363,7 +682,9 @@ public class ReporteVentasControlador {
 
 
                 /*
-                 * CONVERTIR FECHA
+                 * ===============================
+                 * FECHA
+                 * ===============================
                  */
 
                 LocalDate fechaVenta =
@@ -371,11 +692,6 @@ public class ReporteVentasControlador {
                         venta.conseguirFecha()
                     );
 
-
-                /*
-                 * SI EXISTE FILTRO DE FECHA
-                 * PERO LA FECHA NO ES VÁLIDA
-                 */
 
                 if (
                     (
@@ -389,10 +705,6 @@ public class ReporteVentasControlador {
                 }
 
 
-                /*
-                 * FECHA DESDE
-                 */
-
                 if (
                     desde != null
                     && fechaVenta.isBefore(
@@ -403,10 +715,6 @@ public class ReporteVentasControlador {
                     return false;
                 }
 
-
-                /*
-                 * FECHA HASTA
-                 */
 
                 if (
                     hasta != null
@@ -490,7 +798,7 @@ public class ReporteVentasControlador {
 
     /*
      * =====================================================
-     * ACTUALIZAR TOTALES
+     * ACTUALIZAR INDICADORES
      * =====================================================
      */
 
@@ -502,9 +810,15 @@ public class ReporteVentasControlador {
         double totalPagado =
             0.0;
 
-        double totalPendiente =
+        double creditoGenerado =
             0.0;
 
+
+        /*
+         * ===============================
+         * CALCULAR VENTAS
+         * ===============================
+         */
 
         for (
             Venta venta
@@ -525,13 +839,86 @@ public class ReporteVentasControlador {
                 );
 
 
-            totalPendiente +=
+            creditoGenerado +=
                 valorSeguro(
                     venta
                         .conseguirSaldoPendiente()
                 );
         }
 
+
+        /*
+         * ===============================
+         * CRÉDITO RECUPERADO
+         * ===============================
+         */
+
+        double creditoRecuperado =
+            calcularCreditoRecuperado(
+                fechaDesde.getValue(),
+                fechaHasta.getValue()
+            );
+
+
+        /*
+         * Para el indicador visual no permitimos
+         * recuperar más de lo generado.
+         */
+
+        double recuperadoAplicable =
+            Math.min(
+                creditoRecuperado,
+                creditoGenerado
+            );
+
+
+        /*
+         * ===============================
+         * CRÉDITO PENDIENTE
+         * ===============================
+         */
+
+        double creditoPendiente =
+            Math.max(
+                0.0,
+                creditoGenerado
+                    - recuperadoAplicable
+            );
+
+
+        /*
+         * ===============================
+         * PORCENTAJE DE RECUPERACIÓN
+         * ===============================
+         */
+
+        double porcentajeRecuperado =
+            0.0;
+
+
+        if (
+            creditoGenerado > 0
+        ) {
+
+            porcentajeRecuperado =
+                (
+                    recuperadoAplicable
+                    / creditoGenerado
+                )
+                * 100.0;
+        }
+
+
+        double progreso =
+            porcentajeRecuperado
+                / 100.0;
+
+
+        /*
+         * ===============================
+         * RESUMEN DE VENTAS
+         * ===============================
+         */
 
         lblCantidadVentas.setText(
             String.valueOf(
@@ -554,11 +941,138 @@ public class ReporteVentasControlador {
         );
 
 
+        /*
+         * ===============================
+         * ESTADO DEL CRÉDITO
+         * ===============================
+         */
+
         lblTotalPendiente.setText(
             formatoDinero(
-                totalPendiente
+                creditoGenerado
             )
         );
+
+
+        lblCreditoRecuperado.setText(
+            formatoDinero(
+                creditoRecuperado
+            )
+        );
+
+
+        lblCreditoPendiente.setText(
+            formatoDinero(
+                creditoPendiente
+            )
+        );
+
+
+       lblPorcentajeRecuperado.setText(
+            String.format(
+                "%.0f %%",
+                porcentajeRecuperado
+            )
+        );
+
+
+        barraRecuperacion.setProgress(
+            progreso
+        );
+    }
+
+
+    /*
+     * =====================================================
+     * CALCULAR CRÉDITO RECUPERADO
+     * =====================================================
+     */
+
+    private double calcularCreditoRecuperado(
+        LocalDate desde,
+        LocalDate hasta
+    ) {
+
+        double total =
+            0.0;
+
+
+        ObservableList<PagoCliente> pagos =
+            pagoClienteRepositorio
+                .consultarTodos();
+
+
+        for (
+            PagoCliente pago
+            : pagos
+        ) {
+
+            LocalDate fechaPago =
+                convertirFecha(
+                    pago.conseguirFecha()
+                );
+
+
+            /*
+             * Si existen filtros de fecha y
+             * no podemos interpretar la fecha,
+             * ignoramos ese pago.
+             */
+
+            if (
+                (
+                    desde != null
+                    || hasta != null
+                )
+                && fechaPago == null
+            ) {
+
+                continue;
+            }
+
+
+            /*
+             * DESDE
+             */
+
+            if (
+                desde != null
+                && fechaPago.isBefore(
+                    desde
+                )
+            ) {
+
+                continue;
+            }
+
+
+            /*
+             * HASTA
+             */
+
+            if (
+                hasta != null
+                && fechaPago.isAfter(
+                    hasta
+                )
+            ) {
+
+                continue;
+            }
+
+
+            /*
+             * SUMAR ABONO
+             */
+
+            total +=
+                valorSeguro(
+                    pago.conseguirMonto()
+                );
+        }
+
+
+        return total;
     }
 
 
@@ -575,9 +1089,11 @@ public class ReporteVentasControlador {
             null
         );
 
+
         fechaHasta.setValue(
             null
         );
+
 
         cmbMetodoPago.setValue(
             "Todos"
@@ -635,7 +1151,9 @@ public class ReporteVentasControlador {
             );
 
 
-        } catch (IOException e) {
+        } catch (
+            IOException e
+        ) {
 
             mostrarError(
                 "No se pudo abrir el reporte de inventario.",
@@ -643,6 +1161,13 @@ public class ReporteVentasControlador {
             );
         }
     }
+
+
+    /*
+     * =====================================================
+     * ABRIR CUENTAS POR COBRAR
+     * =====================================================
+     */
 
     @FXML
     private void abrirCuentasCobrar() {
@@ -656,19 +1181,25 @@ public class ReporteVentasControlador {
                     )
                 );
 
+
             Parent vista =
                 loader.load();
+
 
             BorderPane panelPrincipal =
                 (BorderPane) tablaVentas
                     .getScene()
                     .getRoot();
 
+
             panelPrincipal.setCenter(
                 vista
             );
 
-        } catch (IOException e) {
+
+        } catch (
+            IOException e
+        ) {
 
             mostrarError(
                 "No se pudo abrir el reporte de cuentas por cobrar.",
@@ -701,16 +1232,13 @@ public class ReporteVentasControlador {
                 "Reporte vacío"
             );
 
-
             alerta.setHeaderText(
                 null
             );
 
-
             alerta.setContentText(
                 "No existen ventas para exportar."
             );
-
 
             alerta.showAndWait();
 
@@ -764,7 +1292,7 @@ public class ReporteVentasControlador {
 
         /*
          * AGREGAR .PDF SI EL USUARIO
-         * NO LO ESCRIBIÓ
+         * NO LO ESCRIBIÓ.
          */
 
         if (
@@ -805,22 +1333,20 @@ public class ReporteVentasControlador {
                 "Reporte generado"
             );
 
-
             alerta.setHeaderText(
                 null
             );
 
-
             alerta.setContentText(
-                "El reporte PDF fue generado "
-                + "correctamente."
+                "El reporte PDF fue generado correctamente."
             );
-
 
             alerta.showAndWait();
 
 
-        } catch (RuntimeException e) {
+        } catch (
+            RuntimeException e
+        ) {
 
             mostrarError(
                 "No se pudo generar el PDF.",
@@ -832,7 +1358,7 @@ public class ReporteVentasControlador {
 
     /*
      * =====================================================
-     * OBTENER VENTAS FILTRADAS
+     * CONSEGUIR VENTAS FILTRADAS
      * =====================================================
      */
 
@@ -848,7 +1374,7 @@ public class ReporteVentasControlador {
 
     /*
      * =====================================================
-     * OBTENER NOMBRE DEL CLIENTE
+     * CONSEGUIR NOMBRE DEL CLIENTE
      * =====================================================
      */
 
@@ -942,6 +1468,10 @@ public class ReporteVentasControlador {
             + String.format(
                 "%,.0f",
                 valor
+            )
+            .replace(
+                ',',
+                '.'
             );
     }
 
@@ -982,18 +1512,15 @@ public class ReporteVentasControlador {
             "Error"
         );
 
-
         alerta.setHeaderText(
             null
         );
-
 
         alerta.setContentText(
             mensaje
             + "\n"
             + detalle
         );
-
 
         alerta.showAndWait();
 

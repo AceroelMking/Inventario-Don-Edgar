@@ -43,7 +43,8 @@ public class ProductoRepositorio {
         + "FOREIGN KEY (id_categoria) REFERENCES categoria(id), "
         + "FOREIGN KEY (unidad_agrupada) REFERENCES producto(id) );"
     ;
-    private static final String CONSULTA_INSERTAR = "INSERT INTO producto "
+    private static final String CONSULTA_INSERTAR =
+        "INSERT INTO producto "
         + "(codigo_barras, "
         + "nombre_producto, "
         + "marca, "
@@ -54,7 +55,7 @@ public class ProductoRepositorio {
         + "precio_venta, "
         + "existencias, "
         + "minimo_existencias) "
-        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+        + "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?);"
     ;
     private static final String CONSULTA_ACTIVAR = "UPDATE producto SET activo = 1 WHERE id = ?;";
     // Read
@@ -152,19 +153,19 @@ public class ProductoRepositorio {
         + "WHERE p.codigo_barras = ?;"
     ;
     // Update
-    private static final String CONSULTA_ACTUALIZAR = "UPDATE producto " 
+   private static final String CONSULTA_ACTUALIZAR =
+        "UPDATE producto "
         + "SET codigo_barras = ?, "
         + "nombre_producto = ?, "
-        + "marca = ?,"
+        + "marca = ?, "
         + "id_categoria = ?, "
-        + "cantidad_producto = ?, "
         + "unidad_medida = ?, "
         + "unidad_agrupada = ?, "
         + "precio_venta = ?, "
-        + "existencias = ?, " 
-        + "minimo_existencias = ? " 
+        + "existencias = ?, "
+        + "minimo_existencias = ? "
         + "WHERE id = ?;"
-    ; 
+    ;
     // Delete    
     private static final String CONSULTA_DESACTIVAR = "UPDATE producto SET activo = 0 WHERE id = ?;";
     
@@ -184,7 +185,6 @@ public class ProductoRepositorio {
         categoria.colocarId(conjuntoResultados.getInt("id_categoria"));
         categoria.colocarNombre(conjuntoResultados.getString("categoria"));
         producto.colocarCategoria(categoria);
-        producto.colocarCantidadProducto(conjuntoResultados.getDouble("cantidad_producto"));
         producto.colocarUnidadMedida(conjuntoResultados.getString("unidad_medida"));
         producto.colocarUnidadAgrupada((Integer) conjuntoResultados.getObject("unidad_agrupada"));
         producto.colocarProductoPadre(
@@ -196,19 +196,57 @@ public class ProductoRepositorio {
         return producto;
     }
 
-    private void actualizarTablaProducto(PreparedStatement sentenciaPreparada, 
+    private void actualizarTablaProducto(
+        PreparedStatement sentenciaPreparada,
         Producto producto
-    ) throws SQLException {
-        sentenciaPreparada.setString(1, producto.conseguirCodigoBarras());
-        sentenciaPreparada.setString(2, producto.conseguirNombre());
-        sentenciaPreparada.setString(3, producto.conseguirMarca());
-        sentenciaPreparada.setInt(4, producto.conseguirCategoria().conseguirId());
-        sentenciaPreparada.setObject(5, producto.conseguirCantidadProducto());
-        sentenciaPreparada.setString(6, producto.conseguirUnidadMedida());
-        sentenciaPreparada.setObject(7, producto.conseguirUnidadAgrupada());
-        sentenciaPreparada.setDouble(8, producto.conseguirPrecio());
-        sentenciaPreparada.setDouble(9, producto.conseguirExistencias());
-        sentenciaPreparada.setDouble(10, producto.conseguirMinimoExistencias());
+        ) throws SQLException {
+
+        sentenciaPreparada.setString(
+            1,
+            producto.conseguirCodigoBarras()
+        );
+
+        sentenciaPreparada.setString(
+            2,
+            producto.conseguirNombre()
+        );
+
+        sentenciaPreparada.setString(
+            3,
+            producto.conseguirMarca()
+        );
+
+        sentenciaPreparada.setInt(
+            4,
+            producto
+                .conseguirCategoria()
+                .conseguirId()
+        );
+
+        sentenciaPreparada.setString(
+            5,
+            producto.conseguirUnidadMedida()
+        );
+
+        sentenciaPreparada.setObject(
+            6,
+            producto.conseguirUnidadAgrupada()
+        );
+
+        sentenciaPreparada.setDouble(
+            7,
+            producto.conseguirPrecio()
+        );
+
+        sentenciaPreparada.setDouble(
+            8,
+            producto.conseguirExistencias()
+        );
+
+        sentenciaPreparada.setDouble(
+            9,
+            producto.conseguirMinimoExistencias()
+        );
     }
     // Create P
     private void generarTabla(){
@@ -334,10 +372,6 @@ public Producto consultarCodigoBarrasUnico(String codigoBarras) {
         return categorias;
     }
 
-    public ObservableList<String> consultarColumnaCantidadProducto(){
-        return consultarColumna(CAMPOS[5]);
-    }
-
     public ObservableList<String> consultarColumnaUnidadMedida(){
         return consultarColumna(CAMPOS[6]);
     }
@@ -419,7 +453,7 @@ public Producto consultarCodigoBarrasUnico(String codigoBarras) {
             PreparedStatement sentenciaPreparada = conexion.prepareStatement(CONSULTA_ACTUALIZAR)
         ) {
             actualizarTablaProducto(sentenciaPreparada,producto);
-            sentenciaPreparada.setInt(11, producto.conseguirId());  
+            sentenciaPreparada.setInt( 10, producto.conseguirId());  
             sentenciaPreparada.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error al editar producto ", e);

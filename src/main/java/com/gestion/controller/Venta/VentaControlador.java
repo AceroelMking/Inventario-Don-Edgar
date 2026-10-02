@@ -3,10 +3,10 @@ package com.gestion.controller.venta;
 import com.gestion.model.Cliente;
 import com.gestion.model.DetalleVenta;
 import com.gestion.model.Producto;
+import com.gestion.model.Venta;
 import com.gestion.service.ClienteServicio;
 import com.gestion.service.ProductoServicio;
 import com.gestion.service.VentaServicio;
-import com.gestion.model.Venta;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -23,6 +23,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
 
+
 public class VentaControlador {
 
     private final VentaServicio ventaServicio =
@@ -36,6 +37,7 @@ public class VentaControlador {
 
     private final ObservableList<DetalleVenta> detalles =
         FXCollections.observableArrayList();
+
 
     @FXML
     private ComboBox<Cliente> comboCliente;
@@ -95,6 +97,18 @@ public class VentaControlador {
 
         configurarCodigoBarras();
 
+
+        /*
+         * MEJORA:
+         * Al presionar ENTER en el campo cantidad,
+         * se agrega el producto sin necesidad
+         * de utilizar el mouse.
+         */
+        txtCantidad.setOnAction(
+            event -> agregarProducto()
+        );
+
+
         tablaDetalles.setItems(detalles);
 
         actualizarTotales();
@@ -109,6 +123,7 @@ public class VentaControlador {
             clienteServicio.consultarTodo()
         );
 
+
         comboCliente.setConverter(
             new StringConverter<>() {
 
@@ -121,8 +136,10 @@ public class VentaControlador {
                         cliente == null
                         || cliente.conseguirPersona() == null
                     ) {
+
                         return "";
                     }
+
 
                     return cliente
                         .conseguirPersona()
@@ -134,6 +151,7 @@ public class VentaControlador {
                 public Cliente fromString(
                     String texto
                 ) {
+
                     return null;
                 }
             }
@@ -147,6 +165,7 @@ public class VentaControlador {
             productoServicio.consultarTodo()
         );
 
+
         comboProducto.setConverter(
             new StringConverter<>() {
 
@@ -159,19 +178,23 @@ public class VentaControlador {
                         return "";
                     }
 
+
                     String nombre =
                         producto.conseguirNombre() == null
-                        ? ""
-                        : producto.conseguirNombre();
+                            ? ""
+                            : producto.conseguirNombre();
+
 
                     String marca =
                         producto.conseguirMarca() == null
-                        ? ""
-                        : producto.conseguirMarca();
+                            ? ""
+                            : producto.conseguirMarca();
+
 
                     if (marca.isBlank()) {
                         return nombre;
                     }
+
 
                     return nombre + " - " + marca;
                 }
@@ -181,7 +204,39 @@ public class VentaControlador {
                 public Producto fromString(
                     String texto
                 ) {
+
                     return null;
+                }
+            }
+        );
+
+
+        /*
+         * MEJORA:
+         * Cuando el producto se selecciona manualmente,
+         * colocamos cantidad 1 por defecto.
+         *
+         * Después movemos el foco al campo cantidad
+         * para permitir modificarla rápidamente.
+         */
+        comboProducto.setOnAction(
+            event -> {
+
+                Producto producto =
+                    comboProducto.getValue();
+
+
+                if (producto != null) {
+
+                    if (txtCantidad.getText().isBlank()) {
+
+                        txtCantidad.setText("1");
+                    }
+
+
+                    txtCantidad.requestFocus();
+
+                    txtCantidad.selectAll();
                 }
             }
         );
@@ -211,6 +266,7 @@ public class VentaControlador {
             )
         );
 
+
         columnaCantidad.setCellValueFactory(
             celda -> new SimpleObjectProperty<>(
                 celda
@@ -218,6 +274,7 @@ public class VentaControlador {
                     .conseguirCantidad()
             )
         );
+
 
         columnaPrecio.setCellValueFactory(
             celda -> new SimpleObjectProperty<>(
@@ -227,6 +284,7 @@ public class VentaControlador {
             )
         );
 
+
         columnaSubtotal.setCellValueFactory(
             celda -> new SimpleObjectProperty<>(
                 celda
@@ -234,6 +292,7 @@ public class VentaControlador {
                     .conseguirSubtotal()
             )
         );
+
 
         configurarColumnaEliminar();
     }
@@ -247,10 +306,12 @@ public class VentaControlador {
                 private final Button boton =
                     new Button("Quitar");
 
+
                 {
                     boton
                         .getStyleClass()
                         .add("boton-secundario");
+
 
                     boton.setOnAction(
                         event -> {
@@ -258,13 +319,16 @@ public class VentaControlador {
                             DetalleVenta detalle =
                                 getTableRow().getItem();
 
+
                             if (detalle != null) {
 
                                 detalles.remove(
                                     detalle
                                 );
 
+
                                 actualizarTotales();
+
 
                                 txtCodigoBarras.requestFocus();
                             }
@@ -283,6 +347,7 @@ public class VentaControlador {
                         item,
                         empty
                     );
+
 
                     setGraphic(
                         empty ? null : boton
@@ -330,9 +395,11 @@ public class VentaControlador {
                 .getText()
                 .trim();
 
+
         if (codigo.isEmpty()) {
             return;
         }
+
 
         try {
 
@@ -341,6 +408,7 @@ public class VentaControlador {
                     .consultarCodigoBarras(
                         codigo
                     );
+
 
             if (
                 producto == null
@@ -353,7 +421,9 @@ public class VentaControlador {
                     + "."
                 );
 
+
                 txtCodigoBarras.selectAll();
+
                 return;
             }
 
@@ -362,22 +432,23 @@ public class VentaControlador {
                 producto
             );
 
-            /*
-             * Para agilizar el uso del lector,
-             * dejamos cantidad 1 por defecto.
-             */
 
+            /*
+             * Si el campo cantidad se encuentra vacío,
+             * utilizamos una unidad por defecto.
+             */
             if (txtCantidad.getText().isBlank()) {
+
                 txtCantidad.setText("1");
             }
 
 
             /*
-             * Cuando el código proviene del lector
+             * Cuando el código proviene del lector,
              * agregamos directamente el producto.
              */
-
             agregarProducto();
+
 
         } catch (RuntimeException e) {
 
@@ -385,6 +456,7 @@ public class VentaControlador {
                 "No se pudo buscar el producto.\n"
                 + e.getMessage()
             );
+
 
             txtCodigoBarras.selectAll();
         }
@@ -396,6 +468,7 @@ public class VentaControlador {
 
         Producto producto =
             comboProducto.getValue();
+
 
         if (producto == null) {
 
@@ -409,6 +482,7 @@ public class VentaControlador {
 
         double cantidad;
 
+
         try {
 
             cantidad =
@@ -418,9 +492,8 @@ public class VentaControlador {
                         .trim()
                 );
 
-        } catch (
-            NumberFormatException e
-        ) {
+
+        } catch (NumberFormatException e) {
 
             mostrarError(
                 "La cantidad debe ser un número válido."
@@ -452,15 +525,14 @@ public class VentaControlador {
 
         double existencias =
             producto.conseguirExistencias() == null
-            ? 0.0
-            : producto.conseguirExistencias();
+                ? 0.0
+                : producto.conseguirExistencias();
 
 
         /*
-         * Verificamos también si este mismo
-         * producto ya está agregado a la venta.
+         * Verificamos si el producto ya se encuentra
+         * agregado en la venta.
          */
-
         DetalleVenta existente =
             buscarDetalleProducto(
                 producto.conseguirId()
@@ -469,14 +541,18 @@ public class VentaControlador {
 
         double cantidadActual =
             existente == null
-            ? 0.0
-            : existente.conseguirCantidad();
+                ? 0.0
+                : existente.conseguirCantidad();
 
 
         double cantidadFinal =
             cantidadActual + cantidad;
 
 
+        /*
+         * La cantidad total agregada del producto
+         * no puede superar las existencias disponibles.
+         */
         if (cantidadFinal > existencias) {
 
             mostrarError(
@@ -490,40 +566,56 @@ public class VentaControlador {
         }
 
 
+        /*
+         * Si el producto ya estaba en la venta,
+         * incrementamos su cantidad.
+         */
         if (existente != null) {
 
             existente.colocarCantidad(
                 cantidadFinal
             );
 
+
             existente.colocarSubtotal(
                 cantidadFinal
                 * existente.conseguirPrecioUnitario()
             );
 
+
             tablaDetalles.refresh();
+
 
         } else {
 
+            /*
+             * Si todavía no existe,
+             * creamos un nuevo detalle.
+             */
             DetalleVenta detalle =
                 new DetalleVenta();
+
 
             detalle.colocarProducto(
                 producto
             );
 
+
             detalle.colocarCantidad(
                 cantidad
             );
+
 
             detalle.colocarPrecioUnitario(
                 producto.conseguirPrecio()
             );
 
+
             detalle.colocarSubtotal(
                 cantidad
                 * producto.conseguirPrecio()
             );
+
 
             detalles.add(
                 detalle
@@ -545,6 +637,7 @@ public class VentaControlador {
             return null;
         }
 
+
         for (
             DetalleVenta detalle
             : detalles
@@ -564,6 +657,7 @@ public class VentaControlador {
                 return detalle;
             }
         }
+
 
         return null;
     }
@@ -588,12 +682,14 @@ public class VentaControlador {
                 detalles
             );
 
+
         lblTotal.setText(
             String.format(
                 "$ %,.0f",
                 total
             )
         );
+
 
         actualizarSaldoPendiente();
     }
@@ -605,6 +701,7 @@ public class VentaControlador {
             ventaServicio.calcularTotal(
                 detalles
             );
+
 
         double pagado =
             0.0;
@@ -626,9 +723,8 @@ public class VentaControlador {
                     );
             }
 
-        } catch (
-            NumberFormatException e
-        ) {
+
+        } catch (NumberFormatException e) {
 
             pagado = 0.0;
         }
@@ -651,202 +747,213 @@ public class VentaControlador {
 
 
     @FXML
-private void finalizarVenta() {
+    private void finalizarVenta() {
 
-    if (detalles.isEmpty()) {
+        if (detalles.isEmpty()) {
 
-        mostrarError(
-            "Debe agregar al menos un producto a la venta."
-        );
+            mostrarError(
+                "Debe agregar al menos un producto a la venta."
+            );
 
-        return;
-    }
-
-
-    String metodoPago =
-        comboMetodoPago.getValue();
-
-    if (metodoPago == null
-            || metodoPago.isBlank()) {
-
-        mostrarError(
-            "Debe seleccionar un método de pago."
-        );
-
-        return;
-    }
-
-
-    double montoPagado;
-
-    try {
-
-        if (txtMontoPagado.getText().isBlank()) {
-
-            montoPagado = 0.0;
-
-        } else {
-
-            montoPagado =
-                Double.parseDouble(
-                    txtMontoPagado
-                        .getText()
-                        .trim()
-                );
+            return;
         }
 
-    } catch (NumberFormatException e) {
 
-        mostrarError(
-            "El monto pagado debe ser un número válido."
-        );
-
-        return;
-    }
+        String metodoPago =
+            comboMetodoPago.getValue();
 
 
-    if (montoPagado < 0) {
+        if (
+            metodoPago == null
+            || metodoPago.isBlank()
+        ) {
 
-        mostrarError(
-            "El monto pagado no puede ser negativo."
-        );
+            mostrarError(
+                "Debe seleccionar un método de pago."
+            );
 
-        return;
-    }
-
-
-    double total =
-        ventaServicio.calcularTotal(
-            detalles
-        );
+            return;
+        }
 
 
-    if (montoPagado > total) {
-
-        mostrarError(
-            "El monto pagado no puede ser mayor "
-            + "al total de la venta."
-        );
-
-        return;
-    }
+        double montoPagado;
 
 
-    double saldoPendiente =
-        total - montoPagado;
+        try {
+
+            if (txtMontoPagado.getText().isBlank()) {
+
+                montoPagado = 0.0;
 
 
-    Cliente cliente =
-        comboCliente.getValue();
+            } else {
+
+                montoPagado =
+                    Double.parseDouble(
+                        txtMontoPagado
+                            .getText()
+                            .trim()
+                    );
+            }
 
 
-    /*
-     * Si queda dinero pendiente,
-     * necesitamos saber quién lo debe.
-     */
-    if (saldoPendiente > 0
-            && cliente == null) {
+        } catch (NumberFormatException e) {
 
-        mostrarError(
-            "Debe seleccionar un cliente "
-            + "cuando existe saldo pendiente."
-        );
+            mostrarError(
+                "El monto pagado debe ser un número válido."
+            );
 
-        return;
-    }
+            return;
+        }
 
 
-    try {
+        if (montoPagado < 0) {
 
-        Venta venta =
-            new Venta();
+            mostrarError(
+                "El monto pagado no puede ser negativo."
+            );
 
-        venta.colocarCliente(
-            cliente
-        );
-
-        venta.colocarMetodoPago(
-            metodoPago
-        );
-
-        venta.colocarMontoPagado(
-            montoPagado
-        );
+            return;
+        }
 
 
-        int idVenta =
-            ventaServicio.registrarVenta(
-                venta,
+        double total =
+            ventaServicio.calcularTotal(
                 detalles
             );
 
 
-        mostrarInformacion(
-            "Venta registrada correctamente.\n"
-            + "Número de venta: "
-            + idVenta
-        );
+        if (montoPagado > total) {
+
+            mostrarError(
+                "El monto pagado no puede ser mayor "
+                + "al total de la venta."
+            );
+
+            return;
+        }
+
+
+        double saldoPendiente =
+            total - montoPagado;
+
+
+        Cliente cliente =
+            comboCliente.getValue();
 
 
         /*
-         * Limpiar la venta después
-         * de registrarla correctamente.
+         * Si queda dinero pendiente,
+         * necesitamos saber quién lo debe.
          */
-        detalles.clear();
+        if (
+            saldoPendiente > 0
+            && cliente == null
+        ) {
 
-        comboCliente.setValue(null);
+            mostrarError(
+                "Debe seleccionar un cliente "
+                + "cuando existe saldo pendiente."
+            );
 
-        comboMetodoPago.setValue(null);
-
-        comboProducto.setValue(null);
-
-        txtCantidad.clear();
-
-        txtCodigoBarras.clear();
-
-        txtMontoPagado.clear();
-
-
-        /*
-         * Volvemos a consultar los productos
-         * para obtener las nuevas existencias.
-         */
-        comboProducto.setItems(
-            productoServicio.consultarTodo()
-        );
+            return;
+        }
 
 
-        /*
-         * Volvemos a consultar los clientes
-         * para obtener sus nuevos saldos.
-         */
-        comboCliente.setItems(
-            clienteServicio.consultarTodo()
-        );
+        try {
+
+            Venta venta =
+                new Venta();
 
 
-        actualizarTotales();
-
-        tablaDetalles.refresh();
-
-        txtCodigoBarras.requestFocus();
+            venta.colocarCliente(
+                cliente
+            );
 
 
-    } catch (IllegalArgumentException e) {
-
-        mostrarError(
-            e.getMessage()
-        );
+            venta.colocarMetodoPago(
+                metodoPago
+            );
 
 
-    } catch (RuntimeException e) {
+            venta.colocarMontoPagado(
+                montoPagado
+            );
 
-        mostrarError(
-            "No se pudo registrar la venta.\n"
-            + e.getMessage()
-        );
+
+            int idVenta =
+                ventaServicio.registrarVenta(
+                    venta,
+                    detalles
+                );
+
+
+            mostrarInformacion(
+                "Venta registrada correctamente.\n"
+                + "Número de venta: "
+                + idVenta
+            );
+
+
+            /*
+             * Limpiar la venta después
+             * de registrarla correctamente.
+             */
+            detalles.clear();
+
+            comboCliente.setValue(null);
+
+            comboMetodoPago.setValue(null);
+
+            comboProducto.setValue(null);
+
+            txtCantidad.clear();
+
+            txtCodigoBarras.clear();
+
+            txtMontoPagado.clear();
+
+
+            /*
+             * Consultamos nuevamente los productos
+             * para obtener las existencias actualizadas.
+             */
+            comboProducto.setItems(
+                productoServicio.consultarTodo()
+            );
+
+
+            /*
+             * Consultamos nuevamente los clientes
+             * para obtener sus saldos actualizados.
+             */
+            comboCliente.setItems(
+                clienteServicio.consultarTodo()
+            );
+
+
+            actualizarTotales();
+
+            tablaDetalles.refresh();
+
+            txtCodigoBarras.requestFocus();
+
+
+        } catch (IllegalArgumentException e) {
+
+            mostrarError(
+                e.getMessage()
+            );
+
+
+        } catch (RuntimeException e) {
+
+            mostrarError(
+                "No se pudo registrar la venta.\n"
+                + e.getMessage()
+            );
+        }
     }
-}
 
 
     private void mostrarError(

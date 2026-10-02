@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gestion.controller.InicioControlador"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            styleClass="dashboard-scroll"
+            stylesheets="@css/estilos.css">
+
+    <content>
+
+        <VBox spacing="20"
+              styleClass="contenido-principal">
+
+            <padding>
+                <Insets top="28"
+                        right="35"
+                        bottom="28"
+                        left="35"/>
+            </padding>
+
+            <!-- BIENVENIDA -->
+
+            <VBox spacing="5">
+
+                <Label text="Bienvenido"
+                       styleClass="dashboard-titulo"/>
+
+                <Label text="Administre el inventario, las ventas y los clientes desde un solo lugar."
+                       wrapText="true"
+                       styleClass="dashboard-subtitulo"/>
+
+            </VBox>
+
+            <!-- BANNER -->
+
+            <HBox spacing="20"
+                  alignment="CENTER_LEFT"
+                  styleClass="dashboard-banner">
+
+                <padding>
+                    <Insets top="18"
+                            right="25"
+                            bottom="18"
+                            left="25"/>
+                </padding>
+
+                <VBox spacing="6"
+                      HBox.hgrow="ALWAYS">
+
+                    <Label text="Víveres y Cárnicos Don Edgar"
+                           styleClass="dashboard-banner-titulo"/>
+
+                    <Label text="Sistema local de gestión de inventario y ventas"
+                           styleClass="dashboard-banner-texto"/>
+
+                    <Label text="Controle productos, existencias, lotes, clientes, ventas y reportes."
+                           wrapText="true"
+                           styleClass="dashboard-banner-descripcion"/>
+
+                </VBox>
+
+                <ImageView fitWidth="85"
+                           fitHeight="85"
+                           preserveRatio="true"
+                           smooth="true">
+
+                    <image>
+                        <Image url="@images/logo-don-edgar.png"/>
+                    </image>
+
+                </ImageView>
+
+            </HBox>
+
+            <!-- ACCESOS RÁPIDOS -->
+
+            <Label text="Accesos rápidos"
+                   styleClass="dashboard-seccion-titulo"/>
+
+            <HBox spacing="14">
+
+                <Button text="Productos"
+                        onAction="#abrirProductos"
+                        prefHeight="100"
+                        maxWidth="Infinity"
+                        HBox.hgrow="ALWAYS"
+                        styleClass="dashboard-boton"/>
+
+                <Button text="Inventario"
+                        onAction="#abrirInventario"
+                        prefHeight="100"
+                        maxWidth="Infinity"
+                        HBox.hgrow="ALWAYS"
+                        styleClass="dashboard-boton"/>
+
+                <Button text="Clientes"
+                        onAction="#abrirClientes"
+                        prefHeight="100"
+                        maxWidth="Infinity"
+                        HBox.hgrow="ALWAYS"
+                        styleClass="dashboard-boton"/>
+
+                <Button text="Ventas"
+                        onAction="#abrirVentas"
+                        prefHeight="100"
+                        maxWidth="Infinity"
+                        HBox.hgrow="ALWAYS"
+                        styleClass="dashboard-boton"/>
+
+                <Button text="Reportes"
+                        onAction="#abrirReportes"
+                        prefHeight="100"
+                        maxWidth="Infinity"
+                        HBox.hgrow="ALWAYS"
+                        styleClass="dashboard-boton"/>
+
+            </HBox>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <!-- ESTADO -->
+
+            <HBox alignment="CENTER_LEFT"
+                  spacing="12"
+                  styleClass="dashboard-info">
+
+                <padding>
+                    <Insets top="14"
+                            right="18"
+                            bottom="14"
+                            left="18"/>
+                </padding>
+
+                <Label text="●"
+                       styleClass="dashboard-estado-icono"/>
+
+                <VBox spacing="2">
+
+                    <Label text="Sistema disponible"
+                           styleClass="dashboard-info-titulo"/>
+
+                    <Label text="La aplicación está funcionando de manera local."
+                           styleClass="dashboard-info-texto"/>
+
+                </VBox>
+
+            </HBox>
+
+        </VBox>
+
+    </content>
+
+</ScrollPane>

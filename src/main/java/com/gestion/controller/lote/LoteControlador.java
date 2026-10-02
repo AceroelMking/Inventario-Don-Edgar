@@ -13,6 +13,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.stage.Modality;
@@ -46,6 +48,9 @@ public class LoteControlador {
 
     @FXML
     private TableColumn<Lote, String> columnaMotivo;
+
+    @FXML
+    private TableColumn<Lote, Void> columnaEditar;
 
 
     @FXML
@@ -108,6 +113,66 @@ public class LoteControlador {
                     .conseguirMotivo()
             )
         );
+
+        configurarColumnaEditar();
+    }
+
+
+    private void configurarColumnaEditar() {
+
+        columnaEditar.setCellFactory(
+            columna -> new TableCell<>() {
+
+                private final Button botonEditar =
+                    new Button("Editar");
+
+                {
+                    botonEditar.getStyleClass().add(
+                        "boton-secundario"
+                    );
+
+                    botonEditar.setOnAction(
+                        evento -> {
+
+                            Lote lote =
+                                getTableView()
+                                    .getItems()
+                                    .get(
+                                        getIndex()
+                                    );
+
+                            abrirFormularioEditar(
+                                lote
+                            );
+                        }
+                    );
+                }
+
+
+                @Override
+                protected void updateItem(
+                    Void item,
+                    boolean vacio
+                ) {
+
+                    super.updateItem(
+                        item,
+                        vacio
+                    );
+
+                    if (vacio) {
+
+                        setGraphic(null);
+
+                    } else {
+
+                        setGraphic(
+                            botonEditar
+                        );
+                    }
+                }
+            }
+        );
     }
 
 
@@ -116,7 +181,9 @@ public class LoteControlador {
         ObservableList<Lote> lotes =
             loteServicio.consultarTodo();
 
-        tablaLotes.setItems(lotes);
+        tablaLotes.setItems(
+            lotes
+        );
     }
 
 
@@ -158,10 +225,94 @@ public class LoteControlador {
 
             e.printStackTrace();
 
-            new Alert(
-                Alert.AlertType.ERROR,
+            mostrarError(
                 "No se pudo abrir el formulario de entrada."
-            ).showAndWait();
+            );
         }
+    }
+
+
+    private void abrirFormularioEditar(
+        Lote lote
+    ) {
+
+        if (
+            lote == null
+            || lote.conseguirId() == null
+        ) {
+
+            mostrarError(
+                "No se pudo identificar la entrada seleccionada."
+            );
+
+            return;
+        }
+
+        try {
+
+            FXMLLoader loader =
+                new FXMLLoader(
+                    getClass().getResource(
+                        "/com/gestion/view/lote/LoteEditar.fxml"
+                    )
+                );
+
+            Parent root =
+                loader.load();
+
+            LoteFormularioControlador controlador =
+                loader.getController();
+
+            controlador.cargarLote(
+                lote.conseguirId()
+            );
+
+            Stage ventana =
+                new Stage();
+
+            ventana.setTitle(
+                "Editar entrada de inventario"
+            );
+
+            ventana.setScene(
+                new Scene(root)
+            );
+
+            ventana.initModality(
+                Modality.APPLICATION_MODAL
+            );
+
+            ventana.showAndWait();
+
+            cargarLotes();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+            mostrarError(
+                "No se pudo abrir el formulario de edición."
+            );
+
+        } catch (RuntimeException e) {
+
+            e.printStackTrace();
+
+            mostrarError(
+                "No se pudo cargar la entrada seleccionada.\n"
+                + e.getMessage()
+            );
+        }
+    }
+
+
+    private void mostrarError(
+        String mensaje
+    ) {
+
+        new Alert(
+            Alert.AlertType.ERROR,
+            mensaje
+        ).showAndWait();
     }
 }

@@ -12,12 +12,20 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 public class AccesoControlador {
 
     private final UsuarioServicio usuarioServicio =
         new UsuarioServicio();
+
+    @FXML
+    private StackPane panelAcceso;
+
+    @FXML
+    private ImageView imagenFondo;
 
     @FXML
     private TextField txtUsuario;
@@ -32,6 +40,26 @@ public class AccesoControlador {
     public void initialize() {
 
         /*
+         * El tamaño del fondo queda enlazado
+         * al tamaño del contenedor principal.
+         *
+         * Cuando la ventana aumenta o disminuye,
+         * la imagen cambia automáticamente
+         * de tamaño.
+         */
+        imagenFondo
+            .fitWidthProperty()
+            .bind(
+                panelAcceso.widthProperty()
+            );
+
+        imagenFondo
+            .fitHeightProperty()
+            .bind(
+                panelAcceso.heightProperty()
+            );
+
+        /*
          * Coloca el cursor automáticamente
          * en el campo de usuario.
          */
@@ -41,9 +69,6 @@ public class AccesoControlador {
     @FXML
     private void iniciarSesion() {
 
-        /*
-         * Limpiamos cualquier mensaje anterior.
-         */
         lblMensaje.setText("");
 
         String nombreUsuario =
@@ -53,7 +78,7 @@ public class AccesoControlador {
             txtContrasena.getText();
 
         /*
-         * Validación del campo usuario.
+         * Validación del usuario.
          */
         if (
             nombreUsuario == null
@@ -70,7 +95,7 @@ public class AccesoControlador {
         }
 
         /*
-         * Validación del campo contraseña.
+         * Validación de la contraseña.
          */
         if (
             contrasena == null
@@ -89,8 +114,7 @@ public class AccesoControlador {
         try {
 
             /*
-             * Se busca el usuario y se verifica
-             * la contraseña utilizando Argon2id.
+             * Autenticación del usuario.
              */
             Usuario usuarioAutenticado =
                 usuarioServicio.autenticar(
@@ -99,8 +123,7 @@ public class AccesoControlador {
                 );
 
             /*
-             * Si autenticar devuelve null,
-             * las credenciales no son correctas.
+             * Credenciales incorrectas.
              */
             if (usuarioAutenticado == null) {
 
@@ -115,11 +138,8 @@ public class AccesoControlador {
             }
 
             /*
-             * Verificamos si todavía se están
-             * utilizando las credenciales iniciales:
-             *
-             * Usuario: admin
-             * Contraseña: admin
+             * Comprueba si todavía utiliza
+             * las credenciales iniciales.
              */
             boolean credencialesPredeterminadas =
                 usuarioServicio
@@ -129,8 +149,8 @@ public class AccesoControlador {
                     );
 
             /*
-             * Si todavía usa admin/admin,
-             * no puede acceder al menú.
+             * Si todavía utiliza admin/admin,
+             * obliga a cambiar las credenciales.
              */
             if (credencialesPredeterminadas) {
 
@@ -140,8 +160,7 @@ public class AccesoControlador {
             }
 
             /*
-             * Si las credenciales ya fueron
-             * modificadas, entra normalmente.
+             * Acceso normal al sistema.
              */
             abrirSistema();
 
@@ -156,7 +175,7 @@ public class AccesoControlador {
     }
 
     /*
-     * Abre la pantalla principal del sistema.
+     * Abre el menú principal.
      */
     private void abrirSistema() {
 
@@ -199,8 +218,8 @@ public class AccesoControlador {
     }
 
     /*
-     * Se ejecuta únicamente cuando el usuario
-     * todavía utiliza admin / admin.
+     * Abre la pantalla de cambio obligatorio
+     * de credenciales.
      */
     private void abrirCambioObligatorio() {
 
@@ -216,21 +235,9 @@ public class AccesoControlador {
             Parent root =
                 loader.load();
 
-            /*
-             * Obtenemos el controlador de la
-             * pantalla de configuración.
-             */
             ConfiguracionUsuarioControlador controlador =
                 loader.getController();
 
-            /*
-             * Indicamos que este cambio es obligatorio.
-             *
-             * Esto permite que la pantalla muestre
-             * el mensaje correspondiente y que no
-             * permita conservar las credenciales
-             * predeterminadas.
-             */
             controlador
                 .configurarCambioObligatorio(
                     true
@@ -239,11 +246,6 @@ public class AccesoControlador {
             Stage ventana =
                 obtenerVentana();
 
-            /*
-             * Esta acción se ejecutará solamente
-             * después de que las nuevas credenciales
-             * hayan sido guardadas correctamente.
-             */
             controlador
                 .colocarAccionAlGuardar(
                     () -> abrirMenuDespuesDelCambio(
@@ -272,8 +274,8 @@ public class AccesoControlador {
     }
 
     /*
-     * Después de cambiar correctamente admin/admin,
-     * abre el menú principal.
+     * Abre el menú después de cambiar
+     * correctamente las credenciales.
      */
     private void abrirMenuDespuesDelCambio(
         Stage ventana
@@ -305,11 +307,6 @@ public class AccesoControlador {
 
             e.printStackTrace();
 
-            /*
-             * Como en este momento ya no estamos
-             * necesariamente en Acceso.fxml,
-             * mostramos el error por consola.
-             */
             System.err.println(
                 "No se pudo abrir el menú principal "
                 + "después de cambiar las credenciales."
@@ -318,8 +315,7 @@ public class AccesoControlador {
     }
 
     /*
-     * Obtiene la ventana actual a partir
-     * de uno de los controles del login.
+     * Obtiene la ventana actual.
      */
     private Stage obtenerVentana() {
 
@@ -329,8 +325,8 @@ public class AccesoControlador {
     }
 
     /*
-     * Método auxiliar para mostrar errores
-     * en la pantalla de inicio de sesión.
+     * Muestra un mensaje de error
+     * en el formulario.
      */
     private void mostrarError(
         String mensaje

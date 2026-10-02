@@ -26,11 +26,24 @@ import javafx.stage.Window;
 
 public class ReporteInventarioControlador {
 
+    /*
+     * =====================================================
+     * REPOSITORIOS Y SERVICIOS
+     * =====================================================
+     */
+
     private final ProductoRepositorio productoRepositorio =
         new ProductoRepositorio();
 
     private final ReportePdfServicio reportePdfServicio =
         new ReportePdfServicio();
+
+
+    /*
+     * =====================================================
+     * LISTAS
+     * =====================================================
+     */
 
     private final ObservableList<Producto> productos =
         FXCollections.observableArrayList();
@@ -42,8 +55,21 @@ public class ReporteInventarioControlador {
         );
 
 
+    /*
+     * =====================================================
+     * BÚSQUEDA
+     * =====================================================
+     */
+
     @FXML
     private TextField txtBuscar;
+
+
+    /*
+     * =====================================================
+     * TABLA
+     * =====================================================
+     */
 
     @FXML
     private TableView<Producto> tablaInventario;
@@ -72,6 +98,13 @@ public class ReporteInventarioControlador {
     @FXML
     private TableColumn<Producto, String> columnaEstado;
 
+
+    /*
+     * =====================================================
+     * RESUMEN
+     * =====================================================
+     */
+
     @FXML
     private Label lblCantidadProductos;
 
@@ -82,12 +115,20 @@ public class ReporteInventarioControlador {
     private Label lblSinExistencias;
 
 
+    /*
+     * =====================================================
+     * INICIALIZAR
+     * =====================================================
+     */
+
     @FXML
     public void initialize() {
 
         configurarTabla();
 
         configurarBusqueda();
+
+        configurarAnchoTabla();
 
         tablaInventario.setItems(
             productosFiltrados
@@ -97,7 +138,17 @@ public class ReporteInventarioControlador {
     }
 
 
+    /*
+     * =====================================================
+     * CONFIGURAR TABLA
+     * =====================================================
+     */
+
     private void configurarTabla() {
+
+        /*
+         * CÓDIGO DE BARRAS
+         */
 
         columnaCodigo.setCellValueFactory(
             celda ->
@@ -111,6 +162,10 @@ public class ReporteInventarioControlador {
         );
 
 
+        /*
+         * NOMBRE
+         */
+
         columnaNombre.setCellValueFactory(
             celda ->
                 new SimpleStringProperty(
@@ -123,6 +178,10 @@ public class ReporteInventarioControlador {
         );
 
 
+        /*
+         * MARCA
+         */
+
         columnaMarca.setCellValueFactory(
             celda ->
                 new SimpleStringProperty(
@@ -134,6 +193,10 @@ public class ReporteInventarioControlador {
                 )
         );
 
+
+        /*
+         * CATEGORÍA
+         */
 
         columnaCategoria.setCellValueFactory(
             celda -> {
@@ -164,6 +227,10 @@ public class ReporteInventarioControlador {
         );
 
 
+        /*
+         * EXISTENCIAS
+         */
+
         columnaExistencias.setCellValueFactory(
             celda ->
                 new SimpleObjectProperty<>(
@@ -175,6 +242,10 @@ public class ReporteInventarioControlador {
                 )
         );
 
+
+        /*
+         * EXISTENCIAS MÍNIMAS
+         */
 
         columnaMinimo.setCellValueFactory(
             celda ->
@@ -188,6 +259,10 @@ public class ReporteInventarioControlador {
         );
 
 
+        /*
+         * UNIDAD DE MEDIDA
+         */
+
         columnaUnidad.setCellValueFactory(
             celda ->
                 new SimpleStringProperty(
@@ -200,6 +275,10 @@ public class ReporteInventarioControlador {
         );
 
 
+        /*
+         * ESTADO
+         */
+
         columnaEstado.setCellValueFactory(
             celda ->
                 new SimpleStringProperty(
@@ -211,6 +290,154 @@ public class ReporteInventarioControlador {
     }
 
 
+    /*
+     * =====================================================
+     * AJUSTAR COLUMNAS AL ANCHO DE LA TABLA
+     * =====================================================
+     */
+
+    private void configurarAnchoTabla() {
+
+        /*
+         * Cada vez que cambie el ancho de la tabla,
+         * volvemos a distribuir las columnas.
+         */
+
+        tablaInventario
+            .widthProperty()
+            .addListener(
+                (
+                    observable,
+                    anchoAnterior,
+                    anchoNuevo
+                ) -> {
+
+                    ajustarAnchoColumnas(
+                        anchoNuevo.doubleValue()
+                    );
+                }
+            );
+
+
+        /*
+         * Cuando JavaFX agregue la tabla a la escena,
+         * hacemos también un primer ajuste.
+         */
+
+        tablaInventario
+            .sceneProperty()
+            .addListener(
+                (
+                    observable,
+                    escenaAnterior,
+                    escenaNueva
+                ) -> {
+
+                    if (
+                        escenaNueva != null
+                    ) {
+
+                        tablaInventario.applyCss();
+
+                        tablaInventario.layout();
+
+                        ajustarAnchoColumnas(
+                            tablaInventario.getWidth()
+                        );
+                    }
+                }
+            );
+    }
+
+
+    /*
+     * =====================================================
+     * DISTRIBUIR ANCHO DE COLUMNAS
+     * =====================================================
+     */
+
+    private void ajustarAnchoColumnas(
+        double anchoTabla
+    ) {
+
+        if (
+            anchoTabla <= 0
+        ) {
+
+            return;
+        }
+
+
+        /*
+         * Restamos un pequeño margen para:
+         *
+         * - barra vertical
+         * - bordes
+         * - espacio interno de la tabla
+         */
+
+        double disponible =
+            Math.max(
+                0,
+                anchoTabla - 30
+            );
+
+
+        /*
+         * DISTRIBUCIÓN:
+         *
+         * Código       12 %
+         * Producto     20 %
+         * Marca        13 %
+         * Categoría    14 %
+         * Existencias  11 %
+         * Mínimo        8 %
+         * Unidad       10 %
+         * Estado       12 %
+         *
+         * TOTAL       100 %
+         */
+
+        columnaCodigo.setPrefWidth(
+            disponible * 0.12
+        );
+
+        columnaNombre.setPrefWidth(
+            disponible * 0.20
+        );
+
+        columnaMarca.setPrefWidth(
+            disponible * 0.13
+        );
+
+        columnaCategoria.setPrefWidth(
+            disponible * 0.14
+        );
+
+        columnaExistencias.setPrefWidth(
+            disponible * 0.11
+        );
+
+        columnaMinimo.setPrefWidth(
+            disponible * 0.08
+        );
+
+        columnaUnidad.setPrefWidth(
+            disponible * 0.10
+        );
+
+        columnaEstado.setPrefWidth(
+            disponible * 0.12
+        );
+    }
+
+
+    /*
+     * =====================================================
+     * CONFIGURAR BÚSQUEDA
+     * =====================================================
+     */
+
     private void configurarBusqueda() {
 
         txtBuscar
@@ -220,10 +447,17 @@ public class ReporteInventarioControlador {
                     observable,
                     anterior,
                     nuevo
-                ) -> aplicarFiltro()
+                ) ->
+                    aplicarFiltro()
             );
     }
 
+
+    /*
+     * =====================================================
+     * CARGAR PRODUCTOS
+     * =====================================================
+     */
 
     private void cargarProductos() {
 
@@ -238,7 +472,9 @@ public class ReporteInventarioControlador {
             aplicarFiltro();
 
 
-        } catch (RuntimeException e) {
+        } catch (
+            RuntimeException e
+        ) {
 
             mostrarError(
                 "No se pudo cargar el inventario.",
@@ -247,6 +483,12 @@ public class ReporteInventarioControlador {
         }
     }
 
+
+    /*
+     * =====================================================
+     * APLICAR FILTRO
+     * =====================================================
+     */
 
     private void aplicarFiltro() {
 
@@ -271,6 +513,11 @@ public class ReporteInventarioControlador {
         productosFiltrados.setPredicate(
             producto -> {
 
+                /*
+                 * Si no hay búsqueda,
+                 * mostramos todo.
+                 */
+
                 if (
                     filtro.isEmpty()
                 ) {
@@ -278,6 +525,10 @@ public class ReporteInventarioControlador {
                     return true;
                 }
 
+
+                /*
+                 * CÓDIGO
+                 */
 
                 String codigo =
                     textoSeguro(
@@ -287,6 +538,10 @@ public class ReporteInventarioControlador {
                     .toLowerCase();
 
 
+                /*
+                 * NOMBRE
+                 */
+
                 String nombre =
                     textoSeguro(
                         producto
@@ -294,6 +549,10 @@ public class ReporteInventarioControlador {
                     )
                     .toLowerCase();
 
+
+                /*
+                 * MARCA
+                 */
 
                 String marca =
                     textoSeguro(
@@ -303,7 +562,12 @@ public class ReporteInventarioControlador {
                     .toLowerCase();
 
 
-                String categoria = "";
+                /*
+                 * CATEGORÍA
+                 */
+
+                String categoria =
+                    "";
 
 
                 if (
@@ -321,6 +585,10 @@ public class ReporteInventarioControlador {
                         .toLowerCase();
                 }
 
+
+                /*
+                 * COINCIDENCIA
+                 */
 
                 return codigo.contains(
                     filtro
@@ -344,11 +612,19 @@ public class ReporteInventarioControlador {
     }
 
 
+    /*
+     * =====================================================
+     * ACTUALIZAR RESUMEN
+     * =====================================================
+     */
+
     private void actualizarResumen() {
 
-        int stockBajo = 0;
+        int stockBajo =
+            0;
 
-        int sinExistencias = 0;
+        int sinExistencias =
+            0;
 
 
         for (
@@ -370,12 +646,20 @@ public class ReporteInventarioControlador {
                 );
 
 
+            /*
+             * SIN EXISTENCIAS
+             */
+
             if (
                 existencias <= 0
             ) {
 
                 sinExistencias++;
 
+
+            /*
+             * STOCK BAJO
+             */
 
             } else if (
                 minimo > 0
@@ -387,12 +671,20 @@ public class ReporteInventarioControlador {
         }
 
 
+        /*
+         * PRODUCTOS MOSTRADOS
+         */
+
         lblCantidadProductos.setText(
             String.valueOf(
                 productosFiltrados.size()
             )
         );
 
+
+        /*
+         * STOCK BAJO
+         */
 
         lblStockBajo.setText(
             String.valueOf(
@@ -401,6 +693,10 @@ public class ReporteInventarioControlador {
         );
 
 
+        /*
+         * SIN EXISTENCIAS
+         */
+
         lblSinExistencias.setText(
             String.valueOf(
                 sinExistencias
@@ -408,6 +704,12 @@ public class ReporteInventarioControlador {
         );
     }
 
+
+    /*
+     * =====================================================
+     * CONSEGUIR ESTADO DEL PRODUCTO
+     * =====================================================
+     */
 
     private String conseguirEstado(
         Producto producto
@@ -427,6 +729,10 @@ public class ReporteInventarioControlador {
             );
 
 
+        /*
+         * SIN EXISTENCIAS
+         */
+
         if (
             existencias <= 0
         ) {
@@ -434,6 +740,10 @@ public class ReporteInventarioControlador {
             return "Sin existencias";
         }
 
+
+        /*
+         * STOCK BAJO
+         */
 
         if (
             minimo > 0
@@ -444,9 +754,19 @@ public class ReporteInventarioControlador {
         }
 
 
+        /*
+         * DISPONIBLE
+         */
+
         return "Disponible";
     }
 
+
+    /*
+     * =====================================================
+     * LIMPIAR BÚSQUEDA
+     * =====================================================
+     */
 
     @FXML
     private void limpiarBusqueda() {
@@ -454,6 +774,12 @@ public class ReporteInventarioControlador {
         txtBuscar.clear();
     }
 
+
+    /*
+     * =====================================================
+     * ACTUALIZAR
+     * =====================================================
+     */
 
     @FXML
     private void actualizar() {
@@ -463,7 +789,9 @@ public class ReporteInventarioControlador {
 
 
     /*
-     * VOLVER AL REPORTE DE VENTAS
+     * =====================================================
+     * ABRIR REPORTE DE VENTAS
+     * =====================================================
      */
 
     @FXML
@@ -494,7 +822,9 @@ public class ReporteInventarioControlador {
             );
 
 
-        } catch (IOException e) {
+        } catch (
+            IOException e
+        ) {
 
             mostrarError(
                 "No se pudo abrir el reporte de ventas.",
@@ -502,6 +832,13 @@ public class ReporteInventarioControlador {
             );
         }
     }
+
+
+    /*
+     * =====================================================
+     * ABRIR REPORTE DE CUENTAS POR COBRAR
+     * =====================================================
+     */
 
     @FXML
     private void abrirCuentasCobrar() {
@@ -515,19 +852,25 @@ public class ReporteInventarioControlador {
                     )
                 );
 
+
             Parent vista =
                 loader.load();
+
 
             BorderPane panelPrincipal =
                 (BorderPane) tablaInventario
                     .getScene()
                     .getRoot();
 
+
             panelPrincipal.setCenter(
                 vista
             );
 
-        } catch (IOException e) {
+
+        } catch (
+            IOException e
+        ) {
 
             mostrarError(
                 "No se pudo abrir el reporte de cuentas por cobrar.",
@@ -538,11 +881,18 @@ public class ReporteInventarioControlador {
 
 
     /*
+     * =====================================================
      * EXPORTAR INVENTARIO A PDF
+     * =====================================================
      */
 
     @FXML
     private void exportarPdf() {
+
+        /*
+         * No exportamos si no existen productos
+         * dentro del resultado actual.
+         */
 
         if (
             productosFiltrados.isEmpty()
@@ -558,22 +908,23 @@ public class ReporteInventarioControlador {
                 "Reporte vacío"
             );
 
-
             alerta.setHeaderText(
                 null
             );
 
-
             alerta.setContentText(
                 "No existen productos para exportar."
             );
-
 
             alerta.showAndWait();
 
             return;
         }
 
+
+        /*
+         * SELECTOR DE ARCHIVO
+         */
 
         FileChooser selector =
             new FileChooser();
@@ -611,6 +962,10 @@ public class ReporteInventarioControlador {
             );
 
 
+        /*
+         * El usuario canceló.
+         */
+
         if (
             archivo == null
         ) {
@@ -618,6 +973,10 @@ public class ReporteInventarioControlador {
             return;
         }
 
+
+        /*
+         * Asegurarnos de que termine en .pdf
+         */
 
         if (
             !archivo
@@ -634,6 +993,10 @@ public class ReporteInventarioControlador {
                 );
         }
 
+
+        /*
+         * GENERAR PDF
+         */
 
         try {
 
@@ -657,22 +1020,21 @@ public class ReporteInventarioControlador {
                 "Reporte generado"
             );
 
-
             alerta.setHeaderText(
                 null
             );
-
 
             alerta.setContentText(
                 "El reporte de inventario fue "
                 + "generado correctamente."
             );
 
-
             alerta.showAndWait();
 
 
-        } catch (RuntimeException e) {
+        } catch (
+            RuntimeException e
+        ) {
 
             mostrarError(
                 "No se pudo generar el PDF.",
@@ -681,6 +1043,12 @@ public class ReporteInventarioControlador {
         }
     }
 
+
+    /*
+     * =====================================================
+     * VALOR SEGURO
+     * =====================================================
+     */
 
     private double valorSeguro(
         Double valor
@@ -698,6 +1066,12 @@ public class ReporteInventarioControlador {
     }
 
 
+    /*
+     * =====================================================
+     * TEXTO SEGURO
+     * =====================================================
+     */
+
     private String textoSeguro(
         String texto
     ) {
@@ -713,6 +1087,12 @@ public class ReporteInventarioControlador {
         return texto;
     }
 
+
+    /*
+     * =====================================================
+     * MOSTRAR ERROR
+     * =====================================================
+     */
 
     private void mostrarError(
         String mensaje,
@@ -744,18 +1124,15 @@ public class ReporteInventarioControlador {
             "Error"
         );
 
-
         alerta.setHeaderText(
             null
         );
-
 
         alerta.setContentText(
             mensaje
             + "\n"
             + detalle
         );
-
 
         alerta.showAndWait();
 

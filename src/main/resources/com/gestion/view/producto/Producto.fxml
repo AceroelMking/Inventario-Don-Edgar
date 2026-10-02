@@ -7,79 +7,180 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="20"
-      stylesheets="@../css/estilos.css"
-      xmlns="http://javafx.com/javafx/21"
+<VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.gestion.controller.producto.ProductoControlador">
+      fx:controller="com.gestion.controller.producto.ProductoControlador"
+      spacing="18"
+      styleClass="modulo-contenido"
+      stylesheets="@../css/estilos.css">
 
     <padding>
-        <Insets top="30"
-                right="35"
-                bottom="30"
-                left="35"/>
+        <Insets top="25"
+                right="30"
+                bottom="25"
+                left="30"/>
     </padding>
 
-    <!-- ENCABEZADO -->
+    <!-- ===================================================== -->
+    <!-- ENCABEZADO                                            -->
+    <!-- ===================================================== -->
+
     <HBox alignment="CENTER_LEFT"
           spacing="15">
 
-        <Button text="Categorías de productos"
+        <VBox spacing="3">
+
+            <Label text="Productos"
+                   styleClass="titulo-pagina"/>
+
+            <Label text="Administre el catálogo de productos del establecimiento."
+                   styleClass="subtitulo-pagina"/>
+
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button text="Categorías"
                 onAction="#abrirCategorias"
+                prefHeight="38"
                 styleClass="boton-secundario"/>
-
-        <Region HBox.hgrow="ALWAYS"/>
-
-        <Label text="Productos"
-               styleClass="titulo-pagina"/>
-
-        <Region HBox.hgrow="ALWAYS"/>
 
         <Button text="Actualizar"
                 onAction="#actualizarProductos"
+                prefHeight="38"
                 styleClass="boton-secundario"/>
 
-        <Button text="Agregar producto"
+        <Button text="+  Agregar producto"
                 onAction="#abrirFormularioAgregar"
+                prefHeight="38"
                 styleClass="boton-principal"/>
 
     </HBox>
 
+    <!-- ===================================================== -->
+    <!-- FILTROS                                               -->
+    <!-- ===================================================== -->
 
-    <!-- FILTROS -->
-    <HBox spacing="15"
-          alignment="CENTER_LEFT">
+    <VBox spacing="12"
+          styleClass="tarjeta-filtros">
 
-        <ComboBox fx:id="filtroCodigoBarras"
-                  promptText="Código de barras"
-                  editable="true"
-                  prefWidth="230"/>
+        <padding>
+            <Insets top="16"
+                    right="18"
+                    bottom="16"
+                    left="18"/>
+        </padding>
 
-        <ComboBox fx:id="filtroNombre"
-                  promptText="Nombre de producto"
-                  editable="true"
-                  prefWidth="230"/>
+        <HBox alignment="CENTER_LEFT"
+              spacing="10">
 
-        <ComboBox fx:id="filtroMarca"
-                  promptText="Marca/Distribuidor"
-                  editable="true"
-                  prefWidth="230"/>
+            <VBox spacing="2">
 
-        <ComboBox fx:id="filtroNombreCategoria"
-                  promptText="Categoría"
-                  editable="true"
-                  prefWidth="230"/>
+                <Label text="Buscar productos"
+                       styleClass="filtro-titulo"/>
 
-    </HBox>
+                <Label text="Utilice uno o varios filtros para localizar productos."
+                       styleClass="filtro-descripcion"/>
 
+            </VBox>
 
-    <!-- TABLA -->
-    <VBox styleClass="tarjeta"
-          VBox.vgrow="ALWAYS">
+        </HBox>
+
+        <HBox spacing="12"
+              alignment="CENTER_LEFT">
+
+            <VBox spacing="5"
+                  HBox.hgrow="ALWAYS">
+
+                <Label text="Código de barras"
+                       styleClass="campo-label"/>
+
+                <ComboBox fx:id="filtroCodigoBarras"
+                          promptText="Buscar por código"
+                          editable="true"
+                          maxWidth="Infinity"/>
+
+            </VBox>
+
+            <VBox spacing="5"
+                  HBox.hgrow="ALWAYS">
+
+                <Label text="Producto"
+                       styleClass="campo-label"/>
+
+                <ComboBox fx:id="filtroNombre"
+                          promptText="Buscar por nombre"
+                          editable="true"
+                          maxWidth="Infinity"/>
+
+            </VBox>
+
+            <VBox spacing="5"
+                  HBox.hgrow="ALWAYS">
+
+                <Label text="Marca / Distribuidor"
+                       styleClass="campo-label"/>
+
+                <ComboBox fx:id="filtroMarca"
+                          promptText="Buscar por marca"
+                          editable="true"
+                          maxWidth="Infinity"/>
+
+            </VBox>
+
+            <VBox spacing="5"
+                  HBox.hgrow="ALWAYS">
+
+                <Label text="Categoría"
+                       styleClass="campo-label"/>
+
+                <ComboBox fx:id="filtroNombreCategoria"
+                          promptText="Todas las categorías"
+                          editable="true"
+                          maxWidth="Infinity"/>
+
+            </VBox>
+
+        </HBox>
+
+    </VBox>
+
+    <!-- ===================================================== -->
+    <!-- LISTADO                                               -->
+    <!-- ===================================================== -->
+
+    <VBox spacing="10"
+          VBox.vgrow="ALWAYS"
+          styleClass="tarjeta-tabla">
+
+        <padding>
+            <Insets top="16"
+                    right="16"
+                    bottom="16"
+                    left="16"/>
+        </padding>
+
+        <HBox alignment="CENTER_LEFT">
+
+            <VBox spacing="2">
+
+                <Label text="Listado de productos"
+                       styleClass="tabla-titulo"/>
+
+                <Label text="Productos registrados actualmente en el sistema."
+                       styleClass="tabla-descripcion"/>
+
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Inventario"
+                   styleClass="etiqueta-estado"/>
+
+        </HBox>
 
         <TableView fx:id="tablaProductos"
                    VBox.vgrow="ALWAYS">
@@ -88,52 +189,69 @@
 
                 <TableColumn fx:id="columnaCodigo"
                              text="Código"
-                             prefWidth="150"/>
+                             minWidth="110"
+                             prefWidth="140"/>
 
                 <TableColumn fx:id="columnaNombre"
-                             text="Nombre"
-                             prefWidth="150"/>
+                             text="Producto"
+                             minWidth="120"
+                             prefWidth="160"/>
 
                 <TableColumn fx:id="columnaMarca"
-                             text="Marca/Distribuidor"
+                             text="Marca / Distribuidor"
+                             minWidth="130"
                              prefWidth="160"/>
 
                 <TableColumn fx:id="columnaCategoria"
                              text="Categoría"
-                             prefWidth="120"/>
-
-                <TableColumn fx:id="columnaCantidad"
-                             text="Cantidad"
-                             prefWidth="100"/>
+                             minWidth="100"
+                             prefWidth="130"/>
 
                 <TableColumn fx:id="columnaUnidadMedida"
-                             text="Unidad medida"
-                             prefWidth="130"/>
+                             text="Unidad"
+                             minWidth="90"
+                             prefWidth="115"/>
 
                 <TableColumn fx:id="columnaProductoPadre"
                              text="Unidad agrupada"
+                             minWidth="110"
                              prefWidth="140"/>
 
                 <TableColumn fx:id="columnaPrecio"
                              text="Precio"
-                             prefWidth="110"/>
+                             minWidth="90"
+                             prefWidth="105"/>
 
                 <TableColumn fx:id="columnaExistencias"
                              text="Existencias"
-                             prefWidth="110"/>
+                             minWidth="85"
+                             prefWidth="105"/>
 
                 <TableColumn fx:id="columnaMinimoExistencias"
-                             text="Mín. existencias"
-                             prefWidth="130"/>
+                             text="Mínimo"
+                             minWidth="80"
+                             prefWidth="95"/>
 
                 <TableColumn fx:id="columnaEditar"
                              text="Acciones"
-                             prefWidth="100"/>
+                             minWidth="95"
+                             prefWidth="110"/>
 
             </columns>
 
             <placeholder>
-                <Label text="No hay productos registrados."/>
+
+                <VBox alignment="CENTER"
+                      spacing="5">
+
+                    <Label text="No hay productos registrados."
+                           styleClass="tabla-vacia-titulo"/>
+
+                    <Label text="Agregue un producto para comenzar."
+                           styleClass="tabla-vacia-texto"/>
+
+                </VBox>
+
             </placeholder>
 
         </TableView>

@@ -3,76 +3,205 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefWidth="520.0"
-      spacing="20"
-      stylesheets="@../css/estilos.css"
-      xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.gestion.controller.cliente.ClienteFormularioControlador">
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gestion.controller.cliente.ClienteFormularioControlador"
+            fitToWidth="true"
+            fitToHeight="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            pannable="true"
+            styleClass="formulario-scroll"
+            stylesheets="@../css/estilos.css">
 
-    <padding>
-        <Insets top="30" right="35" bottom="30" left="35"/>
-    </padding>
+    <content>
 
-    <VBox spacing="5">
-        <Label text="Editar cliente"
-               styleClass="titulo-formulario"/>
+        <VBox alignment="TOP_CENTER"
+              spacing="12"
+              styleClass="modulo-contenido">
 
-        <Label text="Modifica la información del cliente."
-               styleClass="texto-ayuda"/>
-    </VBox>
+            <padding>
+                <Insets top="20"
+                        right="25"
+                        bottom="20"
+                        left="25"/>
+            </padding>
 
-    <VBox spacing="8">
-        <Label text="Nombre completo"
-               styleClass="titulo-tarjeta"/>
+            <!-- ENCABEZADO -->
 
-        <TextField fx:id="txtNombre"
-                   promptText="Ej. Juan Pérez"/>
-    </VBox>
+            <HBox alignment="CENTER_LEFT"
+                  maxWidth="750">
 
-    <VBox spacing="8">
-        <Label text="Número de identificación"
-               styleClass="titulo-tarjeta"/>
+                <VBox spacing="2">
 
-        <TextField fx:id="txtIdentificacion"
-                   promptText="Ej. 1020304050"/>
-    </VBox>
+                    <Label text="Editar cliente"
+                           styleClass="titulo-pagina"/>
 
-    <VBox spacing="8">
-        <Label text="Teléfono"
-               styleClass="titulo-tarjeta"/>
+                    <Label text="Actualice la información registrada del cliente."
+                           styleClass="subtitulo-pagina"/>
 
-        <TextField fx:id="txtTelefono"
-                   promptText="Ej. 3001234567"/>
-    </VBox>
+                </VBox>
 
-    <VBox spacing="8">
-        <Label text="Correo electrónico"
-               styleClass="titulo-tarjeta"/>
+            </HBox>
 
-        <TextField fx:id="txtCorreo"
-                   promptText="Ej. cliente@correo.com"/>
-    </VBox>
+            <!-- INFORMACIÓN PERSONAL -->
 
-    <Region prefHeight="5"/>
+            <VBox spacing="12"
+                  maxWidth="750"
+                  styleClass="formulario-tarjeta">
 
-    <HBox alignment="CENTER_RIGHT"
-          spacing="10">
+                <padding>
+                    <Insets top="16"
+                            right="18"
+                            bottom="16"
+                            left="18"/>
+                </padding>
 
-        <Button fx:id="botonCancelar"
-                text="Cancelar"
-                onAction="#cancelar"
-                styleClass="boton-secundario"/>
+                <Label text="Información personal"
+                       styleClass="formulario-seccion-titulo"/>
 
-        <Button text="Guardar cambios"
-                onAction="#guardar"
-                styleClass="boton-principal"/>
+                <Label text="Modifique los datos utilizados para identificar al cliente."
+                       styleClass="formulario-seccion-descripcion"/>
 
-    </HBox>
+                <HBox spacing="15">
 
-</VBox>
+                    <VBox spacing="4"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Nombre completo"
+                               styleClass="campo-label"/>
+
+                        <TextField fx:id="txtNombre"
+                                   promptText="Ej. Juan Pérez"
+                                   prefHeight="36"
+                                   maxWidth="Infinity"/>
+
+                    </VBox>
+
+                    <VBox spacing="4"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Número de identificación"
+                               styleClass="campo-label"/>
+
+                        <TextField fx:id="txtIdentificacion"
+                                   promptText="Ej. 1020304050"
+                                   prefHeight="36"
+                                   maxWidth="Infinity"/>
+
+                    </VBox>
+
+                </HBox>
+
+            </VBox>
+
+            <!-- INFORMACIÓN DE CONTACTO -->
+
+            <VBox spacing="12"
+                  maxWidth="750"
+                  styleClass="formulario-tarjeta">
+
+                <padding>
+                    <Insets top="16"
+                            right="18"
+                            bottom="16"
+                            left="18"/>
+                </padding>
+
+                <Label text="Información de contacto"
+                       styleClass="formulario-seccion-titulo"/>
+
+                <Label text="Actualice los medios de contacto asociados al cliente."
+                       styleClass="formulario-seccion-descripcion"/>
+
+                <HBox spacing="15">
+
+                    <VBox spacing="4"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Teléfono"
+                               styleClass="campo-label"/>
+
+                        <TextField fx:id="txtTelefono"
+                                   promptText="Ej. 3001234567"
+                                   prefHeight="36"
+                                   maxWidth="Infinity"/>
+
+                    </VBox>
+
+                    <VBox spacing="4"
+                          HBox.hgrow="ALWAYS">
+
+                        <Label text="Correo electrónico"
+                               styleClass="campo-label"/>
+
+                        <TextField fx:id="txtCorreo"
+                                   promptText="Ej. cliente@correo.com"
+                                   prefHeight="36"
+                                   maxWidth="Infinity"/>
+
+                    </VBox>
+
+                </HBox>
+
+                <!-- AVISO -->
+
+                <HBox alignment="CENTER_LEFT"
+                      spacing="10"
+                      styleClass="formulario-aviso">
+
+                    <padding>
+                        <Insets top="8"
+                                right="12"
+                                bottom="8"
+                                left="12"/>
+                    </padding>
+
+                    <Label text="i"
+                           styleClass="formulario-aviso-icono"/>
+
+                    <Label text="El saldo pendiente no se modifica desde este formulario. Los cambios de saldo se realizan mediante ventas a crédito y abonos."
+                           wrapText="true"
+                           HBox.hgrow="ALWAYS"
+                           styleClass="formulario-aviso-texto"/>
+
+                </HBox>
+
+            </VBox>
+
+            <!-- BOTONES -->
+
+            <HBox alignment="CENTER_RIGHT"
+                  spacing="10"
+                  maxWidth="750">
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button fx:id="botonCancelar"
+                        text="Cancelar"
+                        mnemonicParsing="false"
+                        onAction="#cancelar"
+                        prefWidth="115"
+                        prefHeight="36"
+                        styleClass="boton-secundario"/>
+
+                <Button text="Guardar cambios"
+                        mnemonicParsing="false"
+                        onAction="#guardar"
+                        prefWidth="145"
+                        prefHeight="36"
+                        styleClass="boton-principal"/>
+
+            </HBox>
+
+        </VBox>
+
+    </content>
+
+</ScrollPane>

@@ -139,7 +139,7 @@ public class LoteServicio {
         ) {
 
             throw new IllegalArgumentException(
-                "El valor del movimiento no puede ser negativo."
+                "El precio de compra unitario no puede ser negativo."
             );
         }
     }

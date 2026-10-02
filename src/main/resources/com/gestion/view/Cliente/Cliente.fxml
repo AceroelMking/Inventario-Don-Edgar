@@ -10,79 +10,159 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="20"
-      stylesheets="@../css/estilos.css"
-      xmlns="http://javafx.com/javafx/21"
+<VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.gestion.controller.cliente.ClienteControlador">
+      fx:controller="com.gestion.controller.cliente.ClienteControlador"
+      spacing="14"
+      styleClass="modulo-contenido"
+      stylesheets="@../css/estilos.css">
 
     <padding>
-        <Insets top="30" right="35" bottom="30" left="35"/>
+        <Insets top="22"
+                right="25"
+                bottom="22"
+                left="25"/>
     </padding>
 
-    <HBox alignment="CENTER_LEFT">
+    <!-- ENCABEZADO -->
 
-        <VBox spacing="4">
+    <HBox alignment="CENTER_LEFT"
+          spacing="15">
+
+        <VBox spacing="3">
+
             <Label text="Clientes"
                    styleClass="titulo-pagina"/>
 
-            <Label text="Administra la información de los clientes y consulta sus saldos pendientes."
-                   styleClass="descripcion-pagina"/>
+            <Label text="Administre la información de los clientes y consulte sus saldos pendientes."
+                   styleClass="subtitulo-pagina"/>
+
         </VBox>
 
         <Region HBox.hgrow="ALWAYS"/>
 
         <Button text="+ Nuevo cliente"
+                mnemonicParsing="false"
                 onAction="#abrirFormularioAgregar"
                 styleClass="boton-principal"/>
 
     </HBox>
 
-    <HBox alignment="CENTER_LEFT"
-          spacing="10"
-          styleClass="barra-herramientas">
-
-        <TextField fx:id="txtBuscar"
-                   promptText="Buscar por nombre, identificación, teléfono o correo..."
-                   prefWidth="420"/>
-
-    </HBox>
+    <!-- BÚSQUEDA -->
 
     <VBox spacing="10"
-          VBox.vgrow="ALWAYS"
-          styleClass="tarjeta">
+          styleClass="tarjeta-filtros">
 
-        <Label text="Listado de clientes"
-               styleClass="titulo-tarjeta"/>
+        <padding>
+            <Insets top="14"
+                    right="16"
+                    bottom="14"
+                    left="16"/>
+        </padding>
+
+        <VBox spacing="2">
+
+            <Label text="Buscar cliente"
+                   styleClass="filtro-titulo"/>
+
+            <Label text="Localice rápidamente un cliente utilizando sus datos principales."
+                   styleClass="filtro-descripcion"/>
+
+        </VBox>
+
+        <VBox spacing="4">
+
+            <Label text="Nombre, identificación, teléfono o correo"
+                   styleClass="campo-label"/>
+
+            <TextField fx:id="txtBuscar"
+                       promptText="Escriba para buscar..."
+                       prefHeight="36"
+                       maxWidth="600"/>
+
+        </VBox>
+
+    </VBox>
+
+    <!-- TABLA -->
+
+    <VBox spacing="12"
+          VBox.vgrow="ALWAYS"
+          styleClass="tarjeta-tabla">
+
+        <padding>
+            <Insets top="15"
+                    right="15"
+                    bottom="15"
+                    left="15"/>
+        </padding>
+
+        <HBox alignment="CENTER_LEFT">
+
+            <VBox spacing="2">
+
+                <Label text="Listado de clientes"
+                       styleClass="tabla-titulo"/>
+
+                <Label text="Consulte los datos registrados, saldos pendientes y acciones disponibles."
+                       styleClass="tabla-descripcion"/>
+
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Clientes"
+                   styleClass="etiqueta-estado"/>
+
+        </HBox>
 
         <TableView fx:id="tablaClientes"
-           VBox.vgrow="ALWAYS">
+                   VBox.vgrow="ALWAYS">
+
+            <placeholder>
+
+                <VBox alignment="CENTER"
+                      spacing="5">
+
+                    <Label text="No hay clientes registrados"
+                           styleClass="tabla-vacia-titulo"/>
+
+                    <Label text="Registre un cliente para comenzar a gestionar sus saldos."
+                           styleClass="tabla-vacia-texto"/>
+
+                </VBox>
+
+            </placeholder>
 
             <columns>
 
                 <TableColumn fx:id="columnaIdentificacion"
-                             text="Identificación"/>
+                             text="Identificación"
+                             prefWidth="120"/>
 
                 <TableColumn fx:id="columnaNombre"
-                             text="Nombre"/>
+                             text="Nombre"
+                             prefWidth="170"/>
 
                 <TableColumn fx:id="columnaTelefono"
-                             text="Teléfono"/>
+                             text="Teléfono"
+                             prefWidth="120"/>
 
                 <TableColumn fx:id="columnaCorreo"
-                             text="Correo electrónico"/>
+                             text="Correo electrónico"
+                             prefWidth="200"/>
 
                 <TableColumn fx:id="columnaSaldo"
-                             text="Saldo pendiente"/>
+                             text="Saldo pendiente"
+                             prefWidth="125"/>
 
                 <TableColumn fx:id="columnaEditar"
-                             text="Acciones"/>
+                             text="Acciones"
+                             prefWidth="190"
+                             minWidth="190"
+                             sortable="false"/>
 
             </columns>
-
-            <placeholder>
-                <Label text="No hay clientes registrados."/>
-            </placeholder>
 
         </TableView>
 

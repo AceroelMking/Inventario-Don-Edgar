@@ -25,6 +25,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -242,39 +243,64 @@ public class ClienteControlador {
                 private final Button botonEliminar =
                     new Button("Eliminar");
 
-                private final HBox contenedor =
-                    new HBox(8);
+                private final HBox filaSuperior =
+                    new HBox(6);
+
+                private final HBox filaInferior =
+                    new HBox(6);
+
+                private final VBox contenedor =
+                    new VBox(6);
 
 
                 {
+
                     botonEditar
                         .getStyleClass()
                         .add("boton-editar");
-
 
                     botonAbonar
                         .getStyleClass()
                         .add("boton-secundario");
 
-
                     botonHistorial
                         .getStyleClass()
                         .add("boton-secundario");
-
 
                     botonEliminar
                         .getStyleClass()
                         .add("boton-eliminar");
 
 
-                    contenedor
-                        .getChildren()
-                        .addAll(
-                            botonEditar,
-                            botonAbonar,
-                            botonHistorial,
-                            botonEliminar
-                        );
+                    /*
+                    * Tamaño uniforme de los botones.
+                    */
+
+                    botonEditar.setPrefWidth(82);
+                    botonAbonar.setPrefWidth(82);
+                    botonHistorial.setPrefWidth(82);
+                    botonEliminar.setPrefWidth(82);
+
+                    botonEditar.setMinWidth(82);
+                    botonAbonar.setMinWidth(82);
+                    botonHistorial.setMinWidth(82);
+                    botonEliminar.setMinWidth(82);
+
+
+                    filaSuperior.getChildren().addAll(
+                        botonEditar,
+                        botonAbonar
+                    );
+
+                    filaInferior.getChildren().addAll(
+                        botonHistorial,
+                        botonEliminar
+                    );
+
+                    contenedor.getChildren().addAll(
+                        filaSuperior,
+                        filaInferior
+                    );
 
 
                     botonEditar.setOnAction(
@@ -353,7 +379,6 @@ public class ClienteControlador {
                         empty
                     );
 
-
                     if (empty) {
 
                         setGraphic(null);
@@ -367,7 +392,7 @@ public class ClienteControlador {
                 }
             }
         );
-    }
+}
 
 
     @FXML

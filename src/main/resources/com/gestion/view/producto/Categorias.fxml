@@ -6,26 +6,136 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gestion.controller.categoria.CategoriaControlador">
-   <children>
-      <HBox alignment="CENTER" spacing="10.0">
-         <children>
-            <Label text="Lista de catgorias" textAlignment="CENTER" />
-            <Button fx:id="botonAgregar" mnemonicParsing="false" onAction="#agregarCategoria" text="+" />
-         </children>
-      </HBox>
-      <TableView fx:id="tablaCategorias" prefHeight="200.0" prefWidth="200.0">
-        <columns>
-          <TableColumn fx:id="columnaId" text="#" />
-          <TableColumn fx:id="columnaCategoria" text="Categoria" />
-            <TableColumn fx:id="columnaEditar" text="Editar" />
-        </columns>
-      </TableView>
-      <Button fx:id="botonSalir" mnemonicParsing="false" onAction="#salir" text="Salir" />
-   </children>
-   <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-   </padding>
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gestion.controller.categoria.CategoriaControlador"
+      spacing="14"
+      styleClass="modulo-contenido"
+      stylesheets="@../css/estilos.css">
+
+    <padding>
+        <Insets top="22"
+                right="25"
+                bottom="22"
+                left="25"/>
+    </padding>
+
+    <!-- ENCABEZADO -->
+
+    <HBox alignment="CENTER_LEFT"
+          spacing="10">
+
+        <VBox spacing="2">
+
+            <Label text="Categorías"
+                   styleClass="titulo-pagina"/>
+
+            <Label text="Administre las categorías utilizadas para clasificar los productos."
+                   styleClass="subtitulo-pagina"/>
+
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button fx:id="botonAgregar"
+                mnemonicParsing="false"
+                onAction="#agregarCategoria"
+                text="+ Agregar categoría"
+                prefHeight="36"
+                styleClass="boton-principal"/>
+
+    </HBox>
+
+    <!-- TABLA -->
+
+    <VBox spacing="10"
+          VBox.vgrow="ALWAYS"
+          styleClass="tarjeta-tabla">
+
+        <padding>
+            <Insets top="16"
+                    right="16"
+                    bottom="16"
+                    left="16"/>
+        </padding>
+
+        <HBox alignment="CENTER_LEFT">
+
+            <VBox spacing="2">
+
+                <Label text="Lista de categorías"
+                       styleClass="tabla-titulo"/>
+
+                <Label text="Categorías disponibles para el registro de productos."
+                       styleClass="tabla-descripcion"/>
+
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Productos"
+                   styleClass="etiqueta-estado"/>
+
+        </HBox>
+
+        <TableView fx:id="tablaCategorias"
+                   VBox.vgrow="ALWAYS">
+
+            <placeholder>
+
+                <VBox alignment="CENTER"
+                      spacing="4">
+
+                    <Label text="No hay categorías registradas"
+                           styleClass="tabla-vacia-titulo"/>
+
+                    <Label text="Agregue una categoría para comenzar."
+                           styleClass="tabla-vacia-texto"/>
+
+                </VBox>
+
+            </placeholder>
+
+            <columns>
+
+                <TableColumn fx:id="columnaId"
+                             text="#"
+                             prefWidth="80"
+                             minWidth="60"/>
+
+                <TableColumn fx:id="columnaCategoria"
+                             text="Categoría"
+                             prefWidth="500"
+                             minWidth="200"/>
+
+                <TableColumn fx:id="columnaEditar"
+                             text="Editar"
+                             prefWidth="120"
+                             minWidth="100"/>
+
+            </columns>
+
+        </TableView>
+
+    </VBox>
+
+    <!-- ACCIONES -->
+
+    <HBox alignment="CENTER_RIGHT">
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Button fx:id="botonSalir"
+                mnemonicParsing="false"
+                onAction="#salir"
+                text="Volver a productos"
+                prefHeight="36"
+                prefWidth="150"
+                styleClass="boton-secundario"/>
+
+    </HBox>
+
 </VBox>

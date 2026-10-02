@@ -1,12 +1,17 @@
 package com.gestion.controller;
 
 import java.io.IOException;
+import java.net.URL;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class MenuLateralControlador {
@@ -15,29 +20,88 @@ public class MenuLateralControlador {
     private BorderPane panelBordes;
 
 
+    @FXML
+    public void initialize() {
+        abrirInicio();
+    }
+
+
     private void cargarVista(
         String archivo
     ) throws IOException {
 
-        FXMLLoader loader =
-            new FXMLLoader(
-                getClass().getResource(
-                    "/com/gestion/view/"
-                    + archivo
-                )
+        URL recurso =
+            getClass().getResource(
+                "/com/gestion/view/"
+                + archivo
             );
+
+        if (recurso == null) {
+            throw new IOException(
+                "No se encontró la vista: "
+                + archivo
+            );
+        }
+
+        FXMLLoader loader =
+            new FXMLLoader(recurso);
 
         Parent vista =
             loader.load();
 
-        panelBordes.setCenter(
-            vista
-        );
+        panelBordes.setCenter(vista);
     }
 
 
     @FXML
-    private void abrirProductos() {
+    public void abrirInicio() {
+
+        try {
+
+            URL recurso =
+                getClass().getResource(
+                    "/com/gestion/view/Inicio.fxml"
+                );
+
+            if (recurso == null) {
+                throw new IOException(
+                    "No se encontró Inicio.fxml."
+                );
+            }
+
+            FXMLLoader loader =
+                new FXMLLoader(recurso);
+
+            Parent vista =
+                loader.load();
+
+            /*
+             * Obtenemos el controlador del dashboard.
+             */
+            InicioControlador controlador =
+                loader.getController();
+
+            /*
+             * Le entregamos una referencia al
+             * controlador principal para que los
+             * accesos rápidos puedan navegar.
+             */
+            controlador.setMenuControlador(this);
+
+            panelBordes.setCenter(vista);
+
+        } catch (IOException e) {
+
+            mostrarError(
+                "No se pudo abrir Inicio.",
+                e
+            );
+        }
+    }
+
+
+    @FXML
+    public void abrirProductos() {
 
         try {
 
@@ -47,13 +111,16 @@ public class MenuLateralControlador {
 
         } catch (IOException e) {
 
-            e.printStackTrace();
+            mostrarError(
+                "No se pudo abrir Productos.",
+                e
+            );
         }
     }
 
 
     @FXML
-    private void abrirLotes() {
+    public void abrirLotes() {
 
         try {
 
@@ -63,13 +130,16 @@ public class MenuLateralControlador {
 
         } catch (IOException e) {
 
-            e.printStackTrace();
+            mostrarError(
+                "No se pudo abrir Inventario / Lotes.",
+                e
+            );
         }
     }
 
 
     @FXML
-    private void abrirClientes() {
+    public void abrirClientes() {
 
         try {
 
@@ -79,13 +149,16 @@ public class MenuLateralControlador {
 
         } catch (IOException e) {
 
-            e.printStackTrace();
+            mostrarError(
+                "No se pudo abrir Clientes.",
+                e
+            );
         }
     }
 
 
     @FXML
-    private void abrirVentas() {
+    public void abrirVentas() {
 
         try {
 
@@ -95,13 +168,16 @@ public class MenuLateralControlador {
 
         } catch (IOException e) {
 
-            e.printStackTrace();
+            mostrarError(
+                "No se pudo abrir Ventas.",
+                e
+            );
         }
     }
 
 
     @FXML
-    private void abrirReportes() {
+    public void abrirReportes() {
 
         try {
 
@@ -111,55 +187,142 @@ public class MenuLateralControlador {
 
         } catch (IOException e) {
 
-            e.printStackTrace();
+            mostrarError(
+                "No se pudo abrir Reportes.",
+                e
+            );
         }
     }
 
+
     @FXML
-    private void abrirConfiguracionUsuario() {
+    public void abrirConfiguracionUsuario() {
 
         try {
+
             cargarVista(
                 "ConfiguracionUsuario.fxml"
             );
 
         } catch (IOException e) {
-            e.printStackTrace();
+
+            mostrarError(
+                "No se pudo abrir la configuración.",
+                e
+            );
         }
     }
 
+
     @FXML
-    private void cerrarSesion() {
+    private void cerrarSesion(
+        ActionEvent evento
+    ) {
+
+        Alert confirmacion =
+            new Alert(
+                Alert.AlertType.CONFIRMATION
+            );
+
+        confirmacion.setTitle(
+            "Cerrar sesión"
+        );
+
+        confirmacion.setHeaderText(
+            "¿Desea cerrar la sesión?"
+        );
+
+        confirmacion.setContentText(
+            "Regresará a la pantalla de inicio de sesión."
+        );
+
+        ButtonType respuesta =
+            confirmacion
+                .showAndWait()
+                .orElse(
+                    ButtonType.CANCEL
+                );
+
+        if (respuesta != ButtonType.OK) {
+            return;
+        }
 
         try {
 
-            FXMLLoader loader =
-                new FXMLLoader(
-                    getClass().getResource(
-                        "/com/gestion/view/Acceso.fxml"
-                    )
+            URL recurso =
+                getClass().getResource(
+                    "/com/gestion/view/Acceso.fxml"
                 );
+
+            if (recurso == null) {
+
+                throw new IOException(
+                    "No se encontró Acceso.fxml."
+                );
+            }
+
+            FXMLLoader loader =
+                new FXMLLoader(recurso);
 
             Parent acceso =
                 loader.load();
 
-            Stage stage =
-                (Stage) panelBordes
+            Node origen =
+                (Node) evento.getSource();
+
+            Stage ventana =
+                (Stage) origen
                     .getScene()
                     .getWindow();
 
-            stage.setScene(
-                new Scene(acceso)
+            Scene escenaAcceso =
+                new Scene(acceso);
+
+            ventana.setScene(
+                escenaAcceso
             );
 
-            stage.setTitle(
+            ventana.setTitle(
                 "Víveres y Cárnicos Don Edgar - Acceso"
             );
 
-            stage.centerOnScreen();
+            ventana.centerOnScreen();
+            ventana.show();
 
         } catch (IOException e) {
-            e.printStackTrace();
+
+            mostrarError(
+                "No se pudo cerrar la sesión.",
+                e
+            );
         }
+    }
+
+
+    private void mostrarError(
+        String mensaje,
+        Exception excepcion
+    ) {
+
+        excepcion.printStackTrace();
+
+        Alert alerta =
+            new Alert(
+                Alert.AlertType.ERROR
+            );
+
+        alerta.setTitle(
+            "Error"
+        );
+
+        alerta.setHeaderText(
+            mensaje
+        );
+
+        alerta.setContentText(
+            excepcion.getMessage()
+        );
+
+        alerta.showAndWait();
     }
 }
