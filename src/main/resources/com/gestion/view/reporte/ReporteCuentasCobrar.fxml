@@ -6,6 +6,8 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -13,124 +15,237 @@
 <VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.gestion.controller.reporte.ReporteCuentasCobrarControlador"
-      spacing="15">
+      stylesheets="@../css/estilos.css"
+      styleClass="modulo-contenido"
+      spacing="10">
 
     <padding>
-        <Insets top="20"
-                right="20"
-                bottom="20"
-                left="20"/>
+        <Insets top="14"
+                right="18"
+                bottom="16"
+                left="18"/>
     </padding>
+
+
+    <!-- ================================================= -->
+    <!-- ENCABEZADO                                        -->
+    <!-- ================================================= -->
 
     <HBox alignment="CENTER_LEFT"
           spacing="10">
 
-        <VBox spacing="5">
+        <VBox spacing="1">
 
-            <Label text="Reportes"/>
+            <Label text="Reportes"
+                   styleClass="titulo-pagina"/>
 
-            <Label text="Consulta y exportación de información"/>
+            <Label text="Consulta y analiza la información registrada en el sistema."
+                   styleClass="subtitulo-pagina"/>
 
         </VBox>
 
         <Region HBox.hgrow="ALWAYS"/>
 
         <Button text="Actualizar"
-                onAction="#actualizar"/>
+                onAction="#actualizar"
+                styleClass="boton-secundario"/>
 
         <Button text="Exportar PDF"
-                onAction="#exportarPdf"/>
+                onAction="#exportarPdf"
+                styleClass="boton-primario"/>
 
     </HBox>
 
-    <HBox alignment="CENTER_LEFT"
-          spacing="10">
 
-        <Label text="Tipo de reporte:"/>
+    <!-- ================================================= -->
+    <!-- NAVEGACIÓN                                        -->
+    <!-- ================================================= -->
+
+    <HBox alignment="CENTER_LEFT"
+          spacing="8"
+          styleClass="tarjeta-filtros">
 
         <Button text="Ventas"
-                onAction="#abrirVentas"/>
+                onAction="#abrirVentas"
+                styleClass="boton-secundario"/>
 
         <Button text="Inventario"
-                onAction="#abrirInventario"/>
+                onAction="#abrirInventario"
+                styleClass="boton-secundario"/>
 
         <Button text="Cuentas por cobrar"
-                disable="true"/>
+                disable="true"
+                styleClass="boton-primario"/>
 
     </HBox>
 
-    <HBox alignment="CENTER_LEFT"
-          spacing="10">
 
-        <Label text="Buscar"/>
+    <!-- ================================================= -->
+    <!-- BÚSQUEDA                                          -->
+    <!-- ================================================= -->
 
-        <TextField fx:id="txtBuscar"
-                   promptText="Identificación, cliente, teléfono o correo"
-                   prefWidth="400"/>
+    <VBox spacing="6"
+          styleClass="tarjeta-filtros">
 
-        <Button text="Limpiar"
-                onAction="#limpiarBusqueda"/>
+        <HBox alignment="CENTER_LEFT"
+              spacing="15">
 
-    </HBox>
+            <VBox spacing="1">
 
-    <TableView fx:id="tablaCuentas"
-               VBox.vgrow="ALWAYS">
+                <Label text="Cuentas por cobrar"
+                       styleClass="filtro-titulo"/>
 
-        <columns>
+                <Label text="Consulta los clientes que actualmente tienen un saldo pendiente."
+                       styleClass="filtro-descripcion"/>
 
-            <TableColumn fx:id="columnaIdentificacion"
-                         text="Identificación"
-                         prefWidth="130"/>
+            </VBox>
 
-            <TableColumn fx:id="columnaNombre"
-                         text="Cliente"
-                         prefWidth="190"/>
+            <Region HBox.hgrow="ALWAYS"/>
 
-            <TableColumn fx:id="columnaTelefono"
-                         text="Teléfono"
-                         prefWidth="130"/>
+            <TextField fx:id="txtBuscar"
+                       promptText="Buscar cliente..."
+                       prefWidth="400"/>
 
-            <TableColumn fx:id="columnaCorreo"
-                         text="Correo"
-                         prefWidth="220"/>
+            <Button text="Limpiar"
+                    onAction="#limpiarBusqueda"
+                    styleClass="boton-secundario"/>
 
-            <TableColumn fx:id="columnaSaldo"
-                         text="Saldo pendiente"
-                         prefWidth="140"/>
+        </HBox>
 
-            <TableColumn fx:id="columnaEstado"
-                         text="Estado"
-                         prefWidth="110"/>
+    </VBox>
 
-        </columns>
 
-        <placeholder>
-            <Label text="No hay cuentas por cobrar"/>
-        </placeholder>
+    <!-- ================================================= -->
+    <!-- TABLA                                             -->
+    <!-- ================================================= -->
 
-    </TableView>
+    <VBox spacing="5"
+          styleClass="tarjeta-tabla"
+          VBox.vgrow="ALWAYS">
 
-    <HBox alignment="CENTER_LEFT"
-          spacing="40">
+        <VBox spacing="1">
 
-        <VBox spacing="5">
+            <Label text="Saldos pendientes"
+                   styleClass="tabla-titulo"/>
 
-            <Label text="Clientes con deuda"/>
-
-            <Label fx:id="lblCantidadClientes"
-                   text="0"/>
+            <Label text="Clientes con cuentas pendientes de pago."
+                   styleClass="tabla-descripcion"/>
 
         </VBox>
 
-        <VBox spacing="5">
 
-            <Label text="Total por cobrar"/>
+        <TableView fx:id="tablaCuentas"
+                   VBox.vgrow="ALWAYS"
+                   minHeight="300">
 
-            <Label fx:id="lblTotalCobrar"
-                   text="0"/>
+            <columns>
 
-        </VBox>
+                <TableColumn fx:id="columnaIdentificacion"
+                             text="Identificación"
+                             prefWidth="150"/>
 
-    </HBox>
+                <TableColumn fx:id="columnaNombre"
+                             text="Cliente"
+                             prefWidth="220"/>
+
+                <TableColumn fx:id="columnaTelefono"
+                             text="Teléfono"
+                             prefWidth="150"/>
+
+                <TableColumn fx:id="columnaCorreo"
+                             text="Correo"
+                             prefWidth="260"/>
+
+                <TableColumn fx:id="columnaSaldo"
+                             text="Saldo pendiente"
+                             prefWidth="170"/>
+
+                <TableColumn fx:id="columnaEstado"
+                             text="Estado"
+                             prefWidth="130"/>
+
+            </columns>
+
+
+            <placeholder>
+
+                <VBox alignment="CENTER"
+                      spacing="4">
+
+                    <Label text="No hay cuentas por cobrar"
+                           styleClass="tabla-vacia-titulo"/>
+
+                    <Label text="Los clientes con saldo pendiente aparecerán aquí."
+                           styleClass="tabla-vacia-texto"/>
+
+                </VBox>
+
+            </placeholder>
+
+        </TableView>
+
+    </VBox>
+
+
+    <!-- ================================================= -->
+    <!-- RESUMEN                                           -->
+    <!-- ================================================= -->
+
+    <VBox spacing="8"
+          styleClass="tarjeta-filtros resumen-cuentas">
+
+        <GridPane hgap="50">
+
+            <columnConstraints>
+
+                <ColumnConstraints percentWidth="50"
+                                   hgrow="ALWAYS"/>
+
+                <ColumnConstraints percentWidth="50"
+                                   hgrow="ALWAYS"/>
+
+            </columnConstraints>
+
+
+            <!-- CLIENTES CON DEUDA -->
+
+            <VBox GridPane.columnIndex="0"
+                  spacing="2">
+
+                <Label text="CLIENTES CON DEUDA"
+                       style="-fx-font-size: 10px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #718078;"/>
+
+                <Label fx:id="lblCantidadClientes"
+                       text="0"
+                       style="-fx-font-size: 22px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #2f6b43;"/>
+
+            </VBox>
+
+
+            <!-- TOTAL POR COBRAR -->
+
+            <VBox GridPane.columnIndex="1"
+                  spacing="2">
+
+                <Label text="TOTAL POR COBRAR"
+                       style="-fx-font-size: 10px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #718078;"/>
+
+                <Label fx:id="lblTotalCobrar"
+                       text="0"
+                       style="-fx-font-size: 22px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #a05a17;"/>
+
+            </VBox>
+
+        </GridPane>
+
+    </VBox>
 
 </VBox>

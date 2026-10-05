@@ -44,6 +44,7 @@
 
             </VBox>
 
+
             <!-- BANNER -->
 
             <HBox spacing="20"
@@ -66,7 +67,7 @@
                     <Label text="Sistema local de gestión de inventario y ventas"
                            styleClass="dashboard-banner-texto"/>
 
-                    <Label text="Controle productos, existencias, lotes, clientes, ventas y reportes."
+                    <Label text="Controle productos, existencias, lotes, clientes, ventas, alertas y reportes."
                            wrapText="true"
                            styleClass="dashboard-banner-descripcion"/>
 
@@ -85,51 +86,70 @@
 
             </HBox>
 
+
             <!-- ACCESOS RÁPIDOS -->
 
             <Label text="Accesos rápidos"
                    styleClass="dashboard-seccion-titulo"/>
 
-            <HBox spacing="14">
 
-                <Button text="Productos"
-                        onAction="#abrirProductos"
-                        prefHeight="100"
-                        maxWidth="Infinity"
-                        HBox.hgrow="ALWAYS"
-                        styleClass="dashboard-boton"/>
+            <!-- PRIMERA FILA -->
 
-                <Button text="Inventario"
-                        onAction="#abrirInventario"
-                        prefHeight="100"
-                        maxWidth="Infinity"
-                        HBox.hgrow="ALWAYS"
-                        styleClass="dashboard-boton"/>
+              <HBox spacing="14">
 
-                <Button text="Clientes"
-                        onAction="#abrirClientes"
-                        prefHeight="100"
-                        maxWidth="Infinity"
-                        HBox.hgrow="ALWAYS"
-                        styleClass="dashboard-boton"/>
+              <Button text="▣   Productos"
+                     onAction="#abrirProductos"
+                     prefHeight="95"
+                     maxWidth="Infinity"
+                     HBox.hgrow="ALWAYS"
+                     styleClass="dashboard-boton"/>
 
-                <Button text="Ventas"
-                        onAction="#abrirVentas"
-                        prefHeight="100"
-                        maxWidth="Infinity"
-                        HBox.hgrow="ALWAYS"
-                        styleClass="dashboard-boton"/>
+              <Button text="▤   Inventario"
+                     onAction="#abrirInventario"
+                     prefHeight="95"
+                     maxWidth="Infinity"
+                     HBox.hgrow="ALWAYS"
+                     styleClass="dashboard-boton"/>
 
-                <Button text="Reportes"
-                        onAction="#abrirReportes"
-                        prefHeight="100"
-                        maxWidth="Infinity"
-                        HBox.hgrow="ALWAYS"
-                        styleClass="dashboard-boton"/>
+              <Button text="♙   Clientes"
+                     onAction="#abrirClientes"
+                     prefHeight="95"
+                     maxWidth="Infinity"
+                     HBox.hgrow="ALWAYS"
+                     styleClass="dashboard-boton"/>
 
-            </HBox>
+              </HBox>
+
+            <!-- SEGUNDA FILA -->
+
+              <HBox spacing="14">
+
+              <Button text="▦   Ventas"
+                     onAction="#abrirVentas"
+                     prefHeight="95"
+                     maxWidth="Infinity"
+                     HBox.hgrow="ALWAYS"
+                     styleClass="dashboard-boton"/>
+
+              <Button text="▥   Reportes"
+                     onAction="#abrirReportes"
+                     prefHeight="95"
+                     maxWidth="Infinity"
+                     HBox.hgrow="ALWAYS"
+                     styleClass="dashboard-boton"/>
+
+              <Button text="⚠   Alertas"
+                     onAction="#abrirAlertas"
+                     prefHeight="95"
+                     maxWidth="Infinity"
+                     HBox.hgrow="ALWAYS"
+                     styleClass="dashboard-boton"/>
+
+              </HBox>
+
 
             <Region VBox.vgrow="ALWAYS"/>
+
 
             <!-- ESTADO -->
 

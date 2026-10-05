@@ -105,6 +105,13 @@
                                 alignment="CENTER_LEFT"
                                 styleClass="boton-menu"/>
 
+                        <Button text="⚠   Alertas"
+                                onAction="#abrirAlertas"
+                                maxWidth="Infinity"
+                                prefHeight="40"
+                                alignment="CENTER_LEFT"
+                                styleClass="boton-menu"/>
+
                         <Button text="♙   Clientes"
                                 onAction="#abrirClientes"
                                 maxWidth="Infinity"
@@ -112,7 +119,7 @@
                                 alignment="CENTER_LEFT"
                                 styleClass="boton-menu"/>
 
-                        <Button text="Ventas"
+                        <Button text="▦   Ventas"
                                 onAction="#abrirVentas"
                                 maxWidth="Infinity"
                                 prefHeight="40"

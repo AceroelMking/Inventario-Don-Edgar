@@ -194,6 +194,24 @@ public class MenuLateralControlador {
         }
     }
 
+    @FXML
+    public void abrirAlertas() {
+
+        try {
+
+            cargarVista(
+                "alerta/Alertas.fxml"
+            );
+
+        } catch (IOException e) {
+
+            mostrarError(
+                "No se pudo abrir Alertas.",
+                e
+            );
+        }
+    }
+
 
     @FXML
     public void abrirConfiguracionUsuario() {

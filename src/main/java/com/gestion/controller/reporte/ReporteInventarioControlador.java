@@ -356,7 +356,7 @@ public class ReporteInventarioControlador {
      * =====================================================
      */
 
-    private void ajustarAnchoColumnas(
+      private void ajustarAnchoColumnas(
         double anchoTabla
     ) {
 
@@ -368,14 +368,6 @@ public class ReporteInventarioControlador {
         }
 
 
-        /*
-         * Restamos un pequeño margen para:
-         *
-         * - barra vertical
-         * - bordes
-         * - espacio interno de la tabla
-         */
-
         double disponible =
             Math.max(
                 0,
@@ -384,22 +376,22 @@ public class ReporteInventarioControlador {
 
 
         /*
-         * DISTRIBUCIÓN:
-         *
-         * Código       12 %
-         * Producto     20 %
-         * Marca        13 %
-         * Categoría    14 %
-         * Existencias  11 %
-         * Mínimo        8 %
-         * Unidad       10 %
-         * Estado       12 %
-         *
-         * TOTAL       100 %
-         */
+        * DISTRIBUCIÓN:
+        *
+        * Código       10 %
+        * Producto     20 %
+        * Marca        13 %
+        * Categoría    14 %
+        * Existencias  11 %
+        * Mínimo        7 %
+        * Unidad       10 %
+        * Estado       15 %
+        *
+        * TOTAL       100 %
+        */
 
         columnaCodigo.setPrefWidth(
-            disponible * 0.12
+            disponible * 0.10
         );
 
         columnaNombre.setPrefWidth(
@@ -419,7 +411,7 @@ public class ReporteInventarioControlador {
         );
 
         columnaMinimo.setPrefWidth(
-            disponible * 0.08
+            disponible * 0.07
         );
 
         columnaUnidad.setPrefWidth(
@@ -427,7 +419,7 @@ public class ReporteInventarioControlador {
         );
 
         columnaEstado.setPrefWidth(
-            disponible * 0.12
+            disponible * 0.15
         );
     }
 

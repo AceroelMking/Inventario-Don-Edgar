@@ -68,15 +68,118 @@ public class ReporteCuentasCobrarControlador {
     @FXML
     private Label lblTotalCobrar;
 
-    @FXML
+   @FXML
     public void initialize() {
 
         configurarTabla();
+
         configurarBusqueda();
 
-        tablaCuentas.setItems(clientesFiltrados);
+        configurarAnchoTabla();
+
+        tablaCuentas.setItems(
+            clientesFiltrados
+        );
 
         cargarClientes();
+    }
+
+
+    private void configurarAnchoTabla() {
+
+        tablaCuentas
+            .widthProperty()
+            .addListener(
+                (
+                    observable,
+                    anchoAnterior,
+                    anchoNuevo
+                ) -> {
+
+                    ajustarAnchoColumnas(
+                        anchoNuevo.doubleValue()
+                    );
+                }
+            );
+
+
+        tablaCuentas
+            .sceneProperty()
+            .addListener(
+                (
+                    observable,
+                    escenaAnterior,
+                    escenaNueva
+                ) -> {
+
+                    if (
+                        escenaNueva != null
+                    ) {
+
+                        tablaCuentas.applyCss();
+
+                        tablaCuentas.layout();
+
+                        ajustarAnchoColumnas(
+                            tablaCuentas.getWidth()
+                        );
+                    }
+                }
+            );
+    }
+
+
+    private void ajustarAnchoColumnas(
+        double anchoTabla
+    ) {
+
+        if (
+            anchoTabla <= 0
+        ) {
+
+            return;
+        }
+
+
+        double disponible =
+            Math.max(
+                0,
+                anchoTabla - 30
+            );
+
+
+        /*
+        * Identificación  13 %
+        * Cliente         20 %
+        * Teléfono        13 %
+        * Correo          24 %
+        * Saldo           17 %
+        * Estado          13 %
+        */
+
+        columnaIdentificacion.setPrefWidth(
+            disponible * 0.13
+        );
+
+        columnaNombre.setPrefWidth(
+            disponible * 0.20
+        );
+
+        columnaTelefono.setPrefWidth(
+            disponible * 0.13
+        );
+
+        columnaCorreo.setPrefWidth(
+            disponible * 0.24
+        );
+
+        columnaSaldo.setPrefWidth(
+            disponible * 0.17
+        );
+
+        columnaEstado.setPrefWidth(
+            disponible * 0.13
+        );
     }
 
     private void configurarTabla() {

@@ -62,4 +62,13 @@ public class InicioControlador {
             menuControlador.abrirReportes();
         }
     }
+
+
+    @FXML
+    private void abrirAlertas() {
+
+        if (menuControlador != null) {
+            menuControlador.abrirAlertas();
+        }
+    }
 }

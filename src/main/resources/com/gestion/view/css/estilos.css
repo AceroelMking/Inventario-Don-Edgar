@@ -1214,3 +1214,122 @@
     -fx-font-size: 11px;
     -fx-text-fill: #496151;
 }
+
+/* =========================================================
+   RESUMEN DE REPORTES
+   ========================================================= */
+
+.resumen-reporte {
+    -fx-padding: 16px 22px 16px 22px;
+}
+
+
+/* =========================================================
+   BARRA DE RECUPERACIÓN DE CRÉDITO
+   ========================================================= */
+
+.barra-recuperacion {
+    -fx-pref-height: 14px;
+    -fx-min-height: 14px;
+    -fx-max-height: 14px;
+}
+
+.barra-recuperacion > .track {
+    -fx-background-color: #e1e8e3;
+    -fx-background-radius: 7px;
+    -fx-background-insets: 0;
+}
+
+.barra-recuperacion > .bar {
+    -fx-background-color: #2f7d4a;
+    -fx-background-radius: 7px;
+    -fx-background-insets: 0;
+    -fx-padding: 7px;
+}
+
+@FXML
+public void initialize() {
+
+    configurarTabla();
+
+    configurarBusqueda();
+
+    configurarAnchoTabla();
+
+    tablaCuentas.setItems(
+        clientesFiltrados
+    );
+
+    cargarClientes();
+}
+
+/* =========================================================
+   ALERTAS
+   ========================================================= */
+
+.resumen-alertas {
+    -fx-padding: 14px 22px 14px 22px;
+}
+
+.alerta-resumen-titulo {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #718078;
+}
+
+.alerta-resumen-total {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2f6b43;
+}
+
+.alerta-resumen-advertencia {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #a05a17;
+}
+
+.alerta-resumen-peligro {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #a63d40;
+}
+
+/* =========================================================
+   CONFIGURACIÓN DE CREDENCIALES
+   ========================================================= */
+
+.credencial-tarjeta {
+    -fx-background-color: white;
+    -fx-background-radius: 12px;
+    -fx-border-color: #dce4df;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(
+        gaussian,
+        rgba(20, 45, 30, 0.08),
+        12,
+        0.10,
+        0,
+        3
+    );
+}
+
+.credencial-validacion {
+    -fx-font-size: 12px;
+}
+
+.credencial-separador {
+    -fx-background-color: #e3e9e5;
+}
+
+.credencial-aviso-obligatorio {
+    -fx-text-fill: #a63d40;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 4px 0 4px;
+}
+
+.credencial-mensaje {
+    -fx-font-size: 13px;
+}

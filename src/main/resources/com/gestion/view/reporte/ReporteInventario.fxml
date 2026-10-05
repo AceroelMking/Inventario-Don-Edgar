@@ -6,8 +6,9 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
@@ -21,7 +22,7 @@
     <padding>
         <Insets top="14"
                 right="18"
-                bottom="14"
+                bottom="16"
                 left="18"/>
     </padding>
 
@@ -81,9 +82,9 @@
           styleClass="tarjeta-filtros">
 
         <HBox alignment="CENTER_LEFT"
-              spacing="12">
+              spacing="15">
 
-            <VBox spacing="2">
+            <VBox spacing="1">
 
                 <Label text="Inventario"
                        styleClass="filtro-titulo"/>
@@ -97,7 +98,7 @@
 
             <TextField fx:id="txtBuscar"
                        promptText="Buscar producto..."
-                       prefWidth="360"/>
+                       prefWidth="400"/>
 
             <Button text="Limpiar"
                     onAction="#limpiarBusqueda"
@@ -114,19 +115,15 @@
           styleClass="tarjeta-tabla"
           VBox.vgrow="ALWAYS">
 
-        <HBox alignment="CENTER_LEFT">
+        <VBox spacing="1">
 
-            <VBox spacing="1">
+            <Label text="Productos registrados"
+                   styleClass="tabla-titulo"/>
 
-                <Label text="Productos registrados"
-                       styleClass="tabla-titulo"/>
+            <Label text="Estado actual de las existencias del inventario."
+                   styleClass="tabla-descripcion"/>
 
-                <Label text="Estado actual de las existencias del inventario."
-                       styleClass="tabla-descripcion"/>
-
-            </VBox>
-
-        </HBox>
+        </VBox>
 
 
         <TableView fx:id="tablaInventario"
@@ -137,7 +134,7 @@
 
                 <TableColumn fx:id="columnaCodigo"
                              text="Código"
-                             prefWidth="140"/>
+                             prefWidth="130"/>
 
                 <TableColumn fx:id="columnaNombre"
                              text="Producto"
@@ -153,21 +150,22 @@
 
                 <TableColumn fx:id="columnaExistencias"
                              text="Existencias"
-                             prefWidth="110"/>
+                             prefWidth="120"/>
 
                 <TableColumn fx:id="columnaMinimo"
                              text="Mínimo"
-                             prefWidth="100"/>
+                             prefWidth="90"/>
 
                 <TableColumn fx:id="columnaUnidad"
                              text="Unidad"
-                             prefWidth="120"/>
+                             prefWidth="125"/>
 
                 <TableColumn fx:id="columnaEstado"
                              text="Estado"
-                             prefWidth="150"/>
+                             prefWidth="180"/>
 
             </columns>
+
 
             <placeholder>
 
@@ -189,59 +187,85 @@
     </VBox>
 
 
-    <!-- RESUMEN COMPACTO -->
+    <!-- RESUMEN -->
 
-    <HBox alignment="CENTER_LEFT"
-          spacing="0"
-          styleClass="tarjeta-filtros">
+    <VBox spacing="8"
+          styleClass="tarjeta-filtros resumen-inventario">
 
-        <!-- PRODUCTOS MOSTRADOS -->
+        <GridPane hgap="40">
 
-        <VBox spacing="2"
-              HBox.hgrow="ALWAYS"
-              maxWidth="Infinity">
+            <columnConstraints>
 
-            <Label text="Productos mostrados"
-                   styleClass="campo-label"/>
+                <ColumnConstraints percentWidth="33.33"
+                                   hgrow="ALWAYS"/>
 
-            <Label fx:id="lblCantidadProductos"
-                   text="0"
-                   styleClass="total-venta"/>
+                <ColumnConstraints percentWidth="33.33"
+                                   hgrow="ALWAYS"/>
 
-        </VBox>
+                <ColumnConstraints percentWidth="33.34"
+                                   hgrow="ALWAYS"/>
 
-
-        <!-- STOCK BAJO -->
-
-        <VBox spacing="2"
-              HBox.hgrow="ALWAYS"
-              maxWidth="Infinity">
-
-            <Label text="Stock bajo"
-                   styleClass="campo-label"/>
-
-            <Label fx:id="lblStockBajo"
-                   text="0"
-                   styleClass="saldo-venta"/>
-
-        </VBox>
+            </columnConstraints>
 
 
-        <!-- SIN EXISTENCIAS -->
+            <!-- PRODUCTOS -->
 
-        <VBox spacing="2"
-              HBox.hgrow="ALWAYS"
-              maxWidth="Infinity">
+            <VBox GridPane.columnIndex="0"
+                  spacing="2">
 
-            <Label text="Sin existencias"
-                   styleClass="campo-label"/>
+                <Label text="PRODUCTOS MOSTRADOS"
+                       style="-fx-font-size: 10px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #718078;"/>
 
-            <Label fx:id="lblSinExistencias"
-                   text="0"
-                   styleClass="saldo-venta"/>
+                <Label fx:id="lblCantidadProductos"
+                       text="0"
+                       style="-fx-font-size: 22px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #2f6b43;"/>
 
-        </VBox>
+            </VBox>
 
-    </HBox>
+
+            <!-- STOCK BAJO -->
+
+            <VBox GridPane.columnIndex="1"
+                  spacing="2">
+
+                <Label text="STOCK BAJO"
+                       style="-fx-font-size: 10px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #718078;"/>
+
+                <Label fx:id="lblStockBajo"
+                       text="0"
+                       style="-fx-font-size: 22px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #a05a17;"/>
+
+            </VBox>
+
+
+            <!-- SIN EXISTENCIAS -->
+
+            <VBox GridPane.columnIndex="2"
+                  spacing="2">
+
+                <Label text="SIN EXISTENCIAS"
+                       style="-fx-font-size: 10px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #718078;"/>
+
+                <Label fx:id="lblSinExistencias"
+                       text="0"
+                       style="-fx-font-size: 22px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #a05a17;"/>
+
+            </VBox>
+
+        </GridPane>
+
+    </VBox>
 
 </VBox>

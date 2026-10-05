@@ -4,105 +4,235 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.gestion.controller.ConfiguracionUsuarioControlador"
-      alignment="TOP_CENTER"
-      spacing="14"
-      prefWidth="700"
-      prefHeight="650"
-      stylesheets="@css/estilos.css">
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gestion.controller.ConfiguracionUsuarioControlador"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            pannable="true"
+            styleClass="formulario-scroll"
+            stylesheets="@css/estilos.css">
 
-    <padding>
-        <Insets top="35"
-                right="50"
-                bottom="35"
-                left="50"/>
-    </padding>
+    <content>
 
-    <Label text="Configuración de acceso"
-           styleClass="titulo-principal"/>
+        <VBox alignment="TOP_CENTER"
+              spacing="14"
+              styleClass="modulo-contenido">
 
-    <Label fx:id="lblObligatorio"
-           text=""
-           wrapText="true"
-           maxWidth="500"
-           style="-fx-text-fill: #c62828; -fx-font-weight: bold;"/>
+            <padding>
+                <Insets top="24"
+                        right="35"
+                        bottom="30"
+                        left="35"/>
+            </padding>
 
-    <Region prefHeight="5"/>
 
-    <VBox spacing="5"
-          maxWidth="420">
+            <!-- ENCABEZADO -->
 
-        <Label text="Nuevo nombre de usuario"/>
+            <VBox alignment="CENTER"
+                  spacing="4"
+                  maxWidth="680">
 
-        <TextField fx:id="txtNuevoUsuario"
-                   promptText="Ingrese el nuevo usuario"/>
+                <Label text="Configuración de acceso"
+                       styleClass="titulo-pagina"/>
 
-        <Label fx:id="checkUsuario"
-               text="○ Mínimo 4 caracteres y caracteres permitidos"/>
-    </VBox>
+                <Label text="Actualice las credenciales utilizadas para ingresar al sistema."
+                       wrapText="true"
+                       textAlignment="CENTER"
+                       styleClass="subtitulo-pagina"/>
 
-    <VBox spacing="5"
-          maxWidth="420">
+            </VBox>
 
-        <Label text="Contraseña actual"/>
 
-        <PasswordField fx:id="txtContrasenaActual"
-                       promptText="Ingrese la contraseña actual"/>
+            <!-- AVISO DE CAMBIO OBLIGATORIO -->
 
-        <Label fx:id="checkActual"
-               text="○ Contraseña actual requerida"/>
-    </VBox>
+            <Label fx:id="lblObligatorio"
+                   text=""
+                   wrapText="true"
+                   maxWidth="680"
+                   styleClass="credencial-aviso-obligatorio"/>
 
-    <VBox spacing="5"
-          maxWidth="420">
 
-        <Label text="Nueva contraseña"/>
+            <!-- TARJETA PRINCIPAL -->
 
-        <PasswordField fx:id="txtNuevaContrasena"
-                       promptText="Ingrese la nueva contraseña"/>
+            <VBox spacing="16"
+                  maxWidth="680"
+                  styleClass="formulario-tarjeta credencial-tarjeta">
 
-        <Label fx:id="checkLongitud"
-               text="○ Mínimo 12 caracteres"/>
+                <padding>
+                    <Insets top="22"
+                            right="28"
+                            bottom="24"
+                            left="28"/>
+                </padding>
 
-        <Label fx:id="checkMayuscula"
-               text="○ Una letra mayúscula"/>
 
-        <Label fx:id="checkMinuscula"
-               text="○ Una letra minúscula"/>
+                <!-- USUARIO -->
 
-        <Label fx:id="checkNumero"
-               text="○ Un número"/>
+                <VBox spacing="3">
 
-        <Label fx:id="checkEspecial"
-               text="○ Un carácter especial"/>
-    </VBox>
+                    <Label text="Datos de acceso"
+                           styleClass="formulario-seccion-titulo"/>
 
-    <VBox spacing="5"
-          maxWidth="420">
+                    <Label text="Defina el nombre de usuario que utilizará el administrador."
+                           wrapText="true"
+                           styleClass="formulario-seccion-descripcion"/>
 
-        <Label text="Confirmar nueva contraseña"/>
+                </VBox>
 
-        <PasswordField fx:id="txtConfirmarContrasena"
-                       promptText="Repita la nueva contraseña"/>
 
-        <Label fx:id="checkCoinciden"
-               text="○ Las contraseñas deben coincidir"/>
-    </VBox>
+                <VBox spacing="5">
 
-    <Label fx:id="lblMensaje"
-           text=""
-           wrapText="true"
-           maxWidth="420"/>
+                    <Label text="Nuevo nombre de usuario"
+                           styleClass="campo-label"/>
 
-    <Button text="Guardar credenciales"
-            onAction="#guardar"
-            prefWidth="250"
-            prefHeight="42"/>
+                    <TextField fx:id="txtNuevoUsuario"
+                               promptText="Ingrese el nuevo usuario"
+                               prefHeight="42"/>
 
-</VBox>
+                    <Label fx:id="checkUsuario"
+                           text="○ Mínimo 4 caracteres y caracteres permitidos"
+                           styleClass="credencial-validacion"/>
+
+                </VBox>
+
+
+                <VBox spacing="5">
+
+                    <Label text="Contraseña actual"
+                           styleClass="campo-label"/>
+
+                    <PasswordField fx:id="txtContrasenaActual"
+                                   promptText="Ingrese la contraseña actual"
+                                   prefHeight="42"/>
+
+                    <Label fx:id="checkActual"
+                           text="○ Contraseña actual requerida"
+                           styleClass="credencial-validacion"/>
+
+                </VBox>
+
+
+                <!-- SEPARADOR VISUAL -->
+
+                <Region prefHeight="1"
+                        maxHeight="1"
+                        styleClass="credencial-separador"/>
+
+
+                <!-- NUEVA CONTRASEÑA -->
+
+                <VBox spacing="3">
+
+                    <Label text="Nueva contraseña"
+                           styleClass="formulario-seccion-titulo"/>
+
+                    <Label text="La contraseña debe cumplir todos los requisitos de seguridad."
+                           wrapText="true"
+                           styleClass="formulario-seccion-descripcion"/>
+
+                </VBox>
+
+
+                <VBox spacing="7">
+
+                    <Label text="Nueva contraseña"
+                           styleClass="campo-label"/>
+
+                    <PasswordField fx:id="txtNuevaContrasena"
+                                   promptText="Ingrese la nueva contraseña"
+                                   prefHeight="42"/>
+
+
+                    <!-- VALIDACIONES -->
+
+                    <GridPane hgap="18"
+                              vgap="5">
+
+                        <Label fx:id="checkLongitud"
+                               text="○ Mínimo 12 caracteres"
+                               GridPane.columnIndex="0"
+                               GridPane.rowIndex="0"
+                               styleClass="credencial-validacion"/>
+
+                        <Label fx:id="checkMayuscula"
+                               text="○ Una letra mayúscula"
+                               GridPane.columnIndex="1"
+                               GridPane.rowIndex="0"
+                               styleClass="credencial-validacion"/>
+
+                        <Label fx:id="checkMinuscula"
+                               text="○ Una letra minúscula"
+                               GridPane.columnIndex="0"
+                               GridPane.rowIndex="1"
+                               styleClass="credencial-validacion"/>
+
+                        <Label fx:id="checkNumero"
+                               text="○ Un número"
+                               GridPane.columnIndex="1"
+                               GridPane.rowIndex="1"
+                               styleClass="credencial-validacion"/>
+
+                        <Label fx:id="checkEspecial"
+                               text="○ Un carácter especial"
+                               GridPane.columnIndex="0"
+                               GridPane.rowIndex="2"
+                               styleClass="credencial-validacion"/>
+
+                    </GridPane>
+
+                </VBox>
+
+
+                <VBox spacing="5">
+
+                    <Label text="Confirmar nueva contraseña"
+                           styleClass="campo-label"/>
+
+                    <PasswordField fx:id="txtConfirmarContrasena"
+                                   promptText="Repita la nueva contraseña"
+                                   prefHeight="42"/>
+
+                    <Label fx:id="checkCoinciden"
+                           text="○ Las contraseñas deben coincidir"
+                           styleClass="credencial-validacion"/>
+
+                </VBox>
+
+
+                <!-- MENSAJE -->
+
+                <Label fx:id="lblMensaje"
+                       text=""
+                       wrapText="true"
+                       maxWidth="Infinity"
+                       styleClass="credencial-mensaje"/>
+
+
+                <!-- ACCIÓN -->
+
+                <HBox alignment="CENTER_RIGHT">
+
+                    <Button text="Guardar credenciales"
+                            onAction="#guardar"
+                            prefWidth="220"
+                            prefHeight="42"
+                            styleClass="boton-primario"/>
+
+                </HBox>
+
+            </VBox>
+
+        </VBox>
+
+    </content>
+
+</ScrollPane>
