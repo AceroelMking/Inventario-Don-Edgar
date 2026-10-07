@@ -48,9 +48,9 @@
                 onAction="#actualizar"
                 styleClass="boton-secundario"/>
 
-        <Button text="Exportar PDF"
-                onAction="#exportarPdf"
-                styleClass="boton-primario"/>
+       <Button text="Exportar PDF"
+               onAction="#exportarPdf"
+               styleClass="boton-exportar-pdf"/>
 
     </HBox>
 

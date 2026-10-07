@@ -79,7 +79,7 @@
                            smooth="true">
 
                     <image>
-                        <Image url="@images/logo-don-edgar.png"/>
+                        <Image url="@Images/logo-don-edgar.png"/>
                     </image>
 
                 </ImageView>

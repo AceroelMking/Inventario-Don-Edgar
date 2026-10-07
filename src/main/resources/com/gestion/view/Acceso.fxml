@@ -27,7 +27,7 @@
                mouseTransparent="true">
 
         <image>
-            <Image url="@images/fondo-login.png"/>
+            <Image url="@Images/fondo-login.png"/>
         </image>
 
     </ImageView>
@@ -54,7 +54,7 @@
                    mouseTransparent="true">
 
             <image>
-                <Image url="@images/logo-don-edgar.png"/>
+                <Image url="@Images/logo-don-edgar.png"/>
             </image>
 
         </ImageView>

@@ -49,6 +49,13 @@ public class ProductoFormularioControlador {
     private final FilteredList<String> unidadesFiltradasProdRepo =
         new FilteredList<>(unidadesProdRepo);
 
+    /*
+     * Evita que el listener del ComboBox de producto padre
+     * se ejecute recursivamente mientras JavaFX actualiza
+     * internamente el editor y la selección.
+     */
+    private boolean actualizandoComboProductoPadre = false;
+
     @FXML
     private TextField txtCodigoBarras;
 
@@ -57,6 +64,19 @@ public class ProductoFormularioControlador {
 
     @FXML
     private TextField txtMarca;
+
+    /*
+     * Cantidad o presentación del producto.
+     *
+     * Ejemplos:
+     * 500 g
+     * 1 L
+     * 250 ml
+     *
+     * No representa las existencias.
+     */
+    @FXML
+    private TextField txtCantidadProducto;
 
     @FXML
     private ChoiceBox<Categoria> seleccionCategoria;
@@ -85,13 +105,12 @@ public class ProductoFormularioControlador {
     @FXML
     private Button botonCancelar;
 
-
     public void colocarProducto(
         Producto producto
     ) {
+
         this.producto = producto;
     }
-
 
     @FXML
     public void initialize() {
@@ -117,6 +136,16 @@ public class ProductoFormularioControlador {
             unidadesFiltradasProdRepo
         );
 
+        /*
+         * Buscador del producto padre.
+         *
+         * La bandera evita el ciclo:
+         *
+         * texto -> filtro -> selección ->
+         * texto -> filtro...
+         *
+         * que puede provocar StackOverflowError.
+         */
         txtUnidadAgrupada
             .getEditor()
             .textProperty()
@@ -124,34 +153,71 @@ public class ProductoFormularioControlador {
                 (obs, anterior, nuevo) -> {
 
                     if (
-                        nuevo == null
-                        || nuevo.isEmpty()
+                        actualizandoComboProductoPadre
                     ) {
+                        return;
+                    }
 
-                        unidadesFiltradasProdRepo
-                            .setPredicate(
-                                p -> true
-                            );
+                    String seleccionado =
+                        txtUnidadAgrupada
+                            .getSelectionModel()
+                            .getSelectedItem();
 
-                    } else {
+                    /*
+                     * Si JavaFX solamente está colocando
+                     * en el editor el elemento seleccionado,
+                     * no volvemos a filtrar.
+                     */
+                    if (
+                        seleccionado != null
+                        && seleccionado.equals(nuevo)
+                    ) {
+                        return;
+                    }
 
-                        String busqueda =
-                            nuevo.toLowerCase();
+                    String busqueda =
+                        nuevo == null
+                            ? ""
+                            : nuevo
+                                .trim()
+                                .toLowerCase();
 
-                        unidadesFiltradasProdRepo
-                            .setPredicate(
-                                texto ->
-                                    texto
-                                        .toLowerCase()
-                                        .contains(
-                                            busqueda
-                                        )
-                            );
+                    actualizandoComboProductoPadre =
+                        true;
+
+                    try {
+
+                        if (
+                            busqueda.isEmpty()
+                        ) {
+
+                            unidadesFiltradasProdRepo
+                                .setPredicate(
+                                    texto -> true
+                                );
+
+                        } else {
+
+                            unidadesFiltradasProdRepo
+                                .setPredicate(
+                                    texto ->
+                                        texto != null
+                                        && texto
+                                            .toLowerCase()
+                                            .contains(
+                                                busqueda
+                                            )
+                                );
+                        }
+
+                    } finally {
+
+                        actualizandoComboProductoPadre =
+                            false;
                     }
                 }
             );
     }
-
 
     public void cargarProductoCampoTexto(
         Producto producto
@@ -173,9 +239,22 @@ public class ProductoFormularioControlador {
             producto.conseguirMarca()
         );
 
+        /*
+         * Carga la cantidad/presentación.
+         */
+        txtCantidadProducto.setText(
+            producto.conseguirCantidadProducto()
+                == null
+                ? ""
+                : String.valueOf(
+                    producto
+                        .conseguirCantidadProducto()
+                )
+        );
+
         if (
             producto.conseguirCategoria()
-            != null
+                != null
         ) {
 
             if (
@@ -183,6 +262,7 @@ public class ProductoFormularioControlador {
                     producto.conseguirCategoria()
                 )
             ) {
+
                 categorias.add(
                     producto.conseguirCategoria()
                 );
@@ -203,7 +283,7 @@ public class ProductoFormularioControlador {
          */
         if (
             producto.conseguirUnidadAgrupada()
-            == null
+                == null
         ) {
 
             unidadMedida.setSelected(
@@ -214,9 +294,25 @@ public class ProductoFormularioControlador {
                 false
             );
 
-            txtUnidadAgrupada.setValue(
-                null
-            );
+            actualizandoComboProductoPadre =
+                true;
+
+            try {
+
+                txtUnidadAgrupada.setValue(
+                    null
+                );
+
+                unidadesFiltradasProdRepo
+                    .setPredicate(
+                        texto -> true
+                    );
+
+            } finally {
+
+                actualizandoComboProductoPadre =
+                    false;
+            }
 
         } else {
 
@@ -275,9 +371,25 @@ public class ProductoFormularioControlador {
                     );
                 }
 
-                txtUnidadAgrupada.setValue(
-                    productoPadreCadena
-                );
+                actualizandoComboProductoPadre =
+                    true;
+
+                try {
+
+                    unidadesFiltradasProdRepo
+                        .setPredicate(
+                            texto -> true
+                        );
+
+                    txtUnidadAgrupada.setValue(
+                        productoPadreCadena
+                    );
+
+                } finally {
+
+                    actualizandoComboProductoPadre =
+                        false;
+                }
             }
         }
 
@@ -306,12 +418,12 @@ public class ProductoFormularioControlador {
         configurarTipoUnidad();
     }
 
-
     private void verifiarHijoPadre() {
 
         if (
             producto != null
-            && producto.conseguirId() != null
+            && producto.conseguirId()
+                != null
         ) {
 
             unidadesProdRepo.remove(
@@ -322,12 +434,13 @@ public class ProductoFormularioControlador {
         }
     }
 
-
     private String productoACadena(
         Producto prod
     ) {
 
-        if (prod == null) {
+        if (
+            prod == null
+        ) {
             return "";
         }
 
@@ -346,7 +459,6 @@ public class ProductoFormularioControlador {
             );
     }
 
-
     private String valorSeguro(
         String valor
     ) {
@@ -355,7 +467,6 @@ public class ProductoFormularioControlador {
             ? ""
             : valor;
     }
-
 
     private ObservableList<String>
     productosACadena() {
@@ -370,7 +481,7 @@ public class ProductoFormularioControlador {
 
             if (
                 prod.conseguirUnidadAgrupada()
-                == null
+                    == null
             ) {
 
                 cadenas.add(
@@ -383,7 +494,6 @@ public class ProductoFormularioControlador {
 
         return cadenas;
     }
-
 
     private void configurarTipoUnidad() {
 
@@ -416,7 +526,6 @@ public class ProductoFormularioControlador {
                 );
         }
     }
-
 
     private boolean mostrarAlertaAdvertencia(
         String titulo,
@@ -468,7 +577,6 @@ public class ProductoFormularioControlador {
                 == botonContinuar;
     }
 
-
     private Integer productoCadenaId(
         String cadena
     ) {
@@ -480,12 +588,11 @@ public class ProductoFormularioControlador {
         );
     }
 
-
     @FXML
     private void cancelar() {
+
         cerrarVentana();
     }
-
 
     private void cerrarVentana() {
 
@@ -496,7 +603,6 @@ public class ProductoFormularioControlador {
 
         ventana.close();
     }
-
 
     @FXML
     private void borrarProducto() {
@@ -532,7 +638,6 @@ public class ProductoFormularioControlador {
         }
     }
 
-
     @FXML
     private void aceptar() {
 
@@ -554,7 +659,9 @@ public class ProductoFormularioControlador {
                     "¿Desea guardar el producto sin código de barras?"
                 );
 
-            if (!continuar) {
+            if (
+                !continuar
+            ) {
                 return;
             }
 
@@ -570,7 +677,6 @@ public class ProductoFormularioControlador {
                     .trim()
             );
         }
-
 
         /*
          * Nombre.
@@ -596,7 +702,6 @@ public class ProductoFormularioControlador {
                 .trim()
         );
 
-
         /*
          * Marca.
          */
@@ -621,7 +726,6 @@ public class ProductoFormularioControlador {
                 .trim()
         );
 
-
         /*
          * Categoría.
          */
@@ -630,7 +734,9 @@ public class ProductoFormularioControlador {
                 .getSelectionModel()
                 .getSelectedItem();
 
-        if (categoria == null) {
+        if (
+            categoria == null
+        ) {
 
             mostrarError(
                 "Debe seleccionar una categoría."
@@ -643,6 +749,66 @@ public class ProductoFormularioControlador {
             categoria
         );
 
+        /*
+         * Cantidad / presentación del producto.
+         *
+         * Ejemplos:
+         * 500 g
+         * 1 L
+         * 250 ml
+         *
+         * No representa las existencias.
+         */
+        if (
+            txtCantidadProducto.getText()
+                == null
+            || txtCantidadProducto
+                .getText()
+                .isBlank()
+        ) {
+
+            mostrarError(
+                "Debe indicar la cantidad del producto."
+            );
+
+            return;
+        }
+
+        try {
+
+            double cantidadProducto =
+                Double.parseDouble(
+                    txtCantidadProducto
+                        .getText()
+                        .trim()
+                        .replace(",", ".")
+                );
+
+            if (
+                cantidadProducto <= 0
+            ) {
+
+                mostrarError(
+                    "La cantidad del producto debe ser mayor que 0."
+                );
+
+                return;
+            }
+
+            producto.colocarCantidadProducto(
+                cantidadProducto
+            );
+
+        } catch (
+            NumberFormatException e
+        ) {
+
+            mostrarError(
+                "La cantidad del producto debe ser un número válido."
+            );
+
+            return;
+        }
 
         /*
          * Unidad de medida o
@@ -697,9 +863,25 @@ public class ProductoFormularioControlador {
                     )
             ) {
 
-                txtUnidadAgrupada
-                    .getEditor()
-                    .clear();
+                actualizandoComboProductoPadre =
+                    true;
+
+                try {
+
+                    txtUnidadAgrupada
+                        .getEditor()
+                        .clear();
+
+                    unidadesFiltradasProdRepo
+                        .setPredicate(
+                            texto -> true
+                        );
+
+                } finally {
+
+                    actualizandoComboProductoPadre =
+                        false;
+                }
 
                 mostrarError(
                     "Debe seleccionar un producto padre válido."
@@ -780,12 +962,12 @@ public class ProductoFormularioControlador {
             return;
         }
 
-
         /*
          * Precio.
          */
         if (
-            txtPrecio.getText() == null
+            txtPrecio.getText()
+                == null
             || txtPrecio
                 .getText()
                 .isBlank()
@@ -807,7 +989,9 @@ public class ProductoFormularioControlador {
                         .trim()
                 );
 
-            if (precio <= 0) {
+            if (
+                precio <= 0
+            ) {
 
                 mostrarError(
                     "El precio debe ser mayor que 0."
@@ -831,7 +1015,6 @@ public class ProductoFormularioControlador {
             return;
         }
 
-
         /*
          * Existencias.
          *
@@ -850,7 +1033,6 @@ public class ProductoFormularioControlador {
                 0.0
             );
         }
-
 
         /*
          * Mínimo de existencias.
@@ -879,7 +1061,9 @@ public class ProductoFormularioControlador {
                         .trim()
                 );
 
-            if (minimo < 0) {
+            if (
+                minimo < 0
+            ) {
 
                 mostrarError(
                     "El mínimo de existencias no puede ser negativo."
@@ -903,7 +1087,6 @@ public class ProductoFormularioControlador {
 
             return;
         }
-
 
         /*
          * Guardar o editar.
@@ -954,7 +1137,6 @@ public class ProductoFormularioControlador {
 
         cerrarVentana();
     }
-
 
     private void mostrarError(
         String mensaje

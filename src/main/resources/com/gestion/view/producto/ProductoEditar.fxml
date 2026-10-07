@@ -140,7 +140,7 @@
             </VBox>
 
             <!-- ================================================= -->
-            <!-- PRESENTACIÓN E INVENTARIO                          -->
+            <!-- PRESENTACIÓN E INVENTARIO                         -->
             <!-- ================================================= -->
 
             <VBox spacing="12"
@@ -156,6 +156,24 @@
 
                 <Label text="Presentación e inventario"
                        styleClass="formulario-seccion-titulo"/>
+
+                <!-- CANTIDAD / PRESENTACIÓN -->
+
+                <VBox spacing="4">
+
+                    <Label text="Cantidad / presentación"
+                           styleClass="campo-label"/>
+
+                    <TextField fx:id="txtCantidadProducto"
+                               promptText="Ej. 500, 1, 250"
+                               prefHeight="36"
+                               maxWidth="Infinity"/>
+
+                    <Label text="Indique cuánto contiene el producto. Ejemplo: 500 g, 1 L o 250 ml."
+                           wrapText="true"
+                           styleClass="campo-ayuda"/>
+
+                </VBox>
 
                 <!-- TIPO DE UNIDAD -->
 
@@ -264,7 +282,7 @@
                     <Label text="i"
                            styleClass="formulario-aviso-icono"/>
 
-                    <Label text="Las existencias no se modifican desde este formulario. Las entradas de inventario se gestionan desde Inventario / Lotes."
+                    <Label text="La cantidad corresponde a la presentación del producto. Las existencias no se modifican desde este formulario; las entradas de inventario se gestionan desde Inventario / Lotes."
                            wrapText="true"
                            HBox.hgrow="ALWAYS"
                            styleClass="formulario-aviso-texto"/>
@@ -281,8 +299,6 @@
                   spacing="10"
                   maxWidth="900">
 
-                <!-- ELIMINAR -->
-
                 <Button fx:id="borrar"
                         text="Eliminar producto"
                         mnemonicParsing="false"
@@ -293,8 +309,6 @@
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <!-- CANCELAR -->
-
                 <Button fx:id="botonCancelar"
                         text="Cancelar"
                         mnemonicParsing="false"
@@ -302,8 +316,6 @@
                         prefWidth="115"
                         prefHeight="36"
                         styleClass="boton-secundario"/>
-
-                <!-- GUARDAR -->
 
                 <Button fx:id="botonAceptar"
                         text="Guardar cambios"

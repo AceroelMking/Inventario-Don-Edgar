@@ -61,7 +61,6 @@ public class ProductoControlador {
             producto -> true
         );
 
-
     @FXML
     private ComboBox<String> filtroCodigoBarras;
 
@@ -89,6 +88,17 @@ public class ProductoControlador {
     @FXML
     private TableColumn<Producto, String> columnaCategoria;
 
+    /*
+     * Cantidad o presentación del producto.
+     *
+     * Ejemplos:
+     * 500 g
+     * 1 L
+     * 250 ml
+     */
+    @FXML
+    private TableColumn<Producto, Double> columnaCantidad;
+
     @FXML
     private TableColumn<Producto, String> columnaUnidadMedida;
 
@@ -106,7 +116,6 @@ public class ProductoControlador {
 
     @FXML
     private TableColumn<Producto, Void> columnaEditar;
-
 
     private void cargarListaFiltros() {
 
@@ -130,7 +139,6 @@ public class ProductoControlador {
             listaFiltroNombreCategoria
         );
     }
-
 
     private void inicializarProductosTablaVista() {
 
@@ -171,7 +179,9 @@ public class ProductoControlador {
             celda -> {
 
                 if (
-                    celda.getValue().conseguirCategoria()
+                    celda
+                        .getValue()
+                        .conseguirCategoria()
                         == null
                 ) {
 
@@ -189,6 +199,20 @@ public class ProductoControlador {
                     )
                 );
             }
+        );
+
+        /*
+         * Cantidad / presentación.
+         *
+         * Esta cantidad NO representa el stock.
+         */
+        columnaCantidad.setCellValueFactory(
+            celda ->
+                new SimpleObjectProperty<>(
+                    celda
+                        .getValue()
+                        .conseguirCantidadProducto()
+                )
         );
 
         columnaUnidadMedida.setCellValueFactory(
@@ -241,7 +265,6 @@ public class ProductoControlador {
         );
     }
 
-
     private String valorSeguro(
         String valor
     ) {
@@ -251,14 +274,12 @@ public class ProductoControlador {
             : valor;
     }
 
-
     private void cargarProductos() {
 
         productosObservables.setAll(
             productoRepositorio.consultarTodo()
         );
     }
-
 
     private void inicializarColumnaEdicion() {
 
@@ -277,7 +298,9 @@ public class ProductoControlador {
                                     getTableRow()
                                         .getItem();
 
-                                if (producto != null) {
+                                if (
+                                    producto != null
+                                ) {
 
                                     editarProducto(
                                         producto
@@ -298,7 +321,9 @@ public class ProductoControlador {
                             empty
                         );
 
-                        if (empty) {
+                        if (
+                            empty
+                        ) {
 
                             setGraphic(
                                 null
@@ -314,7 +339,6 @@ public class ProductoControlador {
                 }
         );
     }
-
 
     private void editarProducto(
         Producto producto
@@ -389,7 +413,6 @@ public class ProductoControlador {
         }
     }
 
-
     private void aplicarFiltros() {
 
         String codigo =
@@ -437,7 +460,8 @@ public class ProductoControlador {
                     "";
 
                 if (
-                    producto.conseguirCategoria()
+                    producto
+                        .conseguirCategoria()
                         != null
                 ) {
 
@@ -481,17 +505,18 @@ public class ProductoControlador {
         );
     }
 
-
     private String obtenerTextoFiltro(
         ComboBox<String> comboBox
     ) {
 
         if (
             comboBox == null
-            || comboBox.getEditor() == null
+            || comboBox.getEditor()
+                == null
             || comboBox
                 .getEditor()
-                .getText() == null
+                .getText()
+                == null
         ) {
 
             return "";
@@ -503,7 +528,6 @@ public class ProductoControlador {
             .trim()
             .toLowerCase();
     }
-
 
     private void configurarFiltro(
         ComboBox<String> comboBox,
@@ -535,7 +559,9 @@ public class ProductoControlador {
                                 return true;
                             }
 
-                            if (texto == null) {
+                            if (
+                                texto == null
+                            ) {
 
                                 return false;
                             }
@@ -543,7 +569,8 @@ public class ProductoControlador {
                             return texto
                                 .toLowerCase()
                                 .contains(
-                                    nuevo.toLowerCase()
+                                    nuevo
+                                        .toLowerCase()
                                 );
                         }
                     );
@@ -552,7 +579,6 @@ public class ProductoControlador {
                 }
             );
     }
-
 
     @FXML
     public void initialize() {
@@ -569,7 +595,6 @@ public class ProductoControlador {
 
         cargarProductos();
     }
-
 
     @FXML
     private void abrirFormularioAgregar() {
@@ -636,7 +661,6 @@ public class ProductoControlador {
         }
     }
 
-
     @FXML
     private void abrirCategorias() {
 
@@ -701,7 +725,6 @@ public class ProductoControlador {
             alerta.showAndWait();
         }
     }
-
 
     @FXML
     private void actualizarProductos() {

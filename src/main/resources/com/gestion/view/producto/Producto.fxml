@@ -189,53 +189,62 @@
 
                 <TableColumn fx:id="columnaCodigo"
                              text="Código"
-                             minWidth="110"
-                             prefWidth="140"/>
+                             minWidth="100"
+                             prefWidth="125"/>
 
                 <TableColumn fx:id="columnaNombre"
                              text="Producto"
-                             minWidth="120"
-                             prefWidth="160"/>
+                             minWidth="115"
+                             prefWidth="145"/>
 
                 <TableColumn fx:id="columnaMarca"
-                             text="Marca / Distribuidor"
-                             minWidth="130"
-                             prefWidth="160"/>
+                             text="Marca"
+                             minWidth="105"
+                             prefWidth="130"/>
 
                 <TableColumn fx:id="columnaCategoria"
                              text="Categoría"
-                             minWidth="100"
-                             prefWidth="130"/>
+                             minWidth="95"
+                             prefWidth="115"/>
+
+                <!-- CANTIDAD / PRESENTACIÓN -->
+
+                <TableColumn fx:id="columnaCantidad"
+                             text="Cantidad"
+                             minWidth="80"
+                             prefWidth="90"/>
 
                 <TableColumn fx:id="columnaUnidadMedida"
                              text="Unidad"
-                             minWidth="90"
-                             prefWidth="115"/>
+                             minWidth="75"
+                             prefWidth="90"/>
 
                 <TableColumn fx:id="columnaProductoPadre"
                              text="Unidad agrupada"
-                             minWidth="110"
-                             prefWidth="140"/>
+                             minWidth="105"
+                             prefWidth="125"/>
 
                 <TableColumn fx:id="columnaPrecio"
                              text="Precio"
-                             minWidth="90"
-                             prefWidth="105"/>
+                             minWidth="80"
+                             prefWidth="95"/>
+
+                <!-- STOCK REAL -->
 
                 <TableColumn fx:id="columnaExistencias"
                              text="Existencias"
                              minWidth="85"
-                             prefWidth="105"/>
+                             prefWidth="95"/>
 
                 <TableColumn fx:id="columnaMinimoExistencias"
                              text="Mínimo"
-                             minWidth="80"
-                             prefWidth="95"/>
+                             minWidth="70"
+                             prefWidth="80"/>
 
                 <TableColumn fx:id="columnaEditar"
                              text="Acciones"
-                             minWidth="95"
-                             prefWidth="110"/>
+                             minWidth="90"
+                             prefWidth="100"/>
 
             </columns>
 

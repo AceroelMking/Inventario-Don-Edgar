@@ -47,7 +47,7 @@
 
         <Button text="Actualizar"
                 onAction="#actualizar"
-                styleClass="boton-primario"/>
+                styleClass="boton-secundario"/>
 
     </HBox>
 

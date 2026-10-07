@@ -64,7 +64,7 @@
 
                 <Button text="Exportar PDF"
                         onAction="#exportarPdf"
-                        styleClass="boton-primario"/>
+                        styleClass="boton-exportar-pdf"/>
 
             </HBox>
 

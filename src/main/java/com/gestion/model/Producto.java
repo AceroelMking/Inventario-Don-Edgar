@@ -10,12 +10,29 @@ public class Producto {
     private String marca;
     private Categoria categoria = new Categoria();
 
+    /*
+     * Cantidad que contiene o representa el producto.
+     *
+     * Ejemplos:
+     * 500 g
+     * 1 L
+     * 250 ml
+     *
+     * No representa las existencias del inventario.
+     */
+    private Double cantidadProducto;
+
     private String unidadMedida;
     private Integer unidadAgrupada;
     private String productoPadre;
 
     private Double precio;
+
+    /*
+     * Cantidad disponible actualmente en inventario.
+     */
     private Double existencias;
+
     private Double minimoExistencias;
 
     private Boolean activo;
@@ -27,6 +44,7 @@ public class Producto {
         String codigoBarras,
         String nombre,
         String marca,
+        Double cantidadProducto,
         String unidadMedida,
         Integer unidadAgrupada,
         Double precio,
@@ -38,6 +56,7 @@ public class Producto {
         this.codigoBarras = codigoBarras;
         this.nombre = nombre;
         this.marca = marca;
+        this.cantidadProducto = cantidadProducto;
         this.unidadMedida = unidadMedida;
         this.unidadAgrupada = unidadAgrupada;
         this.precio = precio;
@@ -64,6 +83,10 @@ public class Producto {
 
     public Categoria conseguirCategoria() {
         return categoria;
+    }
+
+    public Double conseguirCantidadProducto() {
+        return cantidadProducto;
     }
 
     public String conseguirUnidadMedida() {
@@ -94,7 +117,9 @@ public class Producto {
         return activo;
     }
 
-    public void colocarId(Integer id) {
+    public void colocarId(
+        Integer id
+    ) {
         this.id = id;
     }
 
@@ -120,6 +145,13 @@ public class Producto {
         Categoria categoria
     ) {
         this.categoria = categoria;
+    }
+
+    public void colocarCantidadProducto(
+        Double cantidadProducto
+    ) {
+        this.cantidadProducto =
+            cantidadProducto;
     }
 
     public void colocarUnidadMedida(

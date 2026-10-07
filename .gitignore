@@ -4,3 +4,19 @@ target/
 *.class
 *.log
 database/*
+
+# Despliegues generados con jpackage
+/despliegue-final-prueba/
+/despliegue-windows/
+/paquete-windows/
+/paquete-windows-final/
+/prueba-final-windows/
+
+# Respaldos temporales
+/respaldo-view-antes-codificacion/
+
+# Base de datos local
+/database/
+
+# Logs locales
+/error-javafx.txt
