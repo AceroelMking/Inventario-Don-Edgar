@@ -167,7 +167,8 @@
 
                         <DatePicker fx:id="fechaRegistro"
                                     prefHeight="36"
-                                    maxWidth="Infinity"/>
+                                    maxWidth="Infinity"
+                                    disable="true"/>
 
                     </VBox>
 

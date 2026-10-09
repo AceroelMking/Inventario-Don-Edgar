@@ -126,6 +126,59 @@ public class CategoriaRepositorio {
     }
 
     // Read
+    public Categoria consultarCategoriaPorNombre(String nombre) {
+        String sql = "SELECT id, nombre_categoria, activo "
+            + "FROM categoria "
+            + "WHERE nombre_categoria = ? COLLATE NOCASE "
+            + "LIMIT 1;";
+
+        try (
+            Connection conexion = ConexionBaseDatos.conectar();
+            PreparedStatement sentencia = conexion.prepareStatement(sql)
+        ) {
+
+            sentencia.setString(1, nombre.trim());
+
+            try (ResultSet resultado = sentencia.executeQuery()) {
+
+                if (resultado.next()) {
+                    return convertirCategoria(resultado);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                "Error al consultar la categoría por nombre", e
+            );
+        }
+
+        return null;
+    }
+
+    public boolean activarCategoria(Integer id) {
+
+        String sql = """
+            UPDATE categoria
+            SET activo = 1
+            WHERE id = ? AND activo = 0;
+            """;
+
+        try (
+            Connection conexion = ConexionBaseDatos.conectar();
+            PreparedStatement sentencia = conexion.prepareStatement(sql)
+        ) {
+
+            sentencia.setInt(1, id);
+
+            return sentencia.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                "Error al reactivar la categoría", e
+            );
+        }
+    }
+
     public static boolean existe(int id) {
         String sql = "SELECT EXISTS(SELECT 1 FROM categoria WHERE id = ?)";
         try (

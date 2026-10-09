@@ -131,8 +131,10 @@
                                styleClass="campo-label"/>
 
                         <DatePicker fx:id="fechaRegistro"
-                                    prefHeight="36"
-                                    maxWidth="Infinity"/>
+                               prefHeight="36"
+                               maxWidth="Infinity"
+                               editable="false"
+                               disable="true"/>
 
                     </VBox>
 

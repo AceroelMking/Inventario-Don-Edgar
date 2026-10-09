@@ -120,31 +120,151 @@ public class CategoriaControlador {
     }
 
     @FXML
-    public void agregarCategoria(){
+    public void agregarCategoria() {
+
         Alert alerta = new Alert(AlertType.CONFIRMATION);
-        alerta.setTitle("Agregar Categoria");
-        alerta.setHeaderText("Nombre de la nuva categoria:");
+        alerta.setTitle("Agregar Categoría");
+        alerta.setHeaderText("Nombre de la nueva categoría:");
         alerta.setContentText(null);
+
         TextField txtNombreCategoria = new TextField();
+        txtNombreCategoria.setPromptText("Nombre");
+
         HBox contenedor = new HBox(txtNombreCategoria);
         contenedor.setPadding(new Insets(15, 5, 5, 5));
         contenedor.setAlignment(Pos.CENTER);
-        txtNombreCategoria.setPromptText("Nombre");
+
         alerta.getDialogPane().setContent(contenedor);
-        ButtonType botonContinuar = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE);
-        ButtonType botonCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alerta.getButtonTypes().setAll(botonContinuar, botonCancelar);
+
+        ButtonType botonContinuar = new ButtonType(
+            "Guardar", ButtonBar.ButtonData.OK_DONE
+        );
+
+        ButtonType botonCancelar = new ButtonType(
+            "Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE
+        );
+
+        alerta.getButtonTypes().setAll(
+            botonContinuar,
+            botonCancelar
+        );
+
         Optional<ButtonType> resultado = alerta.showAndWait();
-        if (resultado.isPresent() && resultado.get() == botonContinuar){
-            if (txtNombreCategoria.getText().trim().isEmpty()){
-                new Alert(AlertType.ERROR,"Debe ingresar un nombre para la categoria.").showAndWait();
-                return;
-            }
-            Categoria nuevaCategoria = new Categoria();
-            nuevaCategoria.colocarNombre(txtNombreCategoria.getText().trim());
-            CategoriaRepositorio catRepo = new CategoriaRepositorio();
-            catRepo.agregarCategoria(nuevaCategoria);
+
+        if (resultado.isEmpty() || resultado.get() != botonContinuar) {
+            return;
         }
-        cargarCategorias();
+
+        String nombre = txtNombreCategoria.getText().trim();
+
+        if (nombre.isEmpty()) {
+
+            new Alert(
+                AlertType.ERROR,
+                "Debe ingresar un nombre para la categoría."
+            ).showAndWait();
+
+            return;
+        }
+
+        try {
+
+            // Verificar si la categoría ya existe.
+            Categoria categoriaExistente =
+                categoriaRepositorio.consultarCategoriaPorNombre(nombre);
+
+            if (categoriaExistente != null) {
+
+                // La categoría existe y está activa.
+                if (categoriaExistente.conseguirActivo() == 1) {
+
+                    new Alert(
+                        AlertType.WARNING,
+                        "La categoría '" + nombre
+                        + "' ya se encuentra registrada y activa."
+                    ).showAndWait();
+
+                    return;
+                }
+
+                // La categoría existe, pero está desactivada.
+                Alert confirmacion = new Alert(AlertType.CONFIRMATION);
+
+                confirmacion.setTitle("Recuperar categoría");
+
+                confirmacion.setHeaderText(
+                    "La categoría ya existe, pero está desactivada."
+                );
+
+                confirmacion.setContentText(
+                    "¿Deseas reactivar la categoría '"
+                    + categoriaExistente.conseguirNombre() + "'?"
+                );
+
+                ButtonType botonReactivar = new ButtonType(
+                    "Reactivar",
+                    ButtonBar.ButtonData.OK_DONE
+                );
+
+                ButtonType botonNo = new ButtonType(
+                    "Cancelar",
+                    ButtonBar.ButtonData.CANCEL_CLOSE
+                );
+
+                confirmacion.getButtonTypes().setAll(
+                    botonReactivar,
+                    botonNo
+                );
+
+                Optional<ButtonType> respuesta = confirmacion.showAndWait();
+
+                if (respuesta.isPresent()
+                        && respuesta.get() == botonReactivar) {
+
+                    boolean reactivada = categoriaRepositorio.activarCategoria(
+                        categoriaExistente.conseguirId()
+                    );
+
+                    if (reactivada) {
+
+                        new Alert(
+                            AlertType.INFORMATION,
+                            "La categoría fue reactivada correctamente."
+                        ).showAndWait();
+
+                    } else {
+
+                        new Alert(
+                            AlertType.WARNING,
+                            "No se pudo reactivar la categoría."
+                        ).showAndWait();
+                    }
+                }
+
+            } else {
+
+                // La categoría no existe, se registra normalmente.
+                Categoria nuevaCategoria = new Categoria();
+                nuevaCategoria.colocarNombre(nombre);
+
+                categoriaRepositorio.agregarCategoria(nuevaCategoria);
+
+                new Alert(
+                    AlertType.INFORMATION,
+                    "La categoría fue registrada correctamente."
+                ).showAndWait();
+            }
+
+            cargarCategorias();
+
+        } catch (RuntimeException e) {
+
+            new Alert(
+                AlertType.ERROR,
+                "No se pudo guardar la categoría: " + e.getMessage()
+            ).showAndWait();
+
+            e.printStackTrace();
+        }
     }
 }

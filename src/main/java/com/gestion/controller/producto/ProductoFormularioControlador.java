@@ -1274,17 +1274,30 @@ public class ProductoFormularioControlador {
                 mostrarError("La cantidad debe ser un número finito.");
                 return;
             }
+            
             String unidadActual = seleccionUnidadMedida.getValue();
-            if (unidadMedida.isSelected() && unidadActual != null
-                    && unidadActual.toLowerCase(java.util.Locale.ROOT)
-                        .replaceAll("[\\s()]", "").equals("unidades")
-                    && cantidadProducto != Math.floor(cantidadProducto)) {
-                new Alert(AlertType.WARNING,
-                    "Para Unidad(es), la cantidad debe ser un número entero.").showAndWait();
+
+            if (unidadMedida.isSelected()
+                    && UnidadesMedida.UNIDAD.equalsIgnoreCase(
+                        unidadActual == null ? "" : unidadActual.trim()
+                    )
+                    && cantidadProducto % 1 != 0) {
+
+                Alert alerta = new Alert(AlertType.WARNING);
+                alerta.setTitle("Cantidad inválida");
+                alerta.setHeaderText("La cantidad debe ser un número entero");
+                alerta.setContentText(
+                    "Cuando la unidad de medida es Unidad(es), "
+                    + "no se permiten cantidades decimales."
+                );
+                alerta.showAndWait();
+
                 txtCantidadProducto.requestFocus();
                 txtCantidadProducto.selectAll();
+
                 return;
             }
+
             producto.colocarCantidadProducto(
                 cantidadProducto
             );

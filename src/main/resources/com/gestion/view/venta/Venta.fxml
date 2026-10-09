@@ -338,10 +338,20 @@
                     <Label text="Monto pagado"
                            styleClass="campo-label"/>
 
-                    <TextField fx:id="txtMontoPagado"
-                               promptText="0"
-                               prefWidth="160"
-                               prefHeight="36"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+
+                            <TextField fx:id="txtMontoPagado"
+                                          promptText="0"
+                                          prefWidth="160"
+                                          prefHeight="36"/>
+
+                            <Button text="Pagar todo"
+                                   mnemonicParsing="false"
+                                   onAction="#pagarTodo"
+                                   prefHeight="36"
+                                   styleClass="boton-secundario"/>
+
+                    </HBox>
 
                 </VBox>
 

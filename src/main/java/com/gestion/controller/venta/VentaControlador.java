@@ -462,6 +462,46 @@ public class VentaControlador {
         }
     }
 
+    @FXML
+    private void pagarTodo() {
+
+        String totalTexto = lblTotal.getText();
+
+        if (totalTexto == null || totalTexto.isBlank()) {
+            return;
+        }
+
+        // Elimina símbolos monetarios y separadores de miles.
+        String totalLimpio = totalTexto
+                .replace("$", "")
+                .replace(" ", "")
+                .replace(".", "")
+                .replace(",", ".");
+
+        try {
+
+            double total = Double.parseDouble(totalLimpio);
+
+            if (total <= 0) {
+                new Alert(
+                    Alert.AlertType.WARNING,
+                    "Debe agregar productos antes de pagar."
+                ).showAndWait();
+                return;
+            }
+
+            txtMontoPagado.setText(
+                String.valueOf(total)
+            );
+
+        } catch (NumberFormatException e) {
+
+            new Alert(
+                Alert.AlertType.ERROR,
+                "No se pudo obtener el total de la venta."
+            ).showAndWait();
+        }
+    }
 
     @FXML
     private void agregarProducto() {
