@@ -22,6 +22,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
+import java.util.Locale;
+
+import javafx.collections.transformation.FilteredList;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 
 
 public class VentaControlador {
@@ -50,6 +55,23 @@ public class VentaControlador {
 
     @FXML
     private ComboBox<Producto> comboProducto;
+
+    @FXML
+    private RadioButton radioCodigoBarras;
+
+    @FXML
+    private RadioButton radioNombreMarca;
+
+    @FXML
+    private ToggleGroup grupoBusqueda;
+
+    private final ObservableList<Producto> productosDisponibles =
+            FXCollections.observableArrayList();
+
+    private final FilteredList<Producto> productosFiltrados =
+            new FilteredList<>(productosDisponibles);
+
+    private boolean actualizandoComboProducto = false;
 
     @FXML
     private TextField txtCantidad;
@@ -88,6 +110,8 @@ public class VentaControlador {
         configurarClientes();
 
         configurarProductos();
+
+        configurarBusquedaProductos();
 
         configurarMetodosPago();
 
@@ -158,90 +182,164 @@ public class VentaControlador {
         );
     }
 
-
     private void configurarProductos() {
 
-        comboProducto.setItems(
+        productosDisponibles.setAll(
             productoServicio.consultarTodo()
         );
 
+        comboProducto.setItems(productosFiltrados);
+        comboProducto.setEditable(true);
 
-        comboProducto.setConverter(
-            new StringConverter<>() {
+        comboProducto.setConverter(new StringConverter<Producto>() {
 
-                @Override
-                public String toString(
-                    Producto producto
-                ) {
+            @Override
+            public String toString(Producto producto) {
 
-                    if (producto == null) {
-                        return "";
-                    }
-
-
-                    String nombre =
-                        producto.conseguirNombre() == null
-                            ? ""
-                            : producto.conseguirNombre();
-
-
-                    String marca =
-                        producto.conseguirMarca() == null
-                            ? ""
-                            : producto.conseguirMarca();
-
-
-                    if (marca.isBlank()) {
-                        return nombre;
-                    }
-
-
-                    return nombre + " - " + marca;
+                if (producto == null) {
+                    return "";
                 }
 
+                String nombre = producto.conseguirNombre() == null
+                        ? ""
+                        : producto.conseguirNombre();
 
-                @Override
-                public Producto fromString(
-                    String texto
-                ) {
+                String marca = producto.conseguirMarca() == null
+                        ? ""
+                        : producto.conseguirMarca();
 
-                    return null;
+                return marca.isBlank()
+                        ? nombre
+                        : nombre + " - " + marca;
+            }
+
+            @Override
+            public Producto fromString(String texto) {
+                return null;
+            }
+        });
+
+        comboProducto.getEditor().textProperty().addListener(
+            (observable, anterior, nuevo) -> {
+
+                if (actualizandoComboProducto
+                        || !radioNombreMarca.isSelected()) {
+                    return;
+                }
+
+                Producto seleccionado = comboProducto.getSelectionModel()
+                        .getSelectedItem();
+
+                if (seleccionado != null
+                        && comboProducto.getConverter()
+                            .toString(seleccionado).equals(nuevo)) {
+                    return;
+                }
+
+                String busqueda = nuevo == null
+                        ? ""
+                        : nuevo.trim().toLowerCase(Locale.ROOT);
+
+                actualizandoComboProducto = true;
+
+                try {
+
+                    productosFiltrados.setPredicate(producto -> {
+
+                        if (busqueda.isEmpty()) {
+                            return true;
+                        }
+
+                        String nombre = producto.conseguirNombre() == null
+                                ? ""
+                                : producto.conseguirNombre()
+                                    .toLowerCase(Locale.ROOT);
+
+                        String marca = producto.conseguirMarca() == null
+                                ? ""
+                                : producto.conseguirMarca()
+                                    .toLowerCase(Locale.ROOT);
+
+                        return nombre.contains(busqueda)
+                                || marca.contains(busqueda)
+                                || (nombre + " " + marca).contains(busqueda);
+                    });
+
+                } finally {
+                    actualizandoComboProducto = false;
                 }
             }
         );
 
+        comboProducto.setOnAction(event -> {
 
-        /*
-         * MEJORA:
-         * Cuando el producto se selecciona manualmente,
-         * colocamos cantidad 1 por defecto.
-         *
-         * Después movemos el foco al campo cantidad
-         * para permitir modificarla rápidamente.
-         */
-        comboProducto.setOnAction(
-            event -> {
-
-                Producto producto =
-                    comboProducto.getValue();
-
-
-                if (producto != null) {
-
-                    if (txtCantidad.getText().isBlank()) {
-
-                        txtCantidad.setText("1");
-                    }
-
-
-                    txtCantidad.requestFocus();
-
-                    txtCantidad.selectAll();
-                }
+            if (actualizandoComboProducto) {
+                return;
             }
-        );
+
+            Producto seleccionado = comboProducto.getValue();
+
+            if (seleccionado != null) {
+
+                actualizandoComboProducto = true;
+
+                try {
+                    comboProducto.getEditor().setText(
+                        comboProducto.getConverter().toString(seleccionado)
+                    );
+                } finally {
+                    actualizandoComboProducto = false;
+                }
+
+                if (txtCantidad.getText().isBlank()) {
+                    txtCantidad.setText("1");
+                }
+
+                txtCantidad.requestFocus();
+                txtCantidad.selectAll();
+            }
+        });
     }
 
+    private void configurarBusquedaProductos() {
+
+        radioCodigoBarras.setSelected(true);
+
+        cambiarTipoBusqueda();
+    }
+
+    @FXML
+    private void cambiarTipoBusqueda() {
+
+        boolean buscarPorCodigo = radioCodigoBarras.isSelected();
+
+        txtCodigoBarras.setDisable(!buscarPorCodigo);
+        comboProducto.setDisable(buscarPorCodigo);
+
+        txtCodigoBarras.clear();
+
+        actualizandoComboProducto = true;
+
+        try {
+
+            comboProducto.setValue(null);
+            comboProducto.getEditor().clear();
+
+            productosFiltrados.setPredicate(producto -> true);
+
+        } finally {
+            actualizandoComboProducto = false;
+        }
+
+        if (buscarPorCodigo) {
+
+            txtCodigoBarras.requestFocus();
+
+        } else {
+
+            comboProducto.requestFocus();
+        }
+    }
 
     private void configurarMetodosPago() {
 
@@ -428,9 +526,13 @@ public class VentaControlador {
             }
 
 
-            comboProducto.setValue(
-                producto
-            );
+            actualizandoComboProducto = true;
+
+            try {
+                comboProducto.setValue(producto);
+            } finally {
+                actualizandoComboProducto = false;
+            }
 
 
             /*
@@ -465,42 +567,20 @@ public class VentaControlador {
     @FXML
     private void pagarTodo() {
 
-        String totalTexto = lblTotal.getText();
+        double total = ventaServicio.calcularTotal(detalles);
 
-        if (totalTexto == null || totalTexto.isBlank()) {
+        if (total <= 0) {
+
+            mostrarError(
+                "Debe agregar productos antes de realizar el pago."
+            );
+
             return;
         }
 
-        // Elimina símbolos monetarios y separadores de miles.
-        String totalLimpio = totalTexto
-                .replace("$", "")
-                .replace(" ", "")
-                .replace(".", "")
-                .replace(",", ".");
-
-        try {
-
-            double total = Double.parseDouble(totalLimpio);
-
-            if (total <= 0) {
-                new Alert(
-                    Alert.AlertType.WARNING,
-                    "Debe agregar productos antes de pagar."
-                ).showAndWait();
-                return;
-            }
-
-            txtMontoPagado.setText(
-                String.valueOf(total)
-            );
-
-        } catch (NumberFormatException e) {
-
-            new Alert(
-                Alert.AlertType.ERROR,
-                "No se pudo obtener el total de la venta."
-            ).showAndWait();
-        }
+        txtMontoPagado.setText(
+            String.valueOf(total)
+        );
     }
 
     @FXML
@@ -705,13 +785,30 @@ public class VentaControlador {
 
     private void limpiarProducto() {
 
-        comboProducto.setValue(null);
+        actualizandoComboProducto = true;
+
+        try {
+
+            comboProducto.setValue(null);
+            comboProducto.getEditor().clear();
+
+            productosFiltrados.setPredicate(producto -> true);
+
+        } finally {
+            actualizandoComboProducto = false;
+        }
 
         txtCantidad.clear();
-
         txtCodigoBarras.clear();
 
-        txtCodigoBarras.requestFocus();
+        if (radioCodigoBarras.isSelected()) {
+
+            txtCodigoBarras.requestFocus();
+
+        } else {
+
+            comboProducto.requestFocus();
+        }
     }
 
 
@@ -958,9 +1055,11 @@ public class VentaControlador {
              * Consultamos nuevamente los productos
              * para obtener las existencias actualizadas.
              */
-            comboProducto.setItems(
+            productosDisponibles.setAll(
                 productoServicio.consultarTodo()
             );
+
+            productosFiltrados.setPredicate(producto -> true);
 
 
             /*
@@ -976,7 +1075,11 @@ public class VentaControlador {
 
             tablaDetalles.refresh();
 
-            txtCodigoBarras.requestFocus();
+            if (radioCodigoBarras.isSelected()) {
+                txtCodigoBarras.requestFocus();
+            } else {
+                comboProducto.requestFocus();
+            }
 
 
         } catch (IllegalArgumentException e) {

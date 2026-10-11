@@ -11,6 +11,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -127,6 +129,25 @@
                 </HBox>
 
                 <!-- CAMPOS PARA AGREGAR PRODUCTO -->
+                     <HBox spacing="18" alignment="CENTER_LEFT">
+
+                     <RadioButton fx:id="radioCodigoBarras"
+                                   text="Código de barras"
+                                   selected="true"
+                                   onAction="#cambiarTipoBusqueda">
+
+                            <toggleGroup>
+                            <ToggleGroup fx:id="grupoBusqueda"/>
+                            </toggleGroup>
+
+                     </RadioButton>
+
+                     <RadioButton fx:id="radioNombreMarca"
+                                   text="Nombre y marca"
+                                   toggleGroup="$grupoBusqueda"
+                                   onAction="#cambiarTipoBusqueda"/>
+
+                     </HBox>
 
                 <HBox spacing="10"
                       alignment="BOTTOM_LEFT">
@@ -155,9 +176,11 @@
                                styleClass="campo-label"/>
 
                         <ComboBox fx:id="comboProducto"
-                                  promptText="Seleccionar producto"
-                                  prefHeight="36"
-                                  maxWidth="Infinity"/>
+                            promptText="Buscar por nombre o marca"
+                            editable="true"
+                            disable="true"
+                            prefHeight="36"
+                            maxWidth="Infinity"/>
 
                     </VBox>
 
