@@ -193,7 +193,7 @@
                                styleClass="campo-label"/>
 
                         <TextField fx:id="txtCantidad"
-                                   promptText="1"
+                                   text="1"
                                    prefWidth="110"
                                    prefHeight="36"/>
 

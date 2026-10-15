@@ -1,3 +1,4 @@
+
 package com.gestion.controller.venta;
 
 import com.gestion.model.Cliente;
@@ -8,6 +9,7 @@ import com.gestion.service.ClienteServicio;
 import com.gestion.service.ProductoServicio;
 import com.gestion.service.VentaServicio;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,33 +18,46 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.util.StringConverter;
-import java.util.Locale;
-
-import javafx.collections.transformation.FilteredList;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.util.StringConverter;
 
+import java.util.Locale;
 
 public class VentaControlador {
 
     private final VentaServicio ventaServicio =
-        new VentaServicio();
+            new VentaServicio();
 
     private final ClienteServicio clienteServicio =
-        new ClienteServicio();
+            new ClienteServicio();
 
     private final ProductoServicio productoServicio =
-        new ProductoServicio();
+            new ProductoServicio();
 
     private final ObservableList<DetalleVenta> detalles =
-        FXCollections.observableArrayList();
+            FXCollections.observableArrayList();
 
+    private final ObservableList<Producto> productosDisponibles =
+            FXCollections.observableArrayList();
+
+    // Las sugerencias son independientes del ComboBox.
+    // Así evitamos modificar su lista durante una selección.
+    private final ContextMenu sugerenciasProductos =
+            new ContextMenu();
+
+    private Producto productoSeleccionado;
+
+    private boolean actualizandoComboProducto = false;
+
+    private static final int MAX_SUGERENCIAS = 12;
 
     @FXML
     private ComboBox<Cliente> comboCliente;
@@ -64,14 +79,6 @@ public class VentaControlador {
 
     @FXML
     private ToggleGroup grupoBusqueda;
-
-    private final ObservableList<Producto> productosDisponibles =
-            FXCollections.observableArrayList();
-
-    private final FilteredList<Producto> productosFiltrados =
-            new FilteredList<>(productosDisponibles);
-
-    private boolean actualizandoComboProducto = false;
 
     @FXML
     private TextField txtCantidad;
@@ -103,203 +110,324 @@ public class VentaControlador {
     @FXML
     private TextField txtMontoPagado;
 
-
     @FXML
     public void initialize() {
 
         configurarClientes();
-
         configurarProductos();
-
         configurarBusquedaProductos();
-
         configurarMetodosPago();
-
         configurarTabla();
-
         configurarMontoPagado();
-
         configurarCodigoBarras();
 
-
-        /*
-         * MEJORA:
-         * Al presionar ENTER en el campo cantidad,
-         * se agrega el producto sin necesidad
-         * de utilizar el mouse.
-         */
-        txtCantidad.setOnAction(
-            event -> agregarProducto()
-        );
-
+        txtCantidad.setOnAction(event -> agregarProducto());
 
         tablaDetalles.setItems(detalles);
 
         actualizarTotales();
 
-        txtCodigoBarras.requestFocus();
+        Platform.runLater(() -> txtCodigoBarras.requestFocus());
     }
 
+    // =====================================================
+    // CLIENTES
+    // =====================================================
 
     private void configurarClientes() {
 
         comboCliente.setItems(
-            clienteServicio.consultarTodo()
+                clienteServicio.consultarTodo()
         );
 
+        comboCliente.setConverter(new StringConverter<Cliente>() {
 
-        comboCliente.setConverter(
-            new StringConverter<>() {
+            @Override
+            public String toString(Cliente cliente) {
 
-                @Override
-                public String toString(
-                    Cliente cliente
-                ) {
-
-                    if (
-                        cliente == null
-                        || cliente.conseguirPersona() == null
-                    ) {
-
-                        return "";
-                    }
-
-
-                    return cliente
-                        .conseguirPersona()
-                        .conseguirNombre();
+                if (cliente == null
+                        || cliente.conseguirPersona() == null) {
+                    return "";
                 }
 
-
-                @Override
-                public Cliente fromString(
-                    String texto
-                ) {
-
-                    return null;
-                }
+                return cliente.conseguirPersona().conseguirNombre();
             }
-        );
+
+            @Override
+            public Cliente fromString(String texto) {
+                return null;
+            }
+        });
     }
+
+    // =====================================================
+    // PRODUCTOS Y BÚSQUEDA POR NOMBRE / MARCA
+    // =====================================================
 
     private void configurarProductos() {
 
         productosDisponibles.setAll(
-            productoServicio.consultarTodo()
+                productoServicio.consultarTodo()
         );
 
-        comboProducto.setItems(productosFiltrados);
+        // La lista del ComboBox permanece estable.
+        comboProducto.setItems(productosDisponibles);
+
         comboProducto.setEditable(true);
 
         comboProducto.setConverter(new StringConverter<Producto>() {
 
             @Override
             public String toString(Producto producto) {
-
-                if (producto == null) {
-                    return "";
-                }
-
-                String nombre = producto.conseguirNombre() == null
-                        ? ""
-                        : producto.conseguirNombre();
-
-                String marca = producto.conseguirMarca() == null
-                        ? ""
-                        : producto.conseguirMarca();
-
-                return marca.isBlank()
-                        ? nombre
-                        : nombre + " - " + marca;
+                return nombreProducto(producto);
             }
 
             @Override
             public Producto fromString(String texto) {
-                return null;
+                return buscarProductoPorNombreExacto(texto);
             }
         });
 
-        comboProducto.getEditor().textProperty().addListener(
-            (observable, anterior, nuevo) -> {
+        comboProducto.getEditor()
+                .textProperty()
+                .addListener((observable, anterior, nuevo) -> {
 
-                if (actualizandoComboProducto
-                        || !radioNombreMarca.isSelected()) {
-                    return;
-                }
+                    if (actualizandoComboProducto
+                            || !radioNombreMarca.isSelected()) {
+                        return;
+                    }
 
-                Producto seleccionado = comboProducto.getSelectionModel()
-                        .getSelectedItem();
+                    // Si el usuario modifica el texto, la selección
+                    // anterior deja de ser válida.
+                    productoSeleccionado = null;
 
-                if (seleccionado != null
-                        && comboProducto.getConverter()
-                            .toString(seleccionado).equals(nuevo)) {
-                    return;
-                }
+                    String texto = nuevo == null ? "" : nuevo;
 
-                String busqueda = nuevo == null
-                        ? ""
-                        : nuevo.trim().toLowerCase(Locale.ROOT);
+                    if (texto.isBlank()) {
+                        sugerenciasProductos.hide();
+                        return;
+                    }
 
-                actualizandoComboProducto = true;
+                    mostrarSugerencias(texto);
+                });
 
-                try {
-
-                    productosFiltrados.setPredicate(producto -> {
-
-                        if (busqueda.isEmpty()) {
-                            return true;
-                        }
-
-                        String nombre = producto.conseguirNombre() == null
-                                ? ""
-                                : producto.conseguirNombre()
-                                    .toLowerCase(Locale.ROOT);
-
-                        String marca = producto.conseguirMarca() == null
-                                ? ""
-                                : producto.conseguirMarca()
-                                    .toLowerCase(Locale.ROOT);
-
-                        return nombre.contains(busqueda)
-                                || marca.contains(busqueda)
-                                || (nombre + " " + marca).contains(busqueda);
-                    });
-
-                } finally {
-                    actualizandoComboProducto = false;
-                }
-            }
-        );
-
+        // Selección desde la lista normal del ComboBox.
         comboProducto.setOnAction(event -> {
 
-            if (actualizandoComboProducto) {
+            if (actualizandoComboProducto
+                    || !radioNombreMarca.isSelected()) {
                 return;
             }
 
-            Producto seleccionado = comboProducto.getValue();
+            Producto producto = comboProducto.getValue();
 
-            if (seleccionado != null) {
+            if (producto == null) {
+                return;
+            }
 
-                actualizandoComboProducto = true;
+            seleccionarProducto(producto);
+        });
 
-                try {
-                    comboProducto.getEditor().setText(
-                        comboProducto.getConverter().toString(seleccionado)
-                    );
-                } finally {
-                    actualizandoComboProducto = false;
+        // Enter en el campo editable.
+        comboProducto.getEditor().setOnAction(event -> {
+
+            if (!radioNombreMarca.isSelected()) {
+                return;
+            }
+
+            if (productoSeleccionado == null) {
+
+                Producto encontrado =
+                        buscarProductoPorNombreExacto(
+                                comboProducto.getEditor().getText()
+                        );
+
+                if (encontrado != null) {
+                    seleccionarProducto(encontrado);
                 }
+            }
 
-                if (txtCantidad.getText().isBlank()) {
-                    txtCantidad.setText("1");
-                }
-
+            if (productoSeleccionado != null) {
+                sugerenciasProductos.hide();
                 txtCantidad.requestFocus();
                 txtCantidad.selectAll();
             }
         });
     }
+
+    private String nombreProducto(Producto producto) {
+
+        if (producto == null) {
+            return "";
+        }
+
+        String nombre = producto.conseguirNombre() == null
+                ? ""
+                : producto.conseguirNombre();
+
+        String marca = producto.conseguirMarca() == null
+                ? ""
+                : producto.conseguirMarca();
+
+        return marca.isBlank()
+                ? nombre
+                : nombre + " - " + marca;
+    }
+
+    private void mostrarSugerencias(String texto) {
+
+        if (!radioNombreMarca.isSelected()
+                || comboProducto.isDisabled()) {
+            sugerenciasProductos.hide();
+            return;
+        }
+
+        String busqueda =
+                texto.trim().toLowerCase(Locale.ROOT);
+
+        sugerenciasProductos.getItems().clear();
+
+        if (busqueda.isEmpty()) {
+            sugerenciasProductos.hide();
+            return;
+        }
+
+        int encontrados = 0;
+
+        for (Producto producto : productosDisponibles) {
+
+            String nombre = producto.conseguirNombre() == null
+                    ? ""
+                    : producto.conseguirNombre()
+                            .toLowerCase(Locale.ROOT);
+
+            String marca = producto.conseguirMarca() == null
+                    ? ""
+                    : producto.conseguirMarca()
+                            .toLowerCase(Locale.ROOT);
+
+            String descripcion =
+                    nombreProducto(producto).toLowerCase(Locale.ROOT);
+
+            boolean coincide =
+                    nombre.contains(busqueda)
+                    || marca.contains(busqueda)
+                    || descripcion.contains(busqueda);
+
+            if (!coincide) {
+                continue;
+            }
+
+            MenuItem opcion =
+                    new MenuItem(nombreProducto(producto));
+
+            opcion.setOnAction(event -> {
+                seleccionarProducto(producto);
+            });
+
+            sugerenciasProductos.getItems().add(opcion);
+
+            encontrados++;
+
+            if (encontrados >= MAX_SUGERENCIAS) {
+                break;
+            }
+        }
+
+        if (sugerenciasProductos.getItems().isEmpty()) {
+            sugerenciasProductos.hide();
+            return;
+        }
+
+        // Mostrar las sugerencias debajo del editor.
+        Platform.runLater(() -> {
+
+            if (!radioNombreMarca.isSelected()
+                    || comboProducto.isDisabled()
+                    || !comboProducto.getEditor().getText()
+                            .equals(texto)) {
+                return;
+            }
+
+            if (comboProducto.getEditor().getScene() == null) {
+                return;
+            }
+
+            if (sugerenciasProductos.isShowing()) {
+                sugerenciasProductos.hide();
+            }
+
+            sugerenciasProductos.show(
+                    comboProducto.getEditor(),
+                    javafx.geometry.Side.BOTTOM,
+                    0,
+                    0
+            );
+        });
+    }
+
+    private void seleccionarProducto(Producto producto) {
+
+        if (producto == null) {
+            return;
+        }
+
+        sugerenciasProductos.hide();
+
+        actualizandoComboProducto = true;
+
+        try {
+
+            productoSeleccionado = producto;
+
+            comboProducto.setValue(producto);
+
+            comboProducto.getEditor().setText(
+                    nombreProducto(producto)
+            );
+
+            comboProducto.getEditor().positionCaret(
+                    comboProducto.getEditor().getText().length()
+            );
+
+        } finally {
+            actualizandoComboProducto = false;
+        }
+
+        if (txtCantidad.getText() == null
+                || txtCantidad.getText().isBlank()) {
+            txtCantidad.setText("1");
+        }
+
+        Platform.runLater(() -> {
+
+            txtCantidad.requestFocus();
+            txtCantidad.selectAll();
+        });
+    }
+
+    private Producto buscarProductoPorNombreExacto(String texto) {
+
+        if (texto == null || texto.isBlank()) {
+            return null;
+        }
+
+        String buscado = texto.trim();
+
+        for (Producto producto : productosDisponibles) {
+
+            if (nombreProducto(producto)
+                    .equalsIgnoreCase(buscado)) {
+                return producto;
+            }
+        }
+
+        return null;
+    }
+
+    // =====================================================
+    // CAMBIAR TIPO DE BÚSQUEDA
+    // =====================================================
 
     private void configurarBusquedaProductos() {
 
@@ -311,577 +439,536 @@ public class VentaControlador {
     @FXML
     private void cambiarTipoBusqueda() {
 
-        boolean buscarPorCodigo = radioCodigoBarras.isSelected();
+        boolean buscarPorCodigo =
+                radioCodigoBarras.isSelected();
+
+        sugerenciasProductos.hide();
 
         txtCodigoBarras.setDisable(!buscarPorCodigo);
+
         comboProducto.setDisable(buscarPorCodigo);
 
-        txtCodigoBarras.clear();
+        limpiarSeleccionProducto();
+
+        if (buscarPorCodigo) {
+
+            Platform.runLater(
+                    () -> txtCodigoBarras.requestFocus()
+            );
+
+        } else {
+
+            Platform.runLater(() -> {
+                comboProducto.getEditor().requestFocus();
+            });
+        }
+    }
+
+    private void limpiarSeleccionProducto() {
+
+        sugerenciasProductos.hide();
 
         actualizandoComboProducto = true;
 
         try {
 
+            productoSeleccionado = null;
+
+            comboProducto.hide();
+
+            comboProducto.getSelectionModel().clearSelection();
+
             comboProducto.setValue(null);
+
             comboProducto.getEditor().clear();
 
-            productosFiltrados.setPredicate(producto -> true);
+            txtCodigoBarras.clear();
 
         } finally {
             actualizandoComboProducto = false;
         }
-
-        if (buscarPorCodigo) {
-
-            txtCodigoBarras.requestFocus();
-
-        } else {
-
-            comboProducto.requestFocus();
-        }
     }
+
+    // =====================================================
+    // MÉTODOS DE PAGO
+    // =====================================================
 
     private void configurarMetodosPago() {
 
         comboMetodoPago.setItems(
-            FXCollections.observableArrayList(
-                "Efectivo",
-                "Transferencia",
-                "Crédito"
-            )
+                FXCollections.observableArrayList(
+                        "Efectivo",
+                        "Transferencia",
+                        "Crédito"
+                )
         );
     }
 
+    // =====================================================
+    // TABLA DE DETALLES
+    // =====================================================
 
     private void configurarTabla() {
 
         columnaProducto.setCellValueFactory(
-            celda -> new SimpleStringProperty(
-                celda
-                    .getValue()
-                    .conseguirProducto()
-                    .conseguirNombre()
-            )
+                celda -> new SimpleStringProperty(
+                        celda.getValue()
+                                .conseguirProducto()
+                                .conseguirNombre()
+                )
         );
-
 
         columnaCantidad.setCellValueFactory(
-            celda -> new SimpleObjectProperty<>(
-                celda
-                    .getValue()
-                    .conseguirCantidad()
-            )
+                celda -> new SimpleObjectProperty<>(
+                        celda.getValue().conseguirCantidad()
+                )
         );
-
 
         columnaPrecio.setCellValueFactory(
-            celda -> new SimpleObjectProperty<>(
-                celda
-                    .getValue()
-                    .conseguirPrecioUnitario()
-            )
+                celda -> new SimpleObjectProperty<>(
+                        celda.getValue().conseguirPrecioUnitario()
+                )
         );
-
 
         columnaSubtotal.setCellValueFactory(
-            celda -> new SimpleObjectProperty<>(
-                celda
-                    .getValue()
-                    .conseguirSubtotal()
-            )
+                celda -> new SimpleObjectProperty<>(
+                        celda.getValue().conseguirSubtotal()
+                )
         );
-
 
         configurarColumnaEliminar();
     }
 
-
     private void configurarColumnaEliminar() {
 
-        columnaEliminar.setCellFactory(
-            columna -> new TableCell<>() {
+        columnaEliminar.setCellFactory(columna -> new TableCell<>() {
 
-                private final Button boton =
-                    new Button("Quitar");
+            private final Button boton = new Button("Quitar");
 
+            {
+                boton.getStyleClass().add("boton-secundario");
 
-                {
-                    boton
-                        .getStyleClass()
-                        .add("boton-secundario");
+                boton.setOnAction(event -> {
 
+                    DetalleVenta detalle =
+                            getTableRow().getItem();
 
-                    boton.setOnAction(
-                        event -> {
+                    if (detalle != null) {
 
-                            DetalleVenta detalle =
-                                getTableRow().getItem();
+                        detalles.remove(detalle);
 
+                        actualizarTotales();
 
-                            if (detalle != null) {
-
-                                detalles.remove(
-                                    detalle
-                                );
-
-
-                                actualizarTotales();
-
-
-                                txtCodigoBarras.requestFocus();
-                            }
+                        if (radioCodigoBarras.isSelected()) {
+                            txtCodigoBarras.requestFocus();
+                        } else {
+                            comboProducto.getEditor().requestFocus();
                         }
-                    );
-                }
-
-
-                @Override
-                protected void updateItem(
-                    Void item,
-                    boolean empty
-                ) {
-
-                    super.updateItem(
-                        item,
-                        empty
-                    );
-
-
-                    setGraphic(
-                        empty ? null : boton
-                    );
-                }
+                    }
+                });
             }
-        );
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+
+                super.updateItem(item, empty);
+
+                setGraphic(empty ? null : boton);
+            }
+        });
     }
 
+    // =====================================================
+    // MONTO PAGADO
+    // =====================================================
 
     private void configurarMontoPagado() {
 
-        txtMontoPagado
-            .textProperty()
-            .addListener(
-                (
-                    observable,
-                    anterior,
-                    nuevo
-                ) -> actualizarSaldoPendiente()
-            );
-    }
-
-
-    private void configurarCodigoBarras() {
-
-        /*
-         * Los lectores USB normalmente funcionan
-         * como un teclado.
-         *
-         * Escriben el código y posteriormente
-         * envían ENTER.
-         */
-
-        txtCodigoBarras.setOnAction(
-            event -> buscarCodigoBarras()
+        txtMontoPagado.textProperty().addListener(
+                (observable, anterior, nuevo) ->
+                        actualizarSaldoPendiente()
         );
     }
 
+    // =====================================================
+    // CÓDIGO DE BARRAS
+    // =====================================================
+
+    private void configurarCodigoBarras() {
+
+        txtCodigoBarras.setOnAction(
+                event -> buscarCodigoBarras()
+        );
+    }
+
+    private Producto buscarProductoPorCodigo(String codigo) {
+
+        if (codigo == null || codigo.isBlank()) {
+            return null;
+        }
+
+        return productoServicio.consultarCodigoBarras(
+                codigo.trim()
+        );
+    }
 
     private void buscarCodigoBarras() {
 
-        String codigo =
-            txtCodigoBarras
-                .getText()
-                .trim();
+        if (!radioCodigoBarras.isSelected()) {
+            return;
+        }
 
+        String codigo = txtCodigoBarras.getText() == null
+                ? ""
+                : txtCodigoBarras.getText().trim();
 
         if (codigo.isEmpty()) {
             return;
         }
 
-
         try {
 
             Producto producto =
-                productoServicio
-                    .consultarCodigoBarras(
-                        codigo
-                    );
+                    buscarProductoPorCodigo(codigo);
 
-
-            if (
-                producto == null
-                || producto.conseguirId() == null
-            ) {
+            if (producto == null
+                    || producto.conseguirId() == null) {
 
                 mostrarError(
-                    "No existe un producto con el código de barras "
-                    + codigo
-                    + "."
+                        "No existe un producto con el código de barras "
+                        + codigo + "."
                 );
 
-
                 txtCodigoBarras.selectAll();
-
                 return;
             }
 
-
-            actualizandoComboProducto = true;
-
-            try {
-                comboProducto.setValue(producto);
-            } finally {
-                actualizandoComboProducto = false;
-            }
-
-
-            /*
-             * Si el campo cantidad se encuentra vacío,
-             * utilizamos una unidad por defecto.
-             */
-            if (txtCantidad.getText().isBlank()) {
-
+            if (txtCantidad.getText() == null
+                    || txtCantidad.getText().isBlank()) {
                 txtCantidad.setText("1");
             }
 
-
-            /*
-             * Cuando el código proviene del lector,
-             * agregamos directamente el producto.
-             */
-            agregarProducto();
-
+            // El escáner agrega automáticamente con Enter.
+            agregarProductoSeleccionado(producto);
 
         } catch (RuntimeException e) {
 
             mostrarError(
-                "No se pudo buscar el producto.\n"
-                + e.getMessage()
+                    "No se pudo buscar el producto.\n"
+                    + e.getMessage()
             );
-
 
             txtCodigoBarras.selectAll();
         }
     }
 
-    @FXML
-    private void pagarTodo() {
-
-        double total = ventaServicio.calcularTotal(detalles);
-
-        if (total <= 0) {
-
-            mostrarError(
-                "Debe agregar productos antes de realizar el pago."
-            );
-
-            return;
-        }
-
-        txtMontoPagado.setText(
-            String.valueOf(total)
-        );
-    }
+    // =====================================================
+    // AGREGAR PRODUCTOS
+    // =====================================================
 
     @FXML
     private void agregarProducto() {
 
-        Producto producto =
-            comboProducto.getValue();
+        Producto producto = null;
 
+        if (radioCodigoBarras.isSelected()) {
+
+            String codigo =
+                    txtCodigoBarras.getText() == null
+                    ? ""
+                    : txtCodigoBarras.getText().trim();
+
+            if (codigo.isEmpty()) {
+
+                mostrarError(
+                        "Debe ingresar un código de barras."
+                );
+
+                return;
+            }
+
+            try {
+
+                producto = buscarProductoPorCodigo(codigo);
+
+            } catch (RuntimeException e) {
+
+                mostrarError(
+                        "No se pudo consultar el producto.\n"
+                        + e.getMessage()
+                );
+
+                return;
+            }
+
+        } else {
+
+            producto = productoSeleccionado;
+
+            if (producto == null) {
+
+                producto = buscarProductoPorNombreExacto(
+                        comboProducto.getEditor().getText()
+                );
+            }
+        }
 
         if (producto == null) {
 
             mostrarError(
-                "Debe seleccionar un producto."
+                    "Debe seleccionar un producto válido."
             );
 
             return;
         }
 
+        agregarProductoSeleccionado(producto);
+    }
+
+    private void agregarProductoSeleccionado(Producto producto) {
+
+        if (producto == null
+                || producto.conseguirId() == null) {
+
+            mostrarError(
+                    "Debe seleccionar un producto válido."
+            );
+
+            return;
+        }
 
         double cantidad;
 
-
         try {
 
-            cantidad =
-                Double.parseDouble(
-                    txtCantidad
-                        .getText()
-                        .trim()
-                );
+            cantidad = Double.parseDouble(
+                    txtCantidad.getText().trim()
+            );
 
-
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | NullPointerException e) {
 
             mostrarError(
-                "La cantidad debe ser un número válido."
+                    "La cantidad debe ser un número válido."
             );
 
             return;
         }
 
-
-        if (cantidad <= 0) {
+        if (!Double.isFinite(cantidad) || cantidad <= 0) {
 
             mostrarError(
-                "La cantidad debe ser mayor que cero."
+                    "La cantidad debe ser mayor que cero."
             );
 
             return;
         }
-
 
         if (producto.conseguirPrecio() == null) {
 
             mostrarError(
-                "El producto no tiene un precio registrado."
+                    "El producto no tiene un precio registrado."
             );
 
             return;
         }
 
+        double precio = producto.conseguirPrecio();
+
+        if (!Double.isFinite(precio) || precio < 0) {
+
+            mostrarError(
+                    "El precio del producto no es válido."
+            );
+
+            return;
+        }
 
         double existencias =
-            producto.conseguirExistencias() == null
+                producto.conseguirExistencias() == null
                 ? 0.0
                 : producto.conseguirExistencias();
 
-
-        /*
-         * Verificamos si el producto ya se encuentra
-         * agregado en la venta.
-         */
         DetalleVenta existente =
-            buscarDetalleProducto(
-                producto.conseguirId()
-            );
-
+                buscarDetalleProducto(
+                        producto.conseguirId()
+                );
 
         double cantidadActual =
-            existente == null
+                existente == null
                 ? 0.0
                 : existente.conseguirCantidad();
 
-
         double cantidadFinal =
-            cantidadActual + cantidad;
+                cantidadActual + cantidad;
 
-
-        /*
-         * La cantidad total agregada del producto
-         * no puede superar las existencias disponibles.
-         */
-        if (cantidadFinal > existencias) {
+        if (!Double.isFinite(cantidadFinal)
+                || cantidadFinal > existencias) {
 
             mostrarError(
-                "No hay existencias suficientes de "
-                + producto.conseguirNombre()
-                + ".\nDisponible: "
-                + existencias
+                    "No hay existencias suficientes de "
+                    + producto.conseguirNombre()
+                    + ".\nDisponible: "
+                    + existencias
             );
 
             return;
         }
 
-
-        /*
-         * Si el producto ya estaba en la venta,
-         * incrementamos su cantidad.
-         */
         if (existente != null) {
 
-            existente.colocarCantidad(
-                cantidadFinal
-            );
-
+            existente.colocarCantidad(cantidadFinal);
 
             existente.colocarSubtotal(
-                cantidadFinal
-                * existente.conseguirPrecioUnitario()
+                    cantidadFinal
+                    * existente.conseguirPrecioUnitario()
             );
-
 
             tablaDetalles.refresh();
 
-
         } else {
 
-            /*
-             * Si todavía no existe,
-             * creamos un nuevo detalle.
-             */
             DetalleVenta detalle =
-                new DetalleVenta();
+                    new DetalleVenta();
 
+            detalle.colocarProducto(producto);
 
-            detalle.colocarProducto(
-                producto
-            );
+            detalle.colocarCantidad(cantidad);
 
-
-            detalle.colocarCantidad(
-                cantidad
-            );
-
-
-            detalle.colocarPrecioUnitario(
-                producto.conseguirPrecio()
-            );
-
+            detalle.colocarPrecioUnitario(precio);
 
             detalle.colocarSubtotal(
-                cantidad
-                * producto.conseguirPrecio()
+                    cantidad * precio
             );
 
-
-            detalles.add(
-                detalle
-            );
+            detalles.add(detalle);
         }
-
 
         limpiarProducto();
 
         actualizarTotales();
     }
 
-
-    private DetalleVenta buscarDetalleProducto(
-        Integer idProducto
-    ) {
+    private DetalleVenta buscarDetalleProducto(Integer idProducto) {
 
         if (idProducto == null) {
             return null;
         }
 
+        for (DetalleVenta detalle : detalles) {
 
-        for (
-            DetalleVenta detalle
-            : detalles
-        ) {
-
-            if (
-                detalle.conseguirProducto() != null
-                && detalle
-                    .conseguirProducto()
-                    .conseguirId() != null
-                && detalle
-                    .conseguirProducto()
-                    .conseguirId()
-                    .equals(idProducto)
-            ) {
+            if (detalle.conseguirProducto() != null
+                    && detalle.conseguirProducto()
+                            .conseguirId() != null
+                    && detalle.conseguirProducto()
+                            .conseguirId()
+                            .equals(idProducto)) {
 
                 return detalle;
             }
         }
 
-
         return null;
     }
 
-
     private void limpiarProducto() {
 
-        actualizandoComboProducto = true;
-
-        try {
-
-            comboProducto.setValue(null);
-            comboProducto.getEditor().clear();
-
-            productosFiltrados.setPredicate(producto -> true);
-
-        } finally {
-            actualizandoComboProducto = false;
-        }
+        limpiarSeleccionProducto();
 
         txtCantidad.clear();
-        txtCodigoBarras.clear();
 
         if (radioCodigoBarras.isSelected()) {
 
-            txtCodigoBarras.requestFocus();
+            Platform.runLater(
+                    () -> txtCodigoBarras.requestFocus()
+            );
 
         } else {
 
-            comboProducto.requestFocus();
+            Platform.runLater(() -> {
+                comboProducto.getEditor().requestFocus();
+            });
         }
     }
 
+    // =====================================================
+    // TOTALES Y SALDOS
+    // =====================================================
 
     private void actualizarTotales() {
 
         double total =
-            ventaServicio.calcularTotal(
-                detalles
-            );
-
+                ventaServicio.calcularTotal(detalles);
 
         lblTotal.setText(
-            String.format(
-                "$ %,.0f",
-                total
-            )
+                String.format(
+                        "$ %,.0f",
+                        total
+                )
         );
-
 
         actualizarSaldoPendiente();
     }
 
-
     private void actualizarSaldoPendiente() {
 
         double total =
-            ventaServicio.calcularTotal(
-                detalles
-            );
+                ventaServicio.calcularTotal(detalles);
 
-
-        double pagado =
-            0.0;
-
+        double pagado = 0.0;
 
         try {
 
-            if (
-                !txtMontoPagado
-                    .getText()
-                    .isBlank()
-            ) {
+            if (txtMontoPagado.getText() != null
+                    && !txtMontoPagado.getText().isBlank()) {
 
-                pagado =
-                    Double.parseDouble(
-                        txtMontoPagado
-                            .getText()
-                            .trim()
-                    );
+                pagado = Double.parseDouble(
+                        txtMontoPagado.getText().trim()
+                );
             }
-
 
         } catch (NumberFormatException e) {
 
             pagado = 0.0;
         }
 
-
         double saldo =
-            Math.max(
-                0,
-                total - pagado
-            );
-
+                Math.max(0, total - pagado);
 
         lblSaldoPendiente.setText(
-            String.format(
-                "$ %,.0f",
-                saldo
-            )
+                String.format(
+                        "$ %,.0f",
+                        saldo
+                )
         );
     }
 
+    // =====================================================
+    // PAGAR TODO
+    // =====================================================
+
+    @FXML
+    private void pagarTodo() {
+
+        double total =
+                ventaServicio.calcularTotal(detalles);
+
+        if (total <= 0) {
+
+            mostrarError(
+                    "Debe agregar productos antes de realizar el pago."
+            );
+
+            return;
+        }
+
+        txtMontoPagado.setText(
+                String.valueOf(total)
+        );
+    }
+
+    // =====================================================
+    // FINALIZAR VENTA
+    // =====================================================
 
     @FXML
     private void finalizarVenta() {
@@ -889,234 +976,167 @@ public class VentaControlador {
         if (detalles.isEmpty()) {
 
             mostrarError(
-                "Debe agregar al menos un producto a la venta."
+                    "Debe agregar al menos un producto a la venta."
             );
 
             return;
         }
-
 
         String metodoPago =
-            comboMetodoPago.getValue();
+                comboMetodoPago.getValue();
 
-
-        if (
-            metodoPago == null
-            || metodoPago.isBlank()
-        ) {
+        if (metodoPago == null
+                || metodoPago.isBlank()) {
 
             mostrarError(
-                "Debe seleccionar un método de pago."
+                    "Debe seleccionar un método de pago."
             );
 
             return;
         }
-
 
         double montoPagado;
 
-
         try {
 
-            if (txtMontoPagado.getText().isBlank()) {
+            if (txtMontoPagado.getText() == null
+                    || txtMontoPagado.getText().isBlank()) {
 
                 montoPagado = 0.0;
 
-
             } else {
 
-                montoPagado =
-                    Double.parseDouble(
-                        txtMontoPagado
-                            .getText()
-                            .trim()
-                    );
+                montoPagado = Double.parseDouble(
+                        txtMontoPagado.getText().trim()
+                );
             }
-
 
         } catch (NumberFormatException e) {
 
             mostrarError(
-                "El monto pagado debe ser un número válido."
+                    "El monto pagado debe ser un número válido."
             );
 
             return;
         }
 
-
-        if (montoPagado < 0) {
+        if (!Double.isFinite(montoPagado)
+                || montoPagado < 0) {
 
             mostrarError(
-                "El monto pagado no puede ser negativo."
+                    "El monto pagado no es válido."
             );
 
             return;
         }
 
-
         double total =
-            ventaServicio.calcularTotal(
-                detalles
-            );
-
+                ventaServicio.calcularTotal(detalles);
 
         if (montoPagado > total) {
 
             mostrarError(
-                "El monto pagado no puede ser mayor "
-                + "al total de la venta."
+                    "El monto pagado no puede ser mayor "
+                    + "al total de la venta."
             );
 
             return;
         }
-
 
         double saldoPendiente =
-            total - montoPagado;
-
+                total - montoPagado;
 
         Cliente cliente =
-            comboCliente.getValue();
+                comboCliente.getValue();
 
-
-        /*
-         * Si queda dinero pendiente,
-         * necesitamos saber quién lo debe.
-         */
-        if (
-            saldoPendiente > 0
-            && cliente == null
-        ) {
+        if (saldoPendiente > 0
+                && cliente == null) {
 
             mostrarError(
-                "Debe seleccionar un cliente "
-                + "cuando existe saldo pendiente."
+                    "Debe seleccionar un cliente "
+                    + "cuando existe saldo pendiente."
             );
 
             return;
         }
-
 
         try {
 
-            Venta venta =
-                new Venta();
+            Venta venta = new Venta();
 
+            venta.colocarCliente(cliente);
 
-            venta.colocarCliente(
-                cliente
-            );
+            venta.colocarMetodoPago(metodoPago);
 
-
-            venta.colocarMetodoPago(
-                metodoPago
-            );
-
-
-            venta.colocarMontoPagado(
-                montoPagado
-            );
-
+            venta.colocarMontoPagado(montoPagado);
 
             int idVenta =
-                ventaServicio.registrarVenta(
-                    venta,
-                    detalles
-                );
-
+                    ventaServicio.registrarVenta(
+                            venta,
+                            detalles
+                    );
 
             mostrarInformacion(
-                "Venta registrada correctamente.\n"
-                + "Número de venta: "
-                + idVenta
+                    "Venta registrada correctamente.\n"
+                    + "Número de venta: "
+                    + idVenta
             );
 
-
-            /*
-             * Limpiar la venta después
-             * de registrarla correctamente.
-             */
+            // Limpiar los datos después del registro.
             detalles.clear();
 
             comboCliente.setValue(null);
 
             comboMetodoPago.setValue(null);
 
-            comboProducto.setValue(null);
-
-            txtCantidad.clear();
-
-            txtCodigoBarras.clear();
+            limpiarProducto();
 
             txtMontoPagado.clear();
 
-
-            /*
-             * Consultamos nuevamente los productos
-             * para obtener las existencias actualizadas.
-             */
+            // Actualizar las existencias.
             productosDisponibles.setAll(
-                productoServicio.consultarTodo()
+                    productoServicio.consultarTodo()
             );
 
-            productosFiltrados.setPredicate(producto -> true);
-
-
-            /*
-             * Consultamos nuevamente los clientes
-             * para obtener sus saldos actualizados.
-             */
+            // Actualizar los saldos de clientes.
             comboCliente.setItems(
-                clienteServicio.consultarTodo()
+                    clienteServicio.consultarTodo()
             );
-
 
             actualizarTotales();
 
             tablaDetalles.refresh();
 
-            if (radioCodigoBarras.isSelected()) {
-                txtCodigoBarras.requestFocus();
-            } else {
-                comboProducto.requestFocus();
-            }
-
-
         } catch (IllegalArgumentException e) {
 
-            mostrarError(
-                e.getMessage()
-            );
-
+            mostrarError(e.getMessage());
 
         } catch (RuntimeException e) {
 
             mostrarError(
-                "No se pudo registrar la venta.\n"
-                + e.getMessage()
+                    "No se pudo registrar la venta.\n"
+                    + e.getMessage()
             );
         }
     }
 
+    // =====================================================
+    // MENSAJES
+    // =====================================================
 
-    private void mostrarError(
-        String mensaje
-    ) {
+    private void mostrarError(String mensaje) {
 
         new Alert(
-            Alert.AlertType.ERROR,
-            mensaje
+                Alert.AlertType.ERROR,
+                mensaje
         ).showAndWait();
     }
 
-
-    private void mostrarInformacion(
-        String mensaje
-    ) {
+    private void mostrarInformacion(String mensaje) {
 
         new Alert(
-            Alert.AlertType.INFORMATION,
-            mensaje
+                Alert.AlertType.INFORMATION,
+                mensaje
         ).showAndWait();
     }
 }
