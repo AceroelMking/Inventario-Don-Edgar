@@ -1,3 +1,4 @@
+
 package com.gestion.controller;
 
 import java.io.IOException;
@@ -19,73 +20,62 @@ public class MenuLateralControlador {
     @FXML
     private BorderPane panelBordes;
 
+    // Conserva la pantalla de ventas y su controlador.
+    private Parent vistaVentas;
 
     @FXML
     public void initialize() {
         abrirInicio();
     }
 
+    private Parent cargarArchivo(String archivo)
+            throws IOException {
 
-    private void cargarVista(
-        String archivo
-    ) throws IOException {
-
-        URL recurso =
-            getClass().getResource(
-                "/com/gestion/view/"
-                + archivo
-            );
+        URL recurso = getClass().getResource(
+                "/com/gestion/view/" + archivo
+        );
 
         if (recurso == null) {
             throw new IOException(
-                "No se encontró la vista: "
-                + archivo
+                    "No se encontró la vista: " + archivo
             );
         }
 
-        FXMLLoader loader =
-            new FXMLLoader(recurso);
+        FXMLLoader loader = new FXMLLoader(recurso);
 
-        Parent vista =
-            loader.load();
+        return loader.load();
+    }
+
+    private void cargarVista(String archivo)
+            throws IOException {
+
+        Parent vista = cargarArchivo(archivo);
 
         panelBordes.setCenter(vista);
     }
-
 
     @FXML
     public void abrirInicio() {
 
         try {
 
-            URL recurso =
-                getClass().getResource(
+            URL recurso = getClass().getResource(
                     "/com/gestion/view/Inicio.fxml"
-                );
+            );
 
             if (recurso == null) {
                 throw new IOException(
-                    "No se encontró Inicio.fxml."
+                        "No se encontró Inicio.fxml."
                 );
             }
 
-            FXMLLoader loader =
-                new FXMLLoader(recurso);
+            FXMLLoader loader = new FXMLLoader(recurso);
 
-            Parent vista =
-                loader.load();
+            Parent vista = loader.load();
 
-            /*
-             * Obtenemos el controlador del dashboard.
-             */
             InicioControlador controlador =
-                loader.getController();
+                    loader.getController();
 
-            /*
-             * Le entregamos una referencia al
-             * controlador principal para que los
-             * accesos rápidos puedan navegar.
-             */
             controlador.setMenuControlador(this);
 
             panelBordes.setCenter(vista);
@@ -93,12 +83,11 @@ public class MenuLateralControlador {
         } catch (IOException e) {
 
             mostrarError(
-                "No se pudo abrir Inicio.",
-                e
+                    "No se pudo abrir Inicio.",
+                    e
             );
         }
     }
-
 
     @FXML
     public void abrirProductos() {
@@ -106,18 +95,17 @@ public class MenuLateralControlador {
         try {
 
             cargarVista(
-                "producto/Producto.fxml"
+                    "producto/Producto.fxml"
             );
 
         } catch (IOException e) {
 
             mostrarError(
-                "No se pudo abrir Productos.",
-                e
+                    "No se pudo abrir Productos.",
+                    e
             );
         }
     }
-
 
     @FXML
     public void abrirLotes() {
@@ -125,18 +113,17 @@ public class MenuLateralControlador {
         try {
 
             cargarVista(
-                "lote/Lote.fxml"
+                    "lote/Lote.fxml"
             );
 
         } catch (IOException e) {
 
             mostrarError(
-                "No se pudo abrir Inventario / Lotes.",
-                e
+                    "No se pudo abrir Inventario / Lotes.",
+                    e
             );
         }
     }
-
 
     @FXML
     public void abrirClientes() {
@@ -144,37 +131,47 @@ public class MenuLateralControlador {
         try {
 
             cargarVista(
-                "cliente/Cliente.fxml"
+                    "cliente/Cliente.fxml"
             );
 
         } catch (IOException e) {
 
             mostrarError(
-                "No se pudo abrir Clientes.",
-                e
+                    "No se pudo abrir Clientes.",
+                    e
             );
         }
     }
 
+    // =====================================================
+    // VENTAS: CONSERVAR EL CARRITO AL CAMBIAR DE PANTALLA
+    // =====================================================
 
     @FXML
     public void abrirVentas() {
 
         try {
 
-            cargarVista(
-                "venta/Venta.fxml"
-            );
+            // Solo se carga Venta.fxml la primera vez.
+            if (vistaVentas == null) {
+
+                vistaVentas = cargarArchivo(
+                        "venta/Venta.fxml"
+                );
+            }
+
+            // Al regresar, recuperamos la misma pantalla.
+            // Se mantienen productos, cliente, pagos y total.
+            panelBordes.setCenter(vistaVentas);
 
         } catch (IOException e) {
 
             mostrarError(
-                "No se pudo abrir Ventas.",
-                e
+                    "No se pudo abrir Ventas.",
+                    e
             );
         }
     }
-
 
     @FXML
     public void abrirReportes() {
@@ -182,14 +179,14 @@ public class MenuLateralControlador {
         try {
 
             cargarVista(
-                "reporte/ReporteVentas.fxml"
+                    "reporte/ReporteVentas.fxml"
             );
 
         } catch (IOException e) {
 
             mostrarError(
-                "No se pudo abrir Reportes.",
-                e
+                    "No se pudo abrir Reportes.",
+                    e
             );
         }
     }
@@ -200,18 +197,17 @@ public class MenuLateralControlador {
         try {
 
             cargarVista(
-                "alerta/Alertas.fxml"
+                    "alerta/Alertas.fxml"
             );
 
         } catch (IOException e) {
 
             mostrarError(
-                "No se pudo abrir Alertas.",
-                e
+                    "No se pudo abrir Alertas.",
+                    e
             );
         }
     }
-
 
     @FXML
     public void abrirConfiguracionUsuario() {
@@ -219,47 +215,40 @@ public class MenuLateralControlador {
         try {
 
             cargarVista(
-                "ConfiguracionUsuario.fxml"
+                    "ConfiguracionUsuario.fxml"
             );
 
         } catch (IOException e) {
 
             mostrarError(
-                "No se pudo abrir la configuración.",
-                e
+                    "No se pudo abrir la configuración.",
+                    e
             );
         }
     }
 
-
     @FXML
-    private void cerrarSesion(
-        ActionEvent evento
-    ) {
+    private void cerrarSesion(ActionEvent evento) {
 
-        Alert confirmacion =
-            new Alert(
+        Alert confirmacion = new Alert(
                 Alert.AlertType.CONFIRMATION
-            );
+        );
 
         confirmacion.setTitle(
-            "Cerrar sesión"
+                "Cerrar sesión"
         );
 
         confirmacion.setHeaderText(
-            "¿Desea cerrar la sesión?"
+                "¿Desea cerrar la sesión?"
         );
 
         confirmacion.setContentText(
-            "Regresará a la pantalla de inicio de sesión."
+                "Regresará a la pantalla de inicio de sesión."
         );
 
-        ButtonType respuesta =
-            confirmacion
+        ButtonType respuesta = confirmacion
                 .showAndWait()
-                .orElse(
-                    ButtonType.CANCEL
-                );
+                .orElse(ButtonType.CANCEL);
 
         if (respuesta != ButtonType.OK) {
             return;
@@ -267,41 +256,36 @@ public class MenuLateralControlador {
 
         try {
 
-            URL recurso =
-                getClass().getResource(
+            URL recurso = getClass().getResource(
                     "/com/gestion/view/Acceso.fxml"
-                );
+            );
 
             if (recurso == null) {
 
                 throw new IOException(
-                    "No se encontró Acceso.fxml."
+                        "No se encontró Acceso.fxml."
                 );
             }
 
-            FXMLLoader loader =
-                new FXMLLoader(recurso);
+            FXMLLoader loader = new FXMLLoader(recurso);
 
-            Parent acceso =
-                loader.load();
+            Parent acceso = loader.load();
 
-            Node origen =
-                (Node) evento.getSource();
+            Node origen = (Node) evento.getSource();
 
-            Stage ventana =
-                (Stage) origen
+            Stage ventana = (Stage) origen
                     .getScene()
                     .getWindow();
 
-            Scene escenaAcceso =
-                new Scene(acceso);
+            // Descartar la vista de ventas de esta sesión.
+            vistaVentas = null;
 
-            ventana.setScene(
-                escenaAcceso
-            );
+            Scene escenaAcceso = new Scene(acceso);
+
+            ventana.setScene(escenaAcceso);
 
             ventana.setTitle(
-                "Víveres y Cárnicos Don Edgar - Acceso"
+                    "Víveres y Cárnicos Don Edgar - Acceso"
             );
 
             ventana.centerOnScreen();
@@ -310,35 +294,29 @@ public class MenuLateralControlador {
         } catch (IOException e) {
 
             mostrarError(
-                "No se pudo cerrar la sesión.",
-                e
+                    "No se pudo cerrar la sesión.",
+                    e
             );
         }
     }
 
-
     private void mostrarError(
-        String mensaje,
-        Exception excepcion
+            String mensaje,
+            Exception excepcion
     ) {
 
         excepcion.printStackTrace();
 
-        Alert alerta =
-            new Alert(
+        Alert alerta = new Alert(
                 Alert.AlertType.ERROR
-            );
-
-        alerta.setTitle(
-            "Error"
         );
 
-        alerta.setHeaderText(
-            mensaje
-        );
+        alerta.setTitle("Error");
+
+        alerta.setHeaderText(mensaje);
 
         alerta.setContentText(
-            excepcion.getMessage()
+                excepcion.getMessage()
         );
 
         alerta.showAndWait();

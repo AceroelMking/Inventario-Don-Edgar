@@ -112,6 +112,12 @@
                              text="Registro"
                              prefWidth="95"/>
 
+                <!-- NUEVA COLUMNA: FECHA DE EXPEDICIÓN -->
+
+                <TableColumn fx:id="columnaFechaExpedicion"
+                             text="Expedición"
+                             prefWidth="110"/>
+
                 <TableColumn fx:id="columnaFechaVencimiento"
                              text="Vencimiento"
                              prefWidth="105"/>

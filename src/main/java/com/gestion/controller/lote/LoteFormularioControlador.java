@@ -1,6 +1,10 @@
+
 package com.gestion.controller.lote;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 
 import com.gestion.model.Lote;
 import com.gestion.model.Producto;
@@ -18,15 +22,18 @@ import javafx.util.StringConverter;
 public class LoteFormularioControlador {
 
     private final LoteServicio loteServicio =
-        new LoteServicio();
+            new LoteServicio();
 
     private final ProductoServicio productoServicio =
-        new ProductoServicio();
+            new ProductoServicio();
 
     private Lote loteActual;
 
     private boolean modoEdicion = false;
 
+    private final DateTimeFormatter formatoFecha =
+            DateTimeFormatter.ofPattern("dd/MM/uuuu")
+                    .withResolverStyle(ResolverStyle.STRICT);
 
     @FXML
     private ComboBox<Producto> comboProducto;
@@ -52,144 +59,196 @@ public class LoteFormularioControlador {
     @FXML
     private TextField txtMotivo;
 
+    // =====================================================
+    // INICIALIZACIÓN
+    // =====================================================
 
     @FXML
     public void initialize() {
 
         cargarProductos();
 
-        fechaRegistro.setValue(
-            LocalDate.now()
+        configurarFecha(fechaRegistro);
+        configurarFecha(fechaExpedicion);
+        configurarFecha(fechaVencimiento);
+
+        fechaRegistro.setValue(LocalDate.now());
+
+        // La fecha de registro es automática.
+        fechaRegistro.setEditable(false);
+        fechaRegistro.setDisable(true);
+    }
+
+    // =====================================================
+    // CONFIGURACIÓN DE FECHAS
+    // =====================================================
+
+    private void configurarFecha(DatePicker campoFecha) {
+
+        campoFecha.setPromptText("dd/MM/aaaa");
+
+        campoFecha.setConverter(
+                new StringConverter<LocalDate>() {
+
+                    @Override
+                    public String toString(LocalDate fecha) {
+
+                        if (fecha == null) {
+                            return "";
+                        }
+
+                        return fecha.format(formatoFecha);
+                    }
+
+                    @Override
+                    public LocalDate fromString(String texto) {
+
+                        if (texto == null || texto.isBlank()) {
+                            return null;
+                        }
+
+                        try {
+
+                            return LocalDate.parse(
+                                    texto.trim(),
+                                    formatoFecha
+                            );
+
+                        } catch (DateTimeParseException e) {
+
+                            // Una fecha inválida se convierte en null
+                            // en lugar de lanzar una excepción.
+                            return null;
+                        }
+                    }
+                }
+        );
+
+        // Normalizar el texto al salir del campo.
+        campoFecha.focusedProperty().addListener(
+                (observable, anterior, tieneFoco) -> {
+
+                    if (!tieneFoco && !campoFecha.isDisabled()) {
+
+                        campoFecha.commitValue();
+
+                        LocalDate fecha = campoFecha.getValue();
+
+                        campoFecha.getEditor().setText(
+                                fecha == null
+                                        ? ""
+                                        : fecha.format(formatoFecha)
+                        );
+                    }
+                }
         );
     }
 
+    // =====================================================
+    // PRODUCTOS
+    // =====================================================
 
     private void cargarProductos() {
 
         comboProducto.setItems(
-            productoServicio.consultarTodo()
+                productoServicio.consultarTodo()
         );
 
         comboProducto.setConverter(
-            new StringConverter<>() {
+                new StringConverter<Producto>() {
 
-                @Override
-                public String toString(
-                    Producto producto
-                ) {
+                    @Override
+                    public String toString(Producto producto) {
 
-                    if (producto == null) {
-                        return "";
+                        if (producto == null) {
+                            return "";
+                        }
+
+                        String nombre =
+                                producto.conseguirNombre() == null
+                                        ? ""
+                                        : producto.conseguirNombre();
+
+                        String marca =
+                                producto.conseguirMarca() == null
+                                        ? ""
+                                        : producto.conseguirMarca();
+
+                        if (marca.isBlank()) {
+                            return nombre;
+                        }
+
+                        return nombre + " - " + marca;
                     }
 
-                    String nombre =
-                        producto.conseguirNombre() == null
-                            ? ""
-                            : producto.conseguirNombre();
-
-                    String marca =
-                        producto.conseguirMarca() == null
-                            ? ""
-                            : producto.conseguirMarca();
-
-                    if (marca.isBlank()) {
-                        return nombre;
+                    @Override
+                    public Producto fromString(String texto) {
+                        return null;
                     }
-
-                    return nombre
-                        + " - "
-                        + marca;
                 }
-
-
-                @Override
-                public Producto fromString(
-                    String texto
-                ) {
-
-                    return null;
-                }
-            }
         );
     }
 
+    // =====================================================
+    // CARGAR LOTE PARA EDICIÓN
+    // =====================================================
 
-    public void cargarLote(
-        int idLote
-    ) {
+    public void cargarLote(int idLote) {
 
-        Lote lote =
-            loteServicio.consultarLote(
-                idLote
-            );
+        Lote lote = loteServicio.consultarLote(idLote);
 
-        if (
-            lote == null
-            || lote.conseguirId() == null
-        ) {
+        if (lote == null || lote.conseguirId() == null) {
 
             throw new IllegalArgumentException(
-                "No se encontró la entrada de inventario."
+                    "No se encontró la entrada de inventario."
             );
         }
 
         this.loteActual = lote;
-
         this.modoEdicion = true;
 
-        cargarDatosFormulario(
-            lote
-        );
+        cargarDatosFormulario(lote);
     }
 
-
-    private void cargarDatosFormulario(
-        Lote lote
-    ) {
+    private void cargarDatosFormulario(Lote lote) {
 
         seleccionarProducto(
-            lote.conseguirProducto()
+                lote.conseguirProducto()
         );
 
-        comboProducto.setDisable(
-            true
-        );
-
-        txtCantidad.setDisable(
-            true
-        );
+        // No permitir cambiar el producto ni la cantidad
+        // porque ya afectaron las existencias.
+        comboProducto.setDisable(true);
+        txtCantidad.setDisable(true);
 
         txtLote.setText(
-            lote.conseguirLote()
+                lote.conseguirLote()
         );
 
         fechaRegistro.setValue(
-            convertirFecha(
-                lote.conseguirFechaRegistro()
-            )
+                convertirFecha(
+                        lote.conseguirFechaRegistro()
+                )
         );
 
         fechaExpedicion.setValue(
-            convertirFecha(
-                lote.conseguirFechaExpedicion()
-            )
+                convertirFecha(
+                        lote.conseguirFechaExpedicion()
+                )
         );
 
         fechaVencimiento.setValue(
-            convertirFecha(
-                lote.conseguirFechaVencimiento()
-            )
+                convertirFecha(
+                        lote.conseguirFechaVencimiento()
+                )
         );
 
-        if (
-            lote.conseguirCantidadMovimiento()
-            != null
-        ) {
+        if (lote.conseguirCantidadMovimiento() != null) {
 
             txtCantidad.setText(
-                String.valueOf(
-                    lote.conseguirCantidadMovimiento()
-                )
+                    String.valueOf(
+                            lote.conseguirCantidadMovimiento()
+                    )
             );
 
         } else {
@@ -197,15 +256,12 @@ public class LoteFormularioControlador {
             txtCantidad.clear();
         }
 
-        if (
-            lote.conseguirValorMovimiento()
-            != null
-        ) {
+        if (lote.conseguirValorMovimiento() != null) {
 
             txtValor.setText(
-                String.valueOf(
-                    lote.conseguirValorMovimiento()
-                )
+                    String.valueOf(
+                            lote.conseguirValorMovimiento()
+                    )
             );
 
         } else {
@@ -214,376 +270,335 @@ public class LoteFormularioControlador {
         }
 
         txtMotivo.setText(
-            lote.conseguirMotivo() == null
-                ? ""
-                : lote.conseguirMotivo()
+                lote.conseguirMotivo() == null
+                        ? ""
+                        : lote.conseguirMotivo()
         );
     }
 
+    private void seleccionarProducto(Producto productoLote) {
 
-    private void seleccionarProducto(
-        Producto productoLote
-    ) {
-
-        if (
-            productoLote == null
-            || productoLote.conseguirId() == null
-        ) {
-
+        if (productoLote == null
+                || productoLote.conseguirId() == null) {
             return;
         }
 
-        for (
-            Producto producto :
-            comboProducto.getItems()
-        ) {
+        for (Producto producto : comboProducto.getItems()) {
 
-            if (
-                producto.conseguirId() != null
-                && producto
-                    .conseguirId()
-                    .equals(
-                        productoLote
-                            .conseguirId()
-                    )
-            ) {
+            if (producto.conseguirId() != null
+                    && producto.conseguirId()
+                            .equals(productoLote.conseguirId())) {
 
-                comboProducto.setValue(
-                    producto
-                );
-
+                comboProducto.setValue(producto);
                 return;
             }
         }
 
-        comboProducto.setValue(
-            productoLote
-        );
+        comboProducto.setValue(productoLote);
     }
 
+    // =====================================================
+    // CONVERTIR FECHAS DE SQLITE
+    // =====================================================
 
-    private LocalDate convertirFecha(
-        String fecha
-    ) {
+    private LocalDate convertirFecha(String fecha) {
 
-        if (
-            fecha == null
-            || fecha.isBlank()
-        ) {
-
+        if (fecha == null || fecha.isBlank()) {
             return null;
         }
 
         try {
 
-            return LocalDate.parse(
-                fecha
-            );
+            // Formato almacenado en SQLite: yyyy-MM-dd
+            return LocalDate.parse(fecha);
 
-        } catch (Exception e) {
+        } catch (DateTimeParseException e) {
 
             return null;
         }
     }
 
+    // =====================================================
+    // GUARDAR LOTE
+    // =====================================================
 
     @FXML
     private void guardar() {
 
         try {
 
-            Producto producto =
-                comboProducto.getValue();
+            Producto producto = comboProducto.getValue();
 
             if (producto == null) {
 
                 throw new IllegalArgumentException(
-                    "Debe seleccionar un producto."
+                        "Debe seleccionar un producto."
                 );
             }
 
-
-            if (
-                txtLote.getText() == null
-                || txtLote
-                    .getText()
-                    .isBlank()
-            ) {
+            if (txtLote.getText() == null
+                    || txtLote.getText().isBlank()) {
 
                 throw new IllegalArgumentException(
-                    "Debe ingresar el código del lote."
+                        "Debe ingresar el código del lote."
                 );
             }
 
+            // Confirmar las fechas escritas manualmente.
+            fechaExpedicion.commitValue();
+            fechaVencimiento.commitValue();
 
-            if (
-                fechaRegistro.getValue() == null
-            ) {
+            if (!modoEdicion) {
+
+                // Fecha automática en el registro de un lote nuevo.
+                fechaRegistro.setValue(LocalDate.now());
+            }
+
+            if (fechaRegistro.getValue() == null) {
 
                 throw new IllegalArgumentException(
-                    "Debe seleccionar la fecha de registro."
+                        "Debe existir una fecha de registro."
                 );
             }
 
-
-            if (
-                fechaVencimiento.getValue() == null
-            ) {
+            if (fechaVencimiento.getValue() == null) {
 
                 throw new IllegalArgumentException(
-                    "Debe seleccionar la fecha de vencimiento."
+                        "Debe seleccionar una fecha de vencimiento válida."
                 );
             }
 
+            LocalDate expedicion = fechaExpedicion.getValue();
+            LocalDate vencimiento = fechaVencimiento.getValue();
+
+            if (expedicion != null
+                    && expedicion.isAfter(vencimiento)) {
+
+                throw new IllegalArgumentException(
+                        "La fecha de expedición no puede ser "
+                        + "posterior a la fecha de vencimiento."
+                );
+            }
+
+            // =================================================
+            // VALIDACIÓN DE CANTIDAD
+            // =================================================
 
             double cantidad;
 
             try {
 
-                cantidad =
-                    Double.parseDouble(
-                        txtCantidad
-                            .getText()
-                            .trim()
-                    );
+                cantidad = Double.parseDouble(
+                        txtCantidad.getText().trim()
+                );
 
             } catch (Exception e) {
 
                 throw new IllegalArgumentException(
-                    "La cantidad debe ser un número válido."
+                        "La cantidad debe ser un número válido."
                 );
             }
 
-
-            if (cantidad <= 0) {
+            if (!Double.isFinite(cantidad) || cantidad <= 0) {
 
                 throw new IllegalArgumentException(
-                    "La cantidad debe ser mayor que cero."
+                        "La cantidad debe ser mayor que cero."
                 );
             }
 
+            // =================================================
+            // VALIDACIÓN DE PRECIO
+            // =================================================
 
-            Double precioCompraUnitario =
-                null;
+            Double precioCompraUnitario = null;
 
-            if (
-                txtValor.getText() != null
-                && !txtValor
-                    .getText()
-                    .isBlank()
-            ) {
+            if (txtValor.getText() != null
+                    && !txtValor.getText().isBlank()) {
 
                 try {
 
-                    precioCompraUnitario =
-                        Double.parseDouble(
-                            txtValor
-                                .getText()
-                                .trim()
-                        );
+                    precioCompraUnitario = Double.parseDouble(
+                            txtValor.getText().trim()
+                    );
 
-                } catch (
-                    NumberFormatException e
-                ) {
+                } catch (NumberFormatException e) {
 
                     throw new IllegalArgumentException(
-                        "El precio de compra unitario debe ser un número válido."
+                            "El precio de compra unitario "
+                            + "debe ser un número válido."
                     );
                 }
 
-                if (
-                    precioCompraUnitario < 0
-                ) {
+                if (!Double.isFinite(precioCompraUnitario)
+                        || precioCompraUnitario < 0) {
 
                     throw new IllegalArgumentException(
-                        "El precio de compra unitario no puede ser negativo."
+                            "El precio de compra unitario "
+                            + "no puede ser negativo."
                     );
                 }
             }
 
+            // =================================================
+            // AGREGAR O EDITAR
+            // =================================================
 
             if (modoEdicion) {
 
                 guardarEdicion(
-                    producto,
-                    cantidad,
-                    precioCompraUnitario
+                        producto,
+                        cantidad,
+                        precioCompraUnitario
                 );
 
             } else {
 
                 guardarNuevo(
-                    producto,
-                    cantidad,
-                    precioCompraUnitario
+                        producto,
+                        cantidad,
+                        precioCompraUnitario
                 );
             }
 
-
             cerrarVentana();
 
+        } catch (IllegalArgumentException e) {
 
-        } catch (
-            IllegalArgumentException e
-        ) {
+            mostrarError(e.getMessage());
 
-            mostrarError(
-                e.getMessage()
-            );
-
-        } catch (
-            RuntimeException e
-        ) {
+        } catch (RuntimeException e) {
 
             e.printStackTrace();
 
             mostrarError(
-                "No se pudo guardar la entrada.\n"
-                + e.getMessage()
+                    "No se pudo guardar la entrada.\n"
+                    + e.getMessage()
             );
         }
     }
 
+    // =====================================================
+    // AGREGAR LOTE
+    // =====================================================
 
     private void guardarNuevo(
-        Producto producto,
-        double cantidad,
-        Double precioCompraUnitario
+            Producto producto,
+            double cantidad,
+            Double precioCompraUnitario
     ) {
 
-        Lote lote =
-            new Lote();
+        Lote lote = new Lote();
 
         completarDatosLote(
-            lote,
-            producto,
-            cantidad,
-            precioCompraUnitario
+                lote,
+                producto,
+                cantidad,
+                precioCompraUnitario
         );
 
-        loteServicio.agregarLote(
-            lote
-        );
+        loteServicio.agregarLote(lote);
 
-        new Alert(
-            Alert.AlertType.INFORMATION,
-            "Entrada de inventario registrada correctamente."
-        ).showAndWait();
+        mostrarInformacion(
+                "Entrada de inventario registrada correctamente."
+        );
     }
 
+    // =====================================================
+    // EDITAR LOTE
+    // =====================================================
 
     private void guardarEdicion(
-        Producto producto,
-        double cantidad,
-        Double precioCompraUnitario
+            Producto producto,
+            double cantidad,
+            Double precioCompraUnitario
     ) {
 
-        if (
-            loteActual == null
-            || loteActual.conseguirId() == null
-        ) {
+        if (loteActual == null
+                || loteActual.conseguirId() == null) {
 
             throw new IllegalArgumentException(
-                "No existe una entrada válida para editar."
+                    "No existe una entrada válida para editar."
             );
         }
 
-        /*
-         * El producto y la cantidad originales
-         * se conservan porque ya afectaron
-         * las existencias del inventario.
-         */
+        // Conservar producto y cantidad originales.
         Producto productoOriginal =
-            loteActual.conseguirProducto();
+                loteActual.conseguirProducto();
 
         Double cantidadOriginal =
-            loteActual
-                .conseguirCantidadMovimiento();
+                loteActual.conseguirCantidadMovimiento();
 
         completarDatosLote(
-            loteActual,
-            productoOriginal,
-            cantidadOriginal,
-            precioCompraUnitario
+                loteActual,
+                productoOriginal,
+                cantidadOriginal,
+                precioCompraUnitario
         );
 
-        loteServicio.editarLote(
-            loteActual
-        );
+        loteServicio.editarLote(loteActual);
 
-        new Alert(
-            Alert.AlertType.INFORMATION,
-            "Entrada de inventario actualizada correctamente."
-        ).showAndWait();
+        mostrarInformacion(
+                "Entrada de inventario actualizada correctamente."
+        );
     }
 
+    // =====================================================
+    // COMPLETAR DATOS DEL LOTE
+    // =====================================================
 
     private void completarDatosLote(
-        Lote lote,
-        Producto producto,
-        double cantidad,
-        Double precioCompraUnitario
+            Lote lote,
+            Producto producto,
+            double cantidad,
+            Double precioCompraUnitario
     ) {
 
-        lote.colocarProducto(
-            producto
-        );
+        lote.colocarProducto(producto);
 
         lote.colocarLote(
-            txtLote
-                .getText()
-                .trim()
+                txtLote.getText().trim()
         );
 
-        lote.colocarFechaRegistro(
-            fechaRegistro
-                .getValue()
-                .toString()
-        );
+        // Solo establecer la fecha de registro al crear.
+        // Al editar, se conserva la fecha original.
+        if (!modoEdicion) {
 
+            lote.colocarFechaRegistro(
+                    LocalDate.now().toString()
+            );
+        }
 
-        if (
-            fechaExpedicion.getValue()
-            != null
-        ) {
+        if (fechaExpedicion.getValue() != null) {
 
             lote.colocarFechaExpedicion(
-                fechaExpedicion
-                    .getValue()
-                    .toString()
+                    fechaExpedicion.getValue().toString()
             );
 
         } else {
 
-            lote.colocarFechaExpedicion(
-                null
-            );
+            lote.colocarFechaExpedicion(null);
         }
 
-
         lote.colocarFechaVencimiento(
-            fechaVencimiento
-                .getValue()
-                .toString()
+                fechaVencimiento.getValue().toString()
         );
 
-        lote.colocarCantidadMovimiento(
-            cantidad
-        );
+        lote.colocarCantidadMovimiento(cantidad);
 
         lote.colocarValorMovimiento(
-            precioCompraUnitario
+                precioCompraUnitario
         );
 
         lote.colocarMotivo(
-            txtMotivo.getText() == null
-                ? ""
-                : txtMotivo
-                    .getText()
-                    .trim()
+                txtMotivo.getText() == null
+                        ? ""
+                        : txtMotivo.getText().trim()
         );
     }
 
+    // =====================================================
+    // CANCELAR Y CERRAR
+    // =====================================================
 
     @FXML
     private void cancelar() {
@@ -591,25 +606,31 @@ public class LoteFormularioControlador {
         cerrarVentana();
     }
 
-
     private void cerrarVentana() {
 
         Stage ventana =
-            (Stage) txtLote
-                .getScene()
-                .getWindow();
+                (Stage) txtLote.getScene().getWindow();
 
         ventana.close();
     }
 
+    // =====================================================
+    // MENSAJES
+    // =====================================================
 
-    private void mostrarError(
-        String mensaje
-    ) {
+    private void mostrarError(String mensaje) {
 
         new Alert(
-            Alert.AlertType.ERROR,
-            mensaje
+                Alert.AlertType.ERROR,
+                mensaje
+        ).showAndWait();
+    }
+
+    private void mostrarInformacion(String mensaje) {
+
+        new Alert(
+                Alert.AlertType.INFORMATION,
+                mensaje
         ).showAndWait();
     }
 }

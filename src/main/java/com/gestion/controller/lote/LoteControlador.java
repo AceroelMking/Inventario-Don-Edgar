@@ -1,6 +1,10 @@
+
 package com.gestion.controller.lote;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import com.gestion.model.Lote;
 import com.gestion.service.LoteServicio;
@@ -23,7 +27,10 @@ import javafx.stage.Stage;
 public class LoteControlador {
 
     private final LoteServicio loteServicio =
-        new LoteServicio();
+            new LoteServicio();
+
+    private final DateTimeFormatter formatoFecha =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML
     private TableView<Lote> tablaLotes;
@@ -36,6 +43,10 @@ public class LoteControlador {
 
     @FXML
     private TableColumn<Lote, String> columnaFechaRegistro;
+
+    // Nueva columna: fecha de expedición
+    @FXML
+    private TableColumn<Lote, String> columnaFechaExpedicion;
 
     @FXML
     private TableColumn<Lote, String> columnaFechaVencimiento;
@@ -52,6 +63,9 @@ public class LoteControlador {
     @FXML
     private TableColumn<Lote, Void> columnaEditar;
 
+    // =====================================================
+    // INICIALIZACIÓN
+    // =====================================================
 
     @FXML
     public void initialize() {
@@ -61,164 +75,203 @@ public class LoteControlador {
         cargarLotes();
     }
 
+    // =====================================================
+    // CONFIGURACIÓN DE LA TABLA
+    // =====================================================
 
     private void configurarTabla() {
 
         columnaProducto.setCellValueFactory(
-            celda -> new SimpleStringProperty(
-                celda.getValue()
-                    .conseguirProducto()
-                    .conseguirNombre()
-            )
+                celda -> new SimpleStringProperty(
+                        celda.getValue().conseguirProducto() == null
+                                ? ""
+                                : celda.getValue()
+                                        .conseguirProducto()
+                                        .conseguirNombre()
+                )
         );
 
         columnaLote.setCellValueFactory(
-            celda -> new SimpleStringProperty(
-                celda.getValue()
-                    .conseguirLote()
-            )
+                celda -> new SimpleStringProperty(
+                        valorSeguro(
+                                celda.getValue().conseguirLote()
+                        )
+                )
         );
 
         columnaFechaRegistro.setCellValueFactory(
-            celda -> new SimpleStringProperty(
-                celda.getValue()
-                    .conseguirFechaRegistro()
-            )
+                celda -> new SimpleStringProperty(
+                        formatearFecha(
+                                celda.getValue().conseguirFechaRegistro()
+                        )
+                )
+        );
+
+        // NUEVA COLUMNA
+        columnaFechaExpedicion.setCellValueFactory(
+                celda -> new SimpleStringProperty(
+                        formatearFecha(
+                                celda.getValue().conseguirFechaExpedicion()
+                        )
+                )
         );
 
         columnaFechaVencimiento.setCellValueFactory(
-            celda -> new SimpleStringProperty(
-                celda.getValue()
-                    .conseguirFechaVencimiento()
-            )
+                celda -> new SimpleStringProperty(
+                        formatearFecha(
+                                celda.getValue().conseguirFechaVencimiento()
+                        )
+                )
         );
 
         columnaCantidad.setCellValueFactory(
-            celda -> new SimpleObjectProperty<>(
-                celda.getValue()
-                    .conseguirCantidadMovimiento()
-            )
+                celda -> new SimpleObjectProperty<>(
+                        celda.getValue().conseguirCantidadMovimiento()
+                )
         );
 
         columnaValor.setCellValueFactory(
-            celda -> new SimpleObjectProperty<>(
-                celda.getValue()
-                    .conseguirValorMovimiento()
-            )
+                celda -> new SimpleObjectProperty<>(
+                        celda.getValue().conseguirValorMovimiento()
+                )
         );
 
         columnaMotivo.setCellValueFactory(
-            celda -> new SimpleStringProperty(
-                celda.getValue()
-                    .conseguirMotivo()
-            )
+                celda -> new SimpleStringProperty(
+                        valorSeguro(
+                                celda.getValue().conseguirMotivo()
+                        )
+                )
         );
 
         configurarColumnaEditar();
     }
 
+    // =====================================================
+    // FORMATO DE FECHAS
+    // =====================================================
+
+    private String formatearFecha(String fecha) {
+
+        if (fecha == null || fecha.isBlank()) {
+            return "";
+        }
+
+        try {
+
+            LocalDate fechaConvertida =
+                    LocalDate.parse(fecha);
+
+            return fechaConvertida.format(formatoFecha);
+
+        } catch (DateTimeParseException e) {
+
+            // Si la fecha tiene un formato inesperado,
+            // mostramos su valor original.
+            return fecha;
+        }
+    }
+
+    private String valorSeguro(String valor) {
+        return valor == null ? "" : valor;
+    }
+
+    // =====================================================
+    // BOTÓN EDITAR
+    // =====================================================
 
     private void configurarColumnaEditar() {
 
         columnaEditar.setCellFactory(
-            columna -> new TableCell<>() {
+                columna -> new TableCell<>() {
 
-                private final Button botonEditar =
-                    new Button("Editar");
+                    private final Button botonEditar =
+                            new Button("Editar");
 
-                {
-                    botonEditar.getStyleClass().add(
-                        "boton-secundario"
-                    );
-
-                    botonEditar.setOnAction(
-                        evento -> {
-
-                            Lote lote =
-                                getTableView()
-                                    .getItems()
-                                    .get(
-                                        getIndex()
-                                    );
-
-                            abrirFormularioEditar(
-                                lote
-                            );
-                        }
-                    );
-                }
-
-
-                @Override
-                protected void updateItem(
-                    Void item,
-                    boolean vacio
-                ) {
-
-                    super.updateItem(
-                        item,
-                        vacio
-                    );
-
-                    if (vacio) {
-
-                        setGraphic(null);
-
-                    } else {
-
-                        setGraphic(
-                            botonEditar
+                    {
+                        botonEditar.getStyleClass().add(
+                                "boton-secundario"
                         );
+
+                        botonEditar.setOnAction(evento -> {
+
+                            Lote lote = getTableRow().getItem();
+
+                            if (lote != null) {
+                                abrirFormularioEditar(lote);
+                            }
+                        });
+                    }
+
+                    @Override
+                    protected void updateItem(
+                            Void item,
+                            boolean vacio
+                    ) {
+
+                        super.updateItem(item, vacio);
+
+                        if (vacio) {
+
+                            setGraphic(null);
+
+                        } else {
+
+                            setGraphic(botonEditar);
+                        }
                     }
                 }
-            }
         );
     }
 
+    // =====================================================
+    // CARGAR LOTES
+    // =====================================================
 
     private void cargarLotes() {
 
         ObservableList<Lote> lotes =
-            loteServicio.consultarTodo();
+                loteServicio.consultarTodo();
 
-        tablaLotes.setItems(
-            lotes
-        );
+        tablaLotes.setItems(lotes);
+
+        tablaLotes.refresh();
     }
 
+    // =====================================================
+    // ABRIR FORMULARIO PARA AGREGAR
+    // =====================================================
 
     @FXML
     private void abrirFormularioAgregar() {
 
         try {
 
-            FXMLLoader loader =
-                new FXMLLoader(
+            FXMLLoader loader = new FXMLLoader(
                     getClass().getResource(
-                        "/com/gestion/view/lote/LoteAgregar.fxml"
+                            "/com/gestion/view/lote/LoteAgregar.fxml"
                     )
-                );
+            );
 
-            Parent root =
-                loader.load();
+            Parent root = loader.load();
 
-            Stage ventana =
-                new Stage();
+            Stage ventana = new Stage();
 
             ventana.setTitle(
-                "Registrar entrada de inventario"
+                    "Registrar entrada de inventario"
             );
 
             ventana.setScene(
-                new Scene(root)
+                    new Scene(root)
             );
 
             ventana.initModality(
-                Modality.APPLICATION_MODAL
+                    Modality.APPLICATION_MODAL
             );
 
             ventana.showAndWait();
 
+            // Actualizar tabla al cerrar el formulario.
             cargarLotes();
 
         } catch (IOException e) {
@@ -226,23 +279,21 @@ public class LoteControlador {
             e.printStackTrace();
 
             mostrarError(
-                "No se pudo abrir el formulario de entrada."
+                    "No se pudo abrir el formulario de entrada."
             );
         }
     }
 
+    // =====================================================
+    // ABRIR FORMULARIO PARA EDITAR
+    // =====================================================
 
-    private void abrirFormularioEditar(
-        Lote lote
-    ) {
+    private void abrirFormularioEditar(Lote lote) {
 
-        if (
-            lote == null
-            || lote.conseguirId() == null
-        ) {
+        if (lote == null || lote.conseguirId() == null) {
 
             mostrarError(
-                "No se pudo identificar la entrada seleccionada."
+                    "No se pudo identificar la entrada seleccionada."
             );
 
             return;
@@ -250,40 +301,38 @@ public class LoteControlador {
 
         try {
 
-            FXMLLoader loader =
-                new FXMLLoader(
+            FXMLLoader loader = new FXMLLoader(
                     getClass().getResource(
-                        "/com/gestion/view/lote/LoteEditar.fxml"
+                            "/com/gestion/view/lote/LoteEditar.fxml"
                     )
-                );
-
-            Parent root =
-                loader.load();
-
-            LoteFormularioControlador controlador =
-                loader.getController();
-
-            controlador.cargarLote(
-                lote.conseguirId()
             );
 
-            Stage ventana =
-                new Stage();
+            Parent root = loader.load();
+
+            LoteFormularioControlador controlador =
+                    loader.getController();
+
+            controlador.cargarLote(
+                    lote.conseguirId()
+            );
+
+            Stage ventana = new Stage();
 
             ventana.setTitle(
-                "Editar entrada de inventario"
+                    "Editar entrada de inventario"
             );
 
             ventana.setScene(
-                new Scene(root)
+                    new Scene(root)
             );
 
             ventana.initModality(
-                Modality.APPLICATION_MODAL
+                    Modality.APPLICATION_MODAL
             );
 
             ventana.showAndWait();
 
+            // Recargar los lotes después de editar.
             cargarLotes();
 
         } catch (IOException e) {
@@ -291,7 +340,7 @@ public class LoteControlador {
             e.printStackTrace();
 
             mostrarError(
-                "No se pudo abrir el formulario de edición."
+                    "No se pudo abrir el formulario de edición."
             );
 
         } catch (RuntimeException e) {
@@ -299,20 +348,21 @@ public class LoteControlador {
             e.printStackTrace();
 
             mostrarError(
-                "No se pudo cargar la entrada seleccionada.\n"
-                + e.getMessage()
+                    "No se pudo cargar la entrada seleccionada.\n"
+                    + e.getMessage()
             );
         }
     }
 
+    // =====================================================
+    // MENSAJES
+    // =====================================================
 
-    private void mostrarError(
-        String mensaje
-    ) {
+    private void mostrarError(String mensaje) {
 
         new Alert(
-            Alert.AlertType.ERROR,
-            mensaje
+                Alert.AlertType.ERROR,
+                mensaje
         ).showAndWait();
     }
 }
