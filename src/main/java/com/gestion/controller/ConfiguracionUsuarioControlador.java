@@ -1,3 +1,4 @@
+
 package com.gestion.controller;
 
 import com.gestion.model.Usuario;
@@ -10,6 +11,10 @@ import javafx.scene.control.TextField;
 
 public class ConfiguracionUsuarioControlador {
 
+    // =====================================================
+    // SERVICIO
+    // =====================================================
+
     private final UsuarioServicio usuarioServicio =
         new UsuarioServicio();
 
@@ -17,8 +22,15 @@ public class ConfiguracionUsuarioControlador {
 
     private Runnable accionAlGuardar;
 
+    // =====================================================
+    // CAMPOS FXML
+    // =====================================================
+
     @FXML
     private TextField txtNuevoUsuario;
+
+    @FXML
+    private TextField txtCorreoElectronico;
 
     @FXML
     private PasswordField txtContrasenaActual;
@@ -29,8 +41,15 @@ public class ConfiguracionUsuarioControlador {
     @FXML
     private PasswordField txtConfirmarContrasena;
 
+    // =====================================================
+    // VALIDACIONES VISUALES
+    // =====================================================
+
     @FXML
     private Label checkUsuario;
+
+    @FXML
+    private Label checkCorreo;
 
     @FXML
     private Label checkActual;
@@ -53,11 +72,19 @@ public class ConfiguracionUsuarioControlador {
     @FXML
     private Label checkCoinciden;
 
+    // =====================================================
+    // MENSAJES
+    // =====================================================
+
     @FXML
     private Label lblMensaje;
 
     @FXML
     private Label lblObligatorio;
+
+    // =====================================================
+    // INICIALIZACIÓN
+    // =====================================================
 
     @FXML
     public void initialize() {
@@ -66,12 +93,29 @@ public class ConfiguracionUsuarioControlador {
             usuarioServicio.consultarAdministrador();
 
         if (usuario != null) {
+
             txtNuevoUsuario.setText(
                 usuario.conseguirNombreUsuario()
             );
+
+            String correo =
+                usuario.conseguirCorreoElectronico();
+
+            if (correo != null) {
+
+                txtCorreoElectronico.setText(
+                    correo
+                );
+            }
         }
 
         txtNuevoUsuario.textProperty()
+            .addListener(
+                (obs, anterior, nuevo) ->
+                    actualizarChecks()
+            );
+
+        txtCorreoElectronico.textProperty()
             .addListener(
                 (obs, anterior, nuevo) ->
                     actualizarChecks()
@@ -98,19 +142,22 @@ public class ConfiguracionUsuarioControlador {
         actualizarChecks();
     }
 
-    public void configurarCambioObligatorio(
-        boolean obligatorio
-    ) {
+    // =====================================================
+    // CONFIGURAR CAMBIO OBLIGATORIO
+    // =====================================================
 
-        this.cambioObligatorio =
-            obligatorio;
+    public void configurarCambioObligatorio(
+            boolean obligatorio) {
+
+        this.cambioObligatorio = obligatorio;
 
         if (obligatorio) {
 
             lblObligatorio.setText(
                 "Por seguridad debe cambiar el usuario "
-                + "y la contraseña predeterminados antes "
-                + "de utilizar el sistema."
+                + "y la contraseña predeterminados, "
+                + "y registrar un correo electrónico "
+                + "para recuperar el acceso al sistema."
             );
 
         } else {
@@ -119,11 +166,19 @@ public class ConfiguracionUsuarioControlador {
         }
     }
 
+    // =====================================================
+    // ACCIÓN DESPUÉS DE GUARDAR
+    // =====================================================
+
     public void colocarAccionAlGuardar(
-        Runnable accion
-    ) {
+            Runnable accion) {
+
         this.accionAlGuardar = accion;
     }
+
+    // =====================================================
+    // ACTUALIZAR VALIDACIONES VISUALES
+    // =====================================================
 
     private void actualizarChecks() {
 
@@ -131,6 +186,11 @@ public class ConfiguracionUsuarioControlador {
             txtNuevoUsuario.getText() == null
                 ? ""
                 : txtNuevoUsuario.getText().trim();
+
+        String correo =
+            txtCorreoElectronico.getText() == null
+                ? ""
+                : txtCorreoElectronico.getText().trim();
 
         String actual =
             txtContrasenaActual.getText() == null
@@ -151,6 +211,11 @@ public class ConfiguracionUsuarioControlador {
             usuario.length() >= 4
             && usuario.matches(
                 "^[A-Za-z0-9._-]+$"
+            );
+
+        boolean correoValido =
+            correo.matches(
+                "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
             );
 
         boolean actualIngresada =
@@ -181,6 +246,12 @@ public class ConfiguracionUsuarioControlador {
             checkUsuario,
             usuarioValido,
             "Mínimo 4 caracteres y caracteres permitidos"
+        );
+
+        colocarEstado(
+            checkCorreo,
+            correoValido,
+            "Correo electrónico válido"
         );
 
         colocarEstado(
@@ -226,11 +297,14 @@ public class ConfiguracionUsuarioControlador {
         );
     }
 
+    // =====================================================
+    // COLOCAR ESTADO DE VALIDACIÓN
+    // =====================================================
+
     private void colocarEstado(
-        Label label,
-        boolean correcto,
-        String texto
-    ) {
+            Label label,
+            boolean correcto,
+            String texto) {
 
         if (correcto) {
 
@@ -254,6 +328,10 @@ public class ConfiguracionUsuarioControlador {
         }
     }
 
+    // =====================================================
+    // GUARDAR CONFIGURACIÓN
+    // =====================================================
+
     @FXML
     private void guardar() {
 
@@ -261,6 +339,9 @@ public class ConfiguracionUsuarioControlador {
 
         String nuevoUsuario =
             txtNuevoUsuario.getText();
+
+        String correo =
+            txtCorreoElectronico.getText();
 
         String actual =
             txtContrasenaActual.getText();
@@ -273,36 +354,82 @@ public class ConfiguracionUsuarioControlador {
 
         actualizarChecks();
 
-        if (
-            nuevoUsuario == null
-            || nuevoUsuario.isBlank()
-        ) {
+        // ================================================
+        // VALIDAR USUARIO
+        // ================================================
+
+        if (nuevoUsuario == null
+                || nuevoUsuario.isBlank()) {
+
             mostrarError(
                 "Revise el campo de nuevo usuario."
             );
+
             txtNuevoUsuario.requestFocus();
+
             return;
         }
 
-        if (
-            actual == null
-            || actual.isBlank()
-        ) {
+        // ================================================
+        // VALIDAR CORREO
+        // ================================================
+
+        if (correo == null
+                || correo.isBlank()) {
+
+            mostrarError(
+                "Debe registrar un correo electrónico "
+                + "para recuperar su contraseña."
+            );
+
+            txtCorreoElectronico.requestFocus();
+
+            return;
+        }
+
+        correo = correo.trim();
+
+        if (!correo.matches(
+                "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+
+            mostrarError(
+                "Ingrese un correo electrónico válido."
+            );
+
+            txtCorreoElectronico.requestFocus();
+
+            return;
+        }
+
+        // ================================================
+        // VALIDAR CONTRASEÑA ACTUAL
+        // ================================================
+
+        if (actual == null
+                || actual.isBlank()) {
+
             mostrarError(
                 "Ingrese la contraseña actual."
             );
+
             txtContrasenaActual.requestFocus();
+
             return;
         }
 
-        if (
-            nueva == null
-            || nueva.isBlank()
-        ) {
+        // ================================================
+        // VALIDAR NUEVA CONTRASEÑA
+        // ================================================
+
+        if (nueva == null
+                || nueva.isBlank()) {
+
             mostrarError(
                 "Ingrese una nueva contraseña."
             );
+
             txtNuevaContrasena.requestFocus();
+
             return;
         }
 
@@ -318,12 +445,14 @@ public class ConfiguracionUsuarioControlador {
 
         } catch (IllegalArgumentException e) {
 
-            mostrarError(
-                e.getMessage()
-            );
+            mostrarError(e.getMessage());
 
             return;
         }
+
+        // ================================================
+        // CONFIRMAR CONTRASEÑA
+        // ================================================
 
         if (!nueva.equals(confirmar)) {
 
@@ -331,21 +460,22 @@ public class ConfiguracionUsuarioControlador {
                 "Las contraseñas nuevas no coinciden."
             );
 
-            txtConfirmarContrasena
-                .requestFocus();
+            txtConfirmarContrasena.requestFocus();
 
             return;
         }
 
-        if (
-            cambioObligatorio
-            && "admin".equalsIgnoreCase(
-                nuevoUsuario.trim()
-            )
-        ) {
+        // ================================================
+        // CAMBIO OBLIGATORIO
+        // ================================================
+
+        if (cambioObligatorio
+                && "admin".equalsIgnoreCase(
+                    nuevoUsuario.trim())) {
 
             mostrarError(
-                "Debe cambiar el nombre de usuario predeterminado."
+                "Debe cambiar el nombre de usuario "
+                + "predeterminado."
             );
 
             txtNuevoUsuario.requestFocus();
@@ -353,13 +483,29 @@ public class ConfiguracionUsuarioControlador {
             return;
         }
 
+        // ================================================
+        // GUARDAR CAMBIOS
+        // ================================================
+
         try {
 
+            /*
+             * Primero se validan y actualizan
+             * las credenciales.
+             */
             usuarioServicio.cambiarCredenciales(
                 actual,
                 nuevoUsuario,
                 nueva,
                 confirmar
+            );
+
+            /*
+             * Después se registra el correo
+             * electrónico del administrador.
+             */
+            usuarioServicio.actualizarCorreoAdministrador(
+                correo
             );
 
             lblMensaje.setStyle(
@@ -368,11 +514,14 @@ public class ConfiguracionUsuarioControlador {
             );
 
             lblMensaje.setText(
-                "Credenciales actualizadas correctamente."
+                "Credenciales y correo electrónico "
+                + "actualizados correctamente."
             );
 
             txtContrasenaActual.clear();
+
             txtNuevaContrasena.clear();
+
             txtConfirmarContrasena.clear();
 
             actualizarChecks();
@@ -384,22 +533,25 @@ public class ConfiguracionUsuarioControlador {
         } catch (RuntimeException e) {
 
             mostrarError(
-                e.getMessage()
+                e.getMessage() == null
+                    ? "No se pudo guardar la configuración."
+                    : e.getMessage()
             );
         }
     }
 
+    // =====================================================
+    // MOSTRAR ERROR
+    // =====================================================
+
     private void mostrarError(
-        String mensaje
-    ) {
+            String mensaje) {
 
         lblMensaje.setStyle(
             "-fx-text-fill: #c62828; "
             + "-fx-font-weight: bold;"
         );
 
-        lblMensaje.setText(
-            mensaje
-        );
+        lblMensaje.setText(mensaje);
     }
 }

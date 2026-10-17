@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.gestion.controller.RecuperacionContrasenaControlador"
+           prefWidth="1100"
+           prefHeight="700"
+           minWidth="900"
+           minHeight="650"
+           stylesheets="@css/estilos.css">
+
+    <!-- ============================================== -->
+    <!-- IMAGEN DE FONDO -->
+    <!-- ============================================== -->
+
+       <ImageView fx:id="imagenFondo"
+              fitWidth="1100"
+              fitHeight="700"
+              preserveRatio="false"
+              smooth="true"
+              mouseTransparent="true">
+
+       <image>
+              <Image url="@Images/fondo-login.png"/>
+       </image>
+
+       </ImageView>
+
+
+    <!-- ============================================== -->
+    <!-- PANEL PRINCIPAL -->
+    <!-- ============================================== -->
+
+    <VBox alignment="CENTER"
+          spacing="12"
+          prefWidth="430"
+          maxWidth="430"
+          prefHeight="620"
+          maxHeight="620"
+          styleClass="login-panel-moderno">
+
+        <padding>
+            <Insets top="24"
+                    right="42"
+                    bottom="24"
+                    left="42"/>
+        </padding>
+
+        <!-- LOGOTIPO -->
+
+        <ImageView fitWidth="135"
+                   fitHeight="135"
+                   preserveRatio="true"
+                   smooth="true"
+                   mouseTransparent="true">
+
+            <image>
+                <Image url="@Images/logo-don-edgar.png"/>
+            </image>
+
+        </ImageView>
+
+        <!-- SEPARADOR -->
+
+        <Region prefWidth="75"
+                maxWidth="75"
+                prefHeight="3"
+                maxHeight="3"
+                styleClass="login-separador"/>
+
+        <!-- TÍTULO -->
+
+        <VBox alignment="CENTER"
+              spacing="5">
+
+            <Label text="Recuperar contraseña"
+                   styleClass="login-titulo-sesion"/>
+
+            <Label text="Restablezca el acceso a su cuenta"
+                   styleClass="login-descripcion"/>
+
+        </VBox>
+
+        <!-- ========================================== -->
+        <!-- PASO 1: INGRESAR CORREO -->
+        <!-- ========================================== -->
+
+        <VBox fx:id="panelCorreo"
+              spacing="14"
+              alignment="CENTER"
+              maxWidth="340">
+
+            <Label text="Ingrese el correo electrónico registrado para recibir un código de recuperación."
+                   wrapText="true"
+                   textAlignment="CENTER"
+                   maxWidth="340"
+                   styleClass="login-descripcion"/>
+
+            <VBox spacing="7"
+                  maxWidth="340">
+
+                <Label text="Correo electrónico"
+                       styleClass="login-label"/>
+
+                <TextField fx:id="txtCorreo"
+                           promptText="ejemplo@correo.com"
+                           prefHeight="46"
+                           maxWidth="340"
+                           styleClass="login-campo"
+                           onAction="#enviarCodigo"/>
+
+            </VBox>
+
+            <Button fx:id="btnEnviarCodigo"
+                    text="Enviar código"
+                    onAction="#enviarCodigo"
+                    prefWidth="340"
+                    prefHeight="46"
+                    styleClass="login-boton"/>
+
+        </VBox>
+
+        <!-- ========================================== -->
+        <!-- PASO 2: VERIFICAR CÓDIGO -->
+        <!-- ========================================== -->
+
+        <VBox fx:id="panelCodigo"
+              spacing="14"
+              alignment="CENTER"
+              maxWidth="340"
+              visible="false"
+              managed="false">
+
+            <Label text="Ingrese el código de seis dígitos enviado a su correo electrónico."
+                   wrapText="true"
+                   textAlignment="CENTER"
+                   maxWidth="340"
+                   styleClass="login-descripcion"/>
+
+            <VBox spacing="7"
+                  maxWidth="340">
+
+                <Label text="Código de recuperación"
+                       styleClass="login-label"/>
+
+                <TextField fx:id="txtCodigo"
+                           promptText="000000"
+                           prefHeight="46"
+                           maxWidth="340"
+                           styleClass="login-campo"
+                           onAction="#verificarCodigo"/>
+
+            </VBox>
+
+            <Button fx:id="btnVerificarCodigo"
+                    text="Verificar código"
+                    onAction="#verificarCodigo"
+                    prefWidth="340"
+                    prefHeight="46"
+                    styleClass="login-boton"/>
+
+            <Button text="Cambiar correo"
+                    onAction="#volverCorreo"
+                    prefWidth="340"
+                    prefHeight="38"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #1565c0;
+                           -fx-cursor: hand;"/>
+
+        </VBox>
+
+        <!-- ========================================== -->
+        <!-- PASO 3: NUEVA CONTRASEÑA -->
+        <!-- ========================================== -->
+
+        <VBox fx:id="panelNuevaContrasena"
+              spacing="12"
+              alignment="CENTER"
+              maxWidth="340"
+              visible="false"
+              managed="false">
+
+            <Label text="Código verificado. Establezca una nueva contraseña."
+                   wrapText="true"
+                   textAlignment="CENTER"
+                   maxWidth="340"
+                   styleClass="login-descripcion"/>
+
+            <VBox spacing="7"
+                  maxWidth="340">
+
+                <Label text="Nueva contraseña"
+                       styleClass="login-label"/>
+
+                <PasswordField fx:id="txtNuevaContrasena"
+                               promptText="Ingrese la nueva contraseña"
+                               prefHeight="46"
+                               maxWidth="340"
+                               styleClass="login-campo"/>
+
+            </VBox>
+
+            <VBox spacing="7"
+                  maxWidth="340">
+
+                <Label text="Confirmar contraseña"
+                       styleClass="login-label"/>
+
+                <PasswordField fx:id="txtConfirmarContrasena"
+                               promptText="Repita la contraseña"
+                               prefHeight="46"
+                               maxWidth="340"
+                               styleClass="login-campo"
+                               onAction="#cambiarContrasena"/>
+
+            </VBox>
+
+            <Label text="Mínimo 12 caracteres, mayúscula, minúscula, número y carácter especial."
+                   wrapText="true"
+                   textAlignment="CENTER"
+                   maxWidth="340"
+                   styleClass="login-descripcion"/>
+
+            <Button fx:id="btnCambiarContrasena"
+                    text="Cambiar contraseña"
+                    onAction="#cambiarContrasena"
+                    prefWidth="340"
+                    prefHeight="46"
+                    styleClass="login-boton"/>
+
+        </VBox>
+
+        <!-- ========================================== -->
+        <!-- MENSAJES -->
+        <!-- ========================================== -->
+
+        <Label fx:id="lblMensaje"
+               text=""
+               wrapText="true"
+               textAlignment="CENTER"
+               alignment="CENTER"
+               maxWidth="340"
+               styleClass="login-error"/>
+
+        <!-- SEPARADOR INFERIOR -->
+
+        <Region prefWidth="340"
+                maxWidth="340"
+                prefHeight="1"
+                maxHeight="1"
+                styleClass="login-linea"/>
+
+        <!-- REGRESAR AL LOGIN -->
+
+        <Button text="Volver al inicio de sesión"
+                onAction="#regresarAcceso"
+                prefWidth="340"
+                prefHeight="38"
+                style="-fx-background-color: transparent;
+                       -fx-text-fill: #1565c0;
+                       -fx-font-size: 12px;
+                       -fx-cursor: hand;"/>
+
+    </VBox>
+
+</StackPane>

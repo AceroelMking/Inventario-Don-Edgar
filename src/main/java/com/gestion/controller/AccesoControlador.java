@@ -4,7 +4,9 @@ import java.io.IOException;
 
 import com.gestion.model.Usuario;
 import com.gestion.service.UsuarioServicio;
+import com.gestion.service.UsuarioServicio.CuentaBloqueadaException;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,8 +20,16 @@ import javafx.stage.Stage;
 
 public class AccesoControlador {
 
+    // =====================================================
+    // SERVICIO DE USUARIOS
+    // =====================================================
+
     private final UsuarioServicio usuarioServicio =
         new UsuarioServicio();
+
+    // =====================================================
+    // COMPONENTES FXML
+    // =====================================================
 
     @FXML
     private StackPane panelAcceso;
@@ -36,35 +46,39 @@ public class AccesoControlador {
     @FXML
     private Label lblMensaje;
 
+    // =====================================================
+    // INICIALIZACIÓN
+    // =====================================================
+
     @FXML
     public void initialize() {
 
-        /*
-         * El tamaño del fondo queda enlazado
-         * al tamaño del contenedor principal.
-         *
-         * Cuando la ventana aumenta o disminuye,
-         * la imagen cambia automáticamente
-         * de tamaño.
-         */
+        // Ajustar imagen al tamaño de la ventana.
         imagenFondo
             .fitWidthProperty()
-            .bind(
-                panelAcceso.widthProperty()
-            );
+            .bind(panelAcceso.widthProperty());
 
         imagenFondo
             .fitHeightProperty()
-            .bind(
-                panelAcceso.heightProperty()
-            );
+            .bind(panelAcceso.heightProperty());
 
-        /*
-         * Coloca el cursor automáticamente
-         * en el campo de usuario.
-         */
-        txtUsuario.requestFocus();
+        lblMensaje.setText("");
+
+        // Limpiar mensajes al cambiar el usuario.
+        txtUsuario.textProperty().addListener(
+            (observable, anterior, nuevo) -> {
+                lblMensaje.setText("");
+            }
+        );
+
+        Platform.runLater(
+            () -> txtUsuario.requestFocus()
+        );
     }
+
+    // =====================================================
+    // INICIAR SESIÓN
+    // =====================================================
 
     @FXML
     private void iniciarSesion() {
@@ -77,59 +91,74 @@ public class AccesoControlador {
         String contrasena =
             txtContrasena.getText();
 
-        /*
-         * Validación del usuario.
-         */
-        if (
-            nombreUsuario == null
-            || nombreUsuario.isBlank()
-        ) {
+        // Validar nombre de usuario.
+        if (nombreUsuario == null
+                || nombreUsuario.isBlank()) {
 
             mostrarError(
                 "Debe ingresar el nombre de usuario."
             );
 
             txtUsuario.requestFocus();
-
             return;
         }
 
-        /*
-         * Validación de la contraseña.
-         */
-        if (
-            contrasena == null
-            || contrasena.isBlank()
-        ) {
+        // Validar contraseña.
+        if (contrasena == null
+                || contrasena.isBlank()) {
 
             mostrarError(
                 "Debe ingresar la contraseña."
             );
 
             txtContrasena.requestFocus();
-
             return;
         }
 
+        nombreUsuario = nombreUsuario.trim();
+
         try {
 
-            /*
-             * Autenticación del usuario.
-             */
+            // Autenticar usuario.
             Usuario usuarioAutenticado =
                 usuarioServicio.autenticar(
-                    nombreUsuario.trim(),
+                    nombreUsuario,
                     contrasena
                 );
 
-            /*
-             * Credenciales incorrectas.
-             */
+            // Credenciales incorrectas.
             if (usuarioAutenticado == null) {
 
-                mostrarError(
-                    "Usuario o contraseña incorrectos."
-                );
+                int intentosRestantes =
+                    usuarioServicio
+                        .consultarIntentosRestantes(
+                            nombreUsuario
+                        );
+
+                Usuario administrador =
+                    usuarioServicio
+                        .consultarAdministrador();
+
+                boolean esAdministrador =
+                    administrador != null
+                    && nombreUsuario.equals(
+                        administrador.conseguirNombreUsuario()
+                    );
+
+                if (esAdministrador) {
+
+                    mostrarError(
+                        "Usuario o contraseña incorrectos.\n"
+                        + "Intentos restantes: "
+                        + intentosRestantes
+                    );
+
+                } else {
+
+                    mostrarError(
+                        "Usuario o contraseña incorrectos."
+                    );
+                }
 
                 txtContrasena.clear();
                 txtContrasena.requestFocus();
@@ -137,10 +166,7 @@ public class AccesoControlador {
                 return;
             }
 
-            /*
-             * Comprueba si todavía utiliza
-             * las credenciales iniciales.
-             */
+            // Comprobar credenciales predeterminadas.
             boolean credencialesPredeterminadas =
                 usuarioServicio
                     .usaCredencialesPredeterminadas(
@@ -148,21 +174,21 @@ public class AccesoControlador {
                         contrasena
                     );
 
-            /*
-             * Si todavía utiliza admin/admin,
-             * obliga a cambiar las credenciales.
-             */
             if (credencialesPredeterminadas) {
 
                 abrirCambioObligatorio();
-
                 return;
             }
 
-            /*
-             * Acceso normal al sistema.
-             */
+            // Acceso normal al sistema.
             abrirSistema();
+
+        } catch (CuentaBloqueadaException e) {
+
+            mostrarError(e.getMessage());
+
+            txtContrasena.clear();
+            txtContrasena.requestFocus();
 
         } catch (RuntimeException e) {
 
@@ -174,9 +200,60 @@ public class AccesoControlador {
         }
     }
 
-    /*
-     * Abre el menú principal.
-     */
+    // =====================================================
+    // ABRIR RECUPERACIÓN DE CONTRASEÑA
+    // =====================================================
+
+    @FXML
+    private void abrirRecuperacion() {
+
+        try {
+
+            FXMLLoader loader =
+                new FXMLLoader(
+                    getClass().getResource(
+                        "/com/gestion/view/RecuperacionContrasena.fxml"
+                    )
+                );
+
+            Parent root = loader.load();
+
+            Stage ventana = obtenerVentana();
+
+            ventana.setScene(
+                new Scene(root)
+            );
+
+            ventana.setTitle(
+                "Recuperación de contraseña - Don Edgar"
+            );
+
+            ventana.centerOnScreen();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+            mostrarError(
+                "No se pudo abrir la recuperación "
+                + "de contraseña."
+            );
+
+        } catch (RuntimeException e) {
+
+            e.printStackTrace();
+
+            mostrarError(
+                "Ocurrió un error al abrir "
+                + "la recuperación de contraseña."
+            );
+        }
+    }
+
+    // =====================================================
+    // ABRIR MENÚ PRINCIPAL
+    // =====================================================
+
     private void abrirSistema() {
 
         try {
@@ -188,17 +265,12 @@ public class AccesoControlador {
                     )
                 );
 
-            Parent root =
-                loader.load();
+            Parent root = loader.load();
 
-            Stage ventana =
-                obtenerVentana();
-
-            Scene escena =
-                new Scene(root);
+            Stage ventana = obtenerVentana();
 
             ventana.setScene(
-                escena
+                new Scene(root)
             );
 
             ventana.setTitle(
@@ -217,10 +289,10 @@ public class AccesoControlador {
         }
     }
 
-    /*
-     * Abre la pantalla de cambio obligatorio
-     * de credenciales.
-     */
+    // =====================================================
+    // CAMBIO OBLIGATORIO DE CREDENCIALES
+    // =====================================================
+
     private void abrirCambioObligatorio() {
 
         try {
@@ -232,26 +304,22 @@ public class AccesoControlador {
                     )
                 );
 
-            Parent root =
-                loader.load();
+            Parent root = loader.load();
 
             ConfiguracionUsuarioControlador controlador =
                 loader.getController();
 
-            controlador
-                .configurarCambioObligatorio(
-                    true
-                );
+            controlador.configurarCambioObligatorio(
+                true
+            );
 
-            Stage ventana =
-                obtenerVentana();
+            Stage ventana = obtenerVentana();
 
-            controlador
-                .colocarAccionAlGuardar(
-                    () -> abrirMenuDespuesDelCambio(
-                        ventana
-                    )
-                );
+            controlador.colocarAccionAlGuardar(
+                () -> abrirMenuDespuesDelCambio(
+                    ventana
+                )
+            );
 
             ventana.setScene(
                 new Scene(root)
@@ -273,13 +341,12 @@ public class AccesoControlador {
         }
     }
 
-    /*
-     * Abre el menú después de cambiar
-     * correctamente las credenciales.
-     */
+    // =====================================================
+    // ABRIR MENÚ DESPUÉS DEL CAMBIO
+    // =====================================================
+
     private void abrirMenuDespuesDelCambio(
-        Stage ventana
-    ) {
+            Stage ventana) {
 
         try {
 
@@ -290,8 +357,7 @@ public class AccesoControlador {
                     )
                 );
 
-            Parent menu =
-                loader.load();
+            Parent menu = loader.load();
 
             ventana.setScene(
                 new Scene(menu)
@@ -314,9 +380,10 @@ public class AccesoControlador {
         }
     }
 
-    /*
-     * Obtiene la ventana actual.
-     */
+    // =====================================================
+    // OBTENER VENTANA ACTUAL
+    // =====================================================
+
     private Stage obtenerVentana() {
 
         return (Stage) txtUsuario
@@ -324,21 +391,18 @@ public class AccesoControlador {
             .getWindow();
     }
 
-    /*
-     * Muestra un mensaje de error
-     * en el formulario.
-     */
+    // =====================================================
+    // MOSTRAR ERROR
+    // =====================================================
+
     private void mostrarError(
-        String mensaje
-    ) {
+            String mensaje) {
 
         lblMensaje.setStyle(
             "-fx-text-fill: #c62828; "
             + "-fx-font-weight: bold;"
         );
 
-        lblMensaje.setText(
-            mensaje
-        );
+        lblMensaje.setText(mensaje);
     }
 }

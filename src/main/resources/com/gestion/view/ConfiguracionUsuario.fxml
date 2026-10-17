@@ -34,7 +34,6 @@
                         left="35"/>
             </padding>
 
-
             <!-- ENCABEZADO -->
 
             <VBox alignment="CENTER"
@@ -44,13 +43,12 @@
                 <Label text="Configuración de acceso"
                        styleClass="titulo-pagina"/>
 
-                <Label text="Actualice las credenciales utilizadas para ingresar al sistema."
+                <Label text="Actualice las credenciales y el correo de recuperación del administrador."
                        wrapText="true"
                        textAlignment="CENTER"
                        styleClass="subtitulo-pagina"/>
 
             </VBox>
-
 
             <!-- AVISO DE CAMBIO OBLIGATORIO -->
 
@@ -59,7 +57,6 @@
                    wrapText="true"
                    maxWidth="680"
                    styleClass="credencial-aviso-obligatorio"/>
-
 
             <!-- TARJETA PRINCIPAL -->
 
@@ -74,8 +71,7 @@
                             left="28"/>
                 </padding>
 
-
-                <!-- USUARIO -->
+                <!-- DATOS DE ACCESO -->
 
                 <VBox spacing="3">
 
@@ -88,6 +84,7 @@
 
                 </VBox>
 
+                <!-- NOMBRE DE USUARIO -->
 
                 <VBox spacing="5">
 
@@ -104,6 +101,28 @@
 
                 </VBox>
 
+                <!-- CORREO ELECTRÓNICO -->
+
+                <VBox spacing="5">
+
+                    <Label text="Correo electrónico de recuperación"
+                           styleClass="campo-label"/>
+
+                    <TextField fx:id="txtCorreoElectronico"
+                               promptText="ejemplo@correo.com"
+                               prefHeight="42"/>
+
+                    <Label fx:id="checkCorreo"
+                           text="○ Correo electrónico válido"
+                           styleClass="credencial-validacion"/>
+
+                    <Label text="Este correo se utilizará para enviar el código de recuperación si olvida su contraseña."
+                           wrapText="true"
+                           styleClass="formulario-seccion-descripcion"/>
+
+                </VBox>
+
+                <!-- CONTRASEÑA ACTUAL -->
 
                 <VBox spacing="5">
 
@@ -120,13 +139,11 @@
 
                 </VBox>
 
-
-                <!-- SEPARADOR VISUAL -->
+                <!-- SEPARADOR -->
 
                 <Region prefHeight="1"
                         maxHeight="1"
                         styleClass="credencial-separador"/>
-
 
                 <!-- NUEVA CONTRASEÑA -->
 
@@ -141,6 +158,7 @@
 
                 </VBox>
 
+                <!-- CAMPO NUEVA CONTRASEÑA -->
 
                 <VBox spacing="7">
 
@@ -151,8 +169,7 @@
                                    promptText="Ingrese la nueva contraseña"
                                    prefHeight="42"/>
 
-
-                    <!-- VALIDACIONES -->
+                    <!-- VALIDACIONES DE SEGURIDAD -->
 
                     <GridPane hgap="18"
                               vgap="5">
@@ -191,6 +208,7 @@
 
                 </VBox>
 
+                <!-- CONFIRMAR CONTRASEÑA -->
 
                 <VBox spacing="5">
 
@@ -207,8 +225,7 @@
 
                 </VBox>
 
-
-                <!-- MENSAJE -->
+                <!-- MENSAJE DE RESULTADO -->
 
                 <Label fx:id="lblMensaje"
                        text=""
@@ -216,12 +233,11 @@
                        maxWidth="Infinity"
                        styleClass="credencial-mensaje"/>
 
-
-                <!-- ACCIÓN -->
+                <!-- GUARDAR -->
 
                 <HBox alignment="CENTER_RIGHT">
 
-                    <Button text="Guardar credenciales"
+                    <Button text="Guardar configuración"
                             onAction="#guardar"
                             prefWidth="220"
                             prefHeight="42"
