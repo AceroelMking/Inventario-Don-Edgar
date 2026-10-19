@@ -43,7 +43,7 @@
                 <Label text="Configuración de acceso"
                        styleClass="titulo-pagina"/>
 
-                <Label text="Actualice las credenciales y el correo de recuperación del administrador."
+                <Label text="Configure las credenciales del administrador y proteja el acceso mediante una clave de emergencia."
                        wrapText="true"
                        textAlignment="CENTER"
                        styleClass="subtitulo-pagina"/>
@@ -78,7 +78,7 @@
                     <Label text="Datos de acceso"
                            styleClass="formulario-seccion-titulo"/>
 
-                    <Label text="Defina el nombre de usuario que utilizará el administrador."
+                    <Label text="Defina el nombre de usuario que utilizará el administrador para ingresar al sistema."
                            wrapText="true"
                            styleClass="formulario-seccion-descripcion"/>
 
@@ -101,11 +101,11 @@
 
                 </VBox>
 
-                <!-- CORREO ELECTRÓNICO -->
+                <!-- CORREO ELECTRÓNICO OPCIONAL -->
 
                 <VBox spacing="5">
 
-                    <Label text="Correo electrónico de recuperación"
+                    <Label text="Correo electrónico (opcional)"
                            styleClass="campo-label"/>
 
                     <TextField fx:id="txtCorreoElectronico"
@@ -113,10 +113,10 @@
                                prefHeight="42"/>
 
                     <Label fx:id="checkCorreo"
-                           text="○ Correo electrónico válido"
+                           text="○ Correo opcional (si lo ingresa, debe ser válido)"
                            styleClass="credencial-validacion"/>
 
-                    <Label text="Este correo se utilizará para enviar el código de recuperación si olvida su contraseña."
+                    <Label text="Este dato es opcional y no se utiliza para recuperar la contraseña. El sistema funciona sin conexión a internet."
                            wrapText="true"
                            styleClass="formulario-seccion-descripcion"/>
 
@@ -152,7 +152,7 @@
                     <Label text="Nueva contraseña"
                            styleClass="formulario-seccion-titulo"/>
 
-                    <Label text="La contraseña debe cumplir todos los requisitos de seguridad."
+                    <Label text="Establezca una contraseña segura que cumpla todos los requisitos."
                            wrapText="true"
                            styleClass="formulario-seccion-descripcion"/>
 
@@ -222,6 +222,29 @@
                     <Label fx:id="checkCoinciden"
                            text="○ Las contraseñas deben coincidir"
                            styleClass="credencial-validacion"/>
+
+                </VBox>
+
+                <!-- SEPARADOR -->
+
+                <Region prefHeight="1"
+                        maxHeight="1"
+                        styleClass="credencial-separador"/>
+
+                <!-- INFORMACIÓN DE RECUPERACIÓN -->
+
+                <VBox spacing="7">
+
+                    <Label text="Recuperación de emergencia"
+                           styleClass="formulario-seccion-titulo"/>
+
+                    <Label text="La recuperación de contraseña se realiza mediante una clave de emergencia, sin utilizar correo electrónico ni conexión a internet."
+                           wrapText="true"
+                           styleClass="formulario-seccion-descripcion"/>
+
+                    <Label text="Si todavía no tiene una clave configurada, el sistema generará una automáticamente al guardar las credenciales. Deberá conservarla en un lugar seguro."
+                           wrapText="true"
+                           styleClass="formulario-seccion-descripcion"/>
 
                 </VBox>
 

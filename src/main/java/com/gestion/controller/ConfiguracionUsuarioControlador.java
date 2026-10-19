@@ -2,21 +2,35 @@
 package com.gestion.controller;
 
 import com.gestion.model.Usuario;
+import com.gestion.service.ContrasenaServicio;
+import com.gestion.service.RecuperacionContrasenaServicio;
 import com.gestion.service.UsuarioServicio;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
 public class ConfiguracionUsuarioControlador {
 
     // =====================================================
-    // SERVICIO
+    // SERVICIOS
     // =====================================================
 
     private final UsuarioServicio usuarioServicio =
         new UsuarioServicio();
+
+    private final ContrasenaServicio contrasenaServicio =
+        new ContrasenaServicio();
+
+    private final RecuperacionContrasenaServicio
+        recuperacionServicio =
+            new RecuperacionContrasenaServicio();
 
     private boolean cambioObligatorio = false;
 
@@ -102,48 +116,35 @@ public class ConfiguracionUsuarioControlador {
                 usuario.conseguirCorreoElectronico();
 
             if (correo != null) {
-
-                txtCorreoElectronico.setText(
-                    correo
-                );
+                txtCorreoElectronico.setText(correo);
             }
         }
 
-        txtNuevoUsuario.textProperty()
-            .addListener(
-                (obs, anterior, nuevo) ->
-                    actualizarChecks()
-            );
+        txtNuevoUsuario.textProperty().addListener(
+            (obs, anterior, nuevo) -> actualizarChecks()
+        );
 
-        txtCorreoElectronico.textProperty()
-            .addListener(
-                (obs, anterior, nuevo) ->
-                    actualizarChecks()
-            );
+        txtCorreoElectronico.textProperty().addListener(
+            (obs, anterior, nuevo) -> actualizarChecks()
+        );
 
-        txtContrasenaActual.textProperty()
-            .addListener(
-                (obs, anterior, nuevo) ->
-                    actualizarChecks()
-            );
+        txtContrasenaActual.textProperty().addListener(
+            (obs, anterior, nuevo) -> actualizarChecks()
+        );
 
-        txtNuevaContrasena.textProperty()
-            .addListener(
-                (obs, anterior, nuevo) ->
-                    actualizarChecks()
-            );
+        txtNuevaContrasena.textProperty().addListener(
+            (obs, anterior, nuevo) -> actualizarChecks()
+        );
 
-        txtConfirmarContrasena.textProperty()
-            .addListener(
-                (obs, anterior, nuevo) ->
-                    actualizarChecks()
-            );
+        txtConfirmarContrasena.textProperty().addListener(
+            (obs, anterior, nuevo) -> actualizarChecks()
+        );
 
         actualizarChecks();
     }
 
     // =====================================================
-    // CONFIGURAR CAMBIO OBLIGATORIO
+    // CAMBIO OBLIGATORIO
     // =====================================================
 
     public void configurarCambioObligatorio(
@@ -155,9 +156,10 @@ public class ConfiguracionUsuarioControlador {
 
             lblObligatorio.setText(
                 "Por seguridad debe cambiar el usuario "
-                + "y la contraseña predeterminados, "
-                + "y registrar un correo electrónico "
-                + "para recuperar el acceso al sistema."
+                + "y la contraseña predeterminados. "
+                + "También deberá guardar una clave "
+                + "de emergencia para recuperar el acceso "
+                + "sin conexión a internet."
             );
 
         } else {
@@ -170,14 +172,12 @@ public class ConfiguracionUsuarioControlador {
     // ACCIÓN DESPUÉS DE GUARDAR
     // =====================================================
 
-    public void colocarAccionAlGuardar(
-            Runnable accion) {
-
+    public void colocarAccionAlGuardar(Runnable accion) {
         this.accionAlGuardar = accion;
     }
 
     // =====================================================
-    // ACTUALIZAR VALIDACIONES VISUALES
+    // ACTUALIZAR VALIDACIONES
     // =====================================================
 
     private void actualizarChecks() {
@@ -209,38 +209,13 @@ public class ConfiguracionUsuarioControlador {
 
         boolean usuarioValido =
             usuario.length() >= 4
-            && usuario.matches(
-                "^[A-Za-z0-9._-]+$"
-            );
+            && usuario.matches("^[A-Za-z0-9._-]+$");
 
         boolean correoValido =
-            correo.matches(
+            correo.isBlank()
+            || correo.matches(
                 "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
             );
-
-        boolean actualIngresada =
-            !actual.isBlank();
-
-        boolean longitud =
-            nueva.length() >= 12;
-
-        boolean mayuscula =
-            nueva.matches(".*[A-Z].*");
-
-        boolean minuscula =
-            nueva.matches(".*[a-z].*");
-
-        boolean numero =
-            nueva.matches(".*[0-9].*");
-
-        boolean especial =
-            nueva.matches(
-                ".*[^A-Za-z0-9].*"
-            );
-
-        boolean coinciden =
-            !nueva.isEmpty()
-            && nueva.equals(confirmar);
 
         colocarEstado(
             checkUsuario,
@@ -251,54 +226,54 @@ public class ConfiguracionUsuarioControlador {
         colocarEstado(
             checkCorreo,
             correoValido,
-            "Correo electrónico válido"
+            "Correo opcional (si lo ingresa, debe ser válido)"
         );
 
         colocarEstado(
             checkActual,
-            actualIngresada,
+            !actual.isBlank(),
             "Contraseña actual requerida"
         );
 
         colocarEstado(
             checkLongitud,
-            longitud,
+            nueva.length() >= 12,
             "Mínimo 12 caracteres"
         );
 
         colocarEstado(
             checkMayuscula,
-            mayuscula,
+            nueva.matches(".*[A-Z].*"),
             "Una letra mayúscula"
         );
 
         colocarEstado(
             checkMinuscula,
-            minuscula,
+            nueva.matches(".*[a-z].*"),
             "Una letra minúscula"
         );
 
         colocarEstado(
             checkNumero,
-            numero,
+            nueva.matches(".*[0-9].*"),
             "Un número"
         );
 
         colocarEstado(
             checkEspecial,
-            especial,
+            nueva.matches(".*[^A-Za-z0-9].*"),
             "Un carácter especial"
         );
 
         colocarEstado(
             checkCoinciden,
-            coinciden,
+            !nueva.isEmpty() && nueva.equals(confirmar),
             "Las contraseñas deben coincidir"
         );
     }
 
     // =====================================================
-    // COLOCAR ESTADO DE VALIDACIÓN
+    // ESTADO DE VALIDACIÓN
     // =====================================================
 
     private void colocarEstado(
@@ -308,9 +283,7 @@ public class ConfiguracionUsuarioControlador {
 
         if (correcto) {
 
-            label.setText(
-                "✓ " + texto
-            );
+            label.setText("✓ " + texto);
 
             label.setStyle(
                 "-fx-text-fill: #2e7d32;"
@@ -318,9 +291,7 @@ public class ConfiguracionUsuarioControlador {
 
         } else {
 
-            label.setText(
-                "✗ " + texto
-            );
+            label.setText("✗ " + texto);
 
             label.setStyle(
                 "-fx-text-fill: #c62828;"
@@ -354,85 +325,6 @@ public class ConfiguracionUsuarioControlador {
 
         actualizarChecks();
 
-        // ================================================
-        // VALIDAR USUARIO
-        // ================================================
-
-        if (nuevoUsuario == null
-                || nuevoUsuario.isBlank()) {
-
-            mostrarError(
-                "Revise el campo de nuevo usuario."
-            );
-
-            txtNuevoUsuario.requestFocus();
-
-            return;
-        }
-
-        // ================================================
-        // VALIDAR CORREO
-        // ================================================
-
-        if (correo == null
-                || correo.isBlank()) {
-
-            mostrarError(
-                "Debe registrar un correo electrónico "
-                + "para recuperar su contraseña."
-            );
-
-            txtCorreoElectronico.requestFocus();
-
-            return;
-        }
-
-        correo = correo.trim();
-
-        if (!correo.matches(
-                "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-
-            mostrarError(
-                "Ingrese un correo electrónico válido."
-            );
-
-            txtCorreoElectronico.requestFocus();
-
-            return;
-        }
-
-        // ================================================
-        // VALIDAR CONTRASEÑA ACTUAL
-        // ================================================
-
-        if (actual == null
-                || actual.isBlank()) {
-
-            mostrarError(
-                "Ingrese la contraseña actual."
-            );
-
-            txtContrasenaActual.requestFocus();
-
-            return;
-        }
-
-        // ================================================
-        // VALIDAR NUEVA CONTRASEÑA
-        // ================================================
-
-        if (nueva == null
-                || nueva.isBlank()) {
-
-            mostrarError(
-                "Ingrese una nueva contraseña."
-            );
-
-            txtNuevaContrasena.requestFocus();
-
-            return;
-        }
-
         try {
 
             usuarioServicio.validarNombreUsuario(
@@ -443,56 +335,43 @@ public class ConfiguracionUsuarioControlador {
                 nueva
             );
 
-        } catch (IllegalArgumentException e) {
+            if (actual == null || actual.isBlank()) {
 
-            mostrarError(e.getMessage());
+                throw new IllegalArgumentException(
+                    "Ingrese la contraseña actual."
+                );
+            }
 
-            return;
-        }
+            if (!nueva.equals(confirmar)) {
 
-        // ================================================
-        // CONFIRMAR CONTRASEÑA
-        // ================================================
+                throw new IllegalArgumentException(
+                    "Las contraseñas nuevas no coinciden."
+                );
+            }
 
-        if (!nueva.equals(confirmar)) {
+            if (cambioObligatorio
+                    && "admin".equalsIgnoreCase(
+                        nuevoUsuario.trim())) {
 
-            mostrarError(
-                "Las contraseñas nuevas no coinciden."
-            );
+                throw new IllegalArgumentException(
+                    "Debe cambiar el nombre de usuario "
+                    + "predeterminado."
+                );
+            }
 
-            txtConfirmarContrasena.requestFocus();
+            String correoNormalizado =
+                correo == null ? "" : correo.trim();
 
-            return;
-        }
+            if (!correoNormalizado.isEmpty()
+                    && !correoNormalizado.matches(
+                        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
 
-        // ================================================
-        // CAMBIO OBLIGATORIO
-        // ================================================
+                throw new IllegalArgumentException(
+                    "Ingrese un correo electrónico válido."
+                );
+            }
 
-        if (cambioObligatorio
-                && "admin".equalsIgnoreCase(
-                    nuevoUsuario.trim())) {
-
-            mostrarError(
-                "Debe cambiar el nombre de usuario "
-                + "predeterminado."
-            );
-
-            txtNuevoUsuario.requestFocus();
-
-            return;
-        }
-
-        // ================================================
-        // GUARDAR CAMBIOS
-        // ================================================
-
-        try {
-
-            /*
-             * Primero se validan y actualizan
-             * las credenciales.
-             */
+            // Actualizar credenciales.
             usuarioServicio.cambiarCredenciales(
                 actual,
                 nuevoUsuario,
@@ -500,13 +379,26 @@ public class ConfiguracionUsuarioControlador {
                 confirmar
             );
 
-            /*
-             * Después se registra el correo
-             * electrónico del administrador.
-             */
-            usuarioServicio.actualizarCorreoAdministrador(
-                correo
+            // El correo ya no es obligatorio.
+            usuarioServicio.guardarCorreoOpcional(
+                correoNormalizado
             );
+
+            txtContrasenaActual.clear();
+            txtNuevaContrasena.clear();
+            txtConfirmarContrasena.clear();
+
+            actualizarChecks();
+
+            // Si no hay clave, generarla.
+            if (!recuperacionServicio.tieneClaveEmergencia()) {
+
+                String clave =
+                    recuperacionServicio
+                        .generarYGuardarClaveEmergencia();
+
+                mostrarClaveEmergencia(clave);
+            }
 
             lblMensaje.setStyle(
                 "-fx-text-fill: #2e7d32; "
@@ -514,17 +406,8 @@ public class ConfiguracionUsuarioControlador {
             );
 
             lblMensaje.setText(
-                "Credenciales y correo electrónico "
-                + "actualizados correctamente."
+                "Configuración guardada correctamente."
             );
-
-            txtContrasenaActual.clear();
-
-            txtNuevaContrasena.clear();
-
-            txtConfirmarContrasena.clear();
-
-            actualizarChecks();
 
             if (accionAlGuardar != null) {
                 accionAlGuardar.run();
@@ -541,11 +424,74 @@ public class ConfiguracionUsuarioControlador {
     }
 
     // =====================================================
+    // MOSTRAR CLAVE DE EMERGENCIA
+    // =====================================================
+
+    private void mostrarClaveEmergencia(String clave) {
+
+        Alert alerta = new Alert(
+            Alert.AlertType.INFORMATION
+        );
+
+        alerta.setTitle("Clave de emergencia");
+
+        alerta.setHeaderText(
+            "Guarde su clave de recuperación"
+        );
+
+        Label descripcion = new Label(
+            "Esta clave permitirá recuperar la contraseña "
+            + "sin correo electrónico ni internet.\n\n"
+            + "Cópiela o escríbala en un lugar seguro. "
+            + "No se volverá a mostrar automáticamente."
+        );
+
+        descripcion.setWrapText(true);
+
+        TextArea campoClave = new TextArea(clave);
+
+        campoClave.setEditable(false);
+        campoClave.setWrapText(true);
+        campoClave.setPrefRowCount(2);
+        campoClave.setPrefWidth(450);
+
+        CheckBox confirmacion = new CheckBox(
+            "Confirmo que guardé la clave de emergencia."
+        );
+
+        VBox contenido = new VBox(
+            15,
+            descripcion,
+            campoClave,
+            confirmacion
+        );
+
+        alerta.getDialogPane().setContent(contenido);
+
+        ButtonType botonContinuar =
+            new ButtonType("Continuar");
+
+        alerta.getButtonTypes().setAll(
+            botonContinuar
+        );
+
+        javafx.scene.Node boton =
+            alerta.getDialogPane().lookupButton(
+                botonContinuar
+            );
+
+        boton.disableProperty().bind(
+            confirmacion.selectedProperty().not()
+        );
+
+        alerta.showAndWait();
+    }
+
+    // =====================================================
     // MOSTRAR ERROR
     // =====================================================
 
-    private void mostrarError(
-            String mensaje) {
+    private void mostrarError(String mensaje) {
 
         lblMensaje.setStyle(
             "-fx-text-fill: #c62828; "

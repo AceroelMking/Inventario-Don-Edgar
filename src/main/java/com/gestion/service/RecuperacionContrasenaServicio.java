@@ -4,6 +4,7 @@ package com.gestion.service;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 
 import com.gestion.model.Usuario;
 import com.gestion.repository.UsuarioRepositorio;
@@ -11,28 +12,18 @@ import com.gestion.repository.UsuarioRepositorio;
 public class RecuperacionContrasenaServicio {
 
     // =====================================================
-    // CONFIGURACIÓN
+    // CONFIGURACIÓN DE SEGURIDAD
     // =====================================================
 
-    private static final int MINUTOS_VIGENCIA = 10;
     private static final int MAX_INTENTOS = 5;
-    private static final int SEGUNDOS_REENVIO = 60;
+    private static final int MINUTOS_BLOQUEO = 15;
+    private static final int TAMANO_CLAVE_BYTES = 16;
 
     private static final SecureRandom RANDOM =
         new SecureRandom();
 
     // =====================================================
-    // CÓDIGO TEMPORAL EN MEMORIA RAM
-    // =====================================================
-
-    private static String codigoRecuperacion;
-    private static String correoRecuperacion;
-    private static LocalDateTime vencimientoCodigo;
-    private static LocalDateTime ultimoEnvio;
-    private static int intentosFallidos = 0;
-
-    // =====================================================
-    // SERVICIOS
+    // DEPENDENCIAS
     // =====================================================
 
     private final UsuarioRepositorio usuarioRepositorio =
@@ -44,142 +35,252 @@ public class RecuperacionContrasenaServicio {
     private final ContrasenaServicio contrasenaServicio =
         new ContrasenaServicio();
 
-    private final CorreoServicio correoServicio =
-        new CorreoServicio();
-
     // =====================================================
-    // SOLICITAR CÓDIGO
+    // GENERAR CLAVE ALEATORIA
     // =====================================================
 
-    public synchronized void solicitarCodigo(
-            String correoElectronico) {
+    private String generarClaveAleatoria() {
 
-        if (correoElectronico == null
-                || correoElectronico.isBlank()) {
+        byte[] bytes = new byte[TAMANO_CLAVE_BYTES];
 
-            throw new IllegalArgumentException(
-                "Debe ingresar su correo electrónico."
-            );
-        }
+        RANDOM.nextBytes(bytes);
 
-        String correo = correoElectronico.trim();
+        String hexadecimal =
+            HexFormat.of()
+                .withUpperCase()
+                .formatHex(bytes);
 
-        if (!correo.matches(
-                "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+        StringBuilder clave = new StringBuilder();
 
-            throw new IllegalArgumentException(
-                "Ingrese un correo electrónico válido."
-            );
-        }
+        for (int i = 0; i < hexadecimal.length(); i += 4) {
 
-        Usuario usuario =
-            usuarioRepositorio.consultarPorCorreo(correo);
-
-        // No revelar si el correo existe.
-        if (usuario == null) {
-            return;
-        }
-
-        LocalDateTime ahora = LocalDateTime.now();
-
-        if (ultimoEnvio != null) {
-
-            long segundos =
-                Duration.between(
-                    ultimoEnvio,
-                    ahora
-                ).getSeconds();
-
-            if (segundos >= 0
-                    && segundos < SEGUNDOS_REENVIO) {
-
-                throw new IllegalStateException(
-                    "Espere un minuto antes de solicitar "
-                    + "otro código."
-                );
+            if (i > 0) {
+                clave.append("-");
             }
+
+            clave.append(
+                hexadecimal,
+                i,
+                i + 4
+            );
         }
 
-        // Generar código aleatorio de seis dígitos.
-        String nuevoCodigo = String.format(
-            "%06d",
-            RANDOM.nextInt(1_000_000)
-        );
-
-        /*
-         * Enviar primero el código.
-         * Si falla el envío, no reemplazamos
-         * el código anterior.
-         */
-        correoServicio.enviarCodigoRecuperacion(
-            usuario.conseguirCorreoElectronico(),
-            nuevoCodigo
-        );
-
-        // Guardar el código únicamente en RAM.
-        codigoRecuperacion = nuevoCodigo;
-
-        correoRecuperacion =
-            usuario.conseguirCorreoElectronico();
-
-        vencimientoCodigo =
-            LocalDateTime.now()
-                .plusMinutes(MINUTOS_VIGENCIA);
-
-        ultimoEnvio = LocalDateTime.now();
-
-        intentosFallidos = 0;
+        return clave.toString();
     }
 
     // =====================================================
-    // VERIFICAR CÓDIGO
+    // NORMALIZAR CLAVE
     // =====================================================
 
-    public synchronized boolean verificarCodigo(
-            String correoElectronico,
-            String codigoIngresado) {
+    private String normalizarClave(String clave) {
 
-        if (correoElectronico == null
-                || codigoIngresado == null) {
-            return false;
+        if (clave == null) {
+            return "";
         }
 
-        if (!codigoIngresado.matches("^[0-9]{6}$")) {
-            return false;
+        String limpia = clave.trim()
+            .toUpperCase()
+            .replaceAll("[\\s-]", "");
+
+        if (!limpia.matches("[0-9A-F]{32}")) {
+            return "";
         }
 
-        if (codigoRecuperacion == null
-                || correoRecuperacion == null
-                || vencimientoCodigo == null) {
-            return false;
-        }
+        StringBuilder resultado = new StringBuilder();
 
-        if (!LocalDateTime.now().isBefore(
-                vencimientoCodigo)) {
+        for (int i = 0; i < limpia.length(); i += 4) {
 
-            limpiarCodigo();
-            return false;
-        }
-
-        if (!correoRecuperacion.equalsIgnoreCase(
-                correoElectronico.trim())) {
-
-            return false;
-        }
-
-        if (intentosFallidos >= MAX_INTENTOS) {
-
-            limpiarCodigo();
-            return false;
-        }
-
-        if (!codigoRecuperacion.equals(codigoIngresado)) {
-
-            intentosFallidos++;
-
-            if (intentosFallidos >= MAX_INTENTOS) {
-                limpiarCodigo();
+            if (i > 0) {
+                resultado.append("-");
             }
+
+            resultado.append(
+                limpia,
+                i,
+                i + 4
+            );
+        }
+
+        return resultado.toString();
+    }
+
+    // =====================================================
+    // CONSULTAR CLAVE CONFIGURADA
+    // =====================================================
+
+    public boolean tieneClaveEmergencia() {
+
+        Usuario usuario =
+            usuarioRepositorio.consultarAdministrador();
+
+        return usuario != null
+            && usuario.conseguirClaveRecuperacionHash() != null
+            && !usuario.conseguirClaveRecuperacionHash().isBlank();
+    }
+
+    // =====================================================
+    // GENERAR Y GUARDAR CLAVE INICIAL
+    // =====================================================
+
+    /**
+     * Solo debe invocarse después de autenticar al
+     * administrador o durante la configuración inicial.
+     *
+     * El controlador debe mostrar la clave una sola vez.
+     */
+    public synchronized String generarYGuardarClaveEmergencia() {
+
+        Usuario usuario =
+            usuarioRepositorio.consultarAdministrador();
+
+        if (usuario == null) {
+            throw new IllegalStateException(
+                "No existe un administrador registrado."
+            );
+        }
+
+        String clave = generarClaveAleatoria();
+
+        String hash =
+            contrasenaServicio.generarHash(clave);
+
+        usuarioRepositorio.guardarClaveRecuperacion(
+            usuario.conseguirId(),
+            hash
+        );
+
+        return clave;
+    }
+
+    // =====================================================
+    // COMPROBAR BLOQUEO
+    // =====================================================
+
+    private void comprobarBloqueo(Usuario usuario) {
+
+        if (!usuario.estaRecuperacionBloqueada()) {
+            return;
+        }
+
+        long segundos =
+            Duration.between(
+                LocalDateTime.now(),
+                usuario.conseguirRecuperacionBloqueadaHasta()
+            ).getSeconds();
+
+        long minutos =
+            Math.max(1, (segundos + 59) / 60);
+
+        throw new IllegalStateException(
+            "La recuperación está bloqueada por seguridad. "
+            + "Intente nuevamente en aproximadamente "
+            + minutos + " minuto(s)."
+        );
+    }
+
+    // =====================================================
+    // REINICIAR BLOQUEO VENCIDO
+    // =====================================================
+
+    private void reiniciarBloqueoVencido(Usuario usuario) {
+
+        LocalDateTime bloqueo =
+            usuario.conseguirRecuperacionBloqueadaHasta();
+
+        if (bloqueo == null) {
+            return;
+        }
+
+        if (bloqueo.isAfter(LocalDateTime.now())) {
+            return;
+        }
+
+        usuarioRepositorio.actualizarBloqueoRecuperacion(
+            usuario.conseguirId(),
+            0,
+            null
+        );
+
+        usuario.colocarIntentosRecuperacionFallidos(0);
+        usuario.colocarRecuperacionBloqueadaHasta(null);
+    }
+
+    // =====================================================
+    // REGISTRAR INTENTO FALLIDO
+    // =====================================================
+
+    private void registrarIntentoFallido(Usuario usuario) {
+
+        int intentos =
+            usuario.conseguirIntentosRecuperacionFallidos() + 1;
+
+        if (intentos >= MAX_INTENTOS) {
+
+            LocalDateTime bloqueadoHasta =
+                LocalDateTime.now()
+                    .plusMinutes(MINUTOS_BLOQUEO);
+
+            usuarioRepositorio.actualizarBloqueoRecuperacion(
+                usuario.conseguirId(),
+                MAX_INTENTOS,
+                bloqueadoHasta
+            );
+
+            throw new IllegalStateException(
+                "Ha alcanzado cinco intentos fallidos. "
+                + "La recuperación estará bloqueada "
+                + "durante 15 minutos."
+            );
+        }
+
+        usuarioRepositorio.actualizarBloqueoRecuperacion(
+            usuario.conseguirId(),
+            intentos,
+            null
+        );
+    }
+
+    // =====================================================
+    // VERIFICAR CLAVE DE EMERGENCIA
+    // =====================================================
+
+    public synchronized boolean verificarClaveEmergencia(
+            String claveIngresada) {
+
+        Usuario usuario =
+            usuarioRepositorio.consultarAdministrador();
+
+        if (usuario == null) {
+            throw new IllegalStateException(
+                "No existe un administrador registrado."
+            );
+        }
+
+        String hashGuardado =
+            usuario.conseguirClaveRecuperacionHash();
+
+        if (hashGuardado == null || hashGuardado.isBlank()) {
+            throw new IllegalStateException(
+                "No existe una clave de emergencia configurada."
+            );
+        }
+
+        comprobarBloqueo(usuario);
+        reiniciarBloqueoVencido(usuario);
+
+        String claveNormalizada =
+            normalizarClave(claveIngresada);
+
+        boolean correcta =
+            !claveNormalizada.isEmpty()
+            && contrasenaServicio.verificar(
+                claveNormalizada,
+                hashGuardado
+            );
+
+        if (!correcta) {
+
+            registrarIntentoFallido(usuario);
 
             return false;
         }
@@ -188,19 +289,31 @@ public class RecuperacionContrasenaServicio {
     }
 
     // =====================================================
-    // RESTABLECER CONTRASEÑA
+    // RESTABLECER CONTRASEÑA Y RENOVAR CLAVE
     // =====================================================
 
-    public synchronized void restablecerContrasena(
-            String correoElectronico,
-            String codigoIngresado,
+    /**
+     * Devuelve la nueva clave de emergencia para
+     * mostrarla una única vez.
+     *
+     * El repositorio debe actualizar conjuntamente:
+     *
+     * - Hash de contraseña.
+     * - Hash de la nueva clave de emergencia.
+     * - Intentos fallidos.
+     * - Fecha de bloqueo.
+     *
+     * También debe comprobar que el hash anterior
+     * siga vigente.
+     */
+    public synchronized String restablecerYRenovarClave(
+            String claveEmergencia,
             String nuevaContrasena,
             String confirmarContrasena) {
 
         if (nuevaContrasena == null
                 || confirmarContrasena == null
-                || !nuevaContrasena.equals(
-                    confirmarContrasena)) {
+                || !nuevaContrasena.equals(confirmarContrasena)) {
 
             throw new IllegalArgumentException(
                 "Las contraseñas no coinciden."
@@ -211,64 +324,61 @@ public class RecuperacionContrasenaServicio {
             nuevaContrasena
         );
 
-        /*
-         * Comprobamos nuevamente el código
-         * antes de actualizar la contraseña.
-         */
-        if (!verificarCodigo(
-                correoElectronico,
-                codigoIngresado)) {
-
-            throw new IllegalStateException(
-                "El código es incorrecto, "
-                + "ha expirado o ya no está disponible."
-            );
-        }
-
         Usuario usuario =
-            usuarioRepositorio.consultarPorCorreo(
-                correoElectronico.trim()
-            );
+            usuarioRepositorio.consultarAdministrador();
 
         if (usuario == null) {
-
             throw new IllegalStateException(
-                "No se encontró la cuenta."
+                "No existe un administrador registrado."
             );
         }
 
-        String nuevaContrasenaHash =
+        // La verificación se repite en el momento
+        // de restablecer la contraseña.
+        if (!verificarClaveEmergencia(claveEmergencia)) {
+
+            throw new IllegalArgumentException(
+                "La clave de emergencia es incorrecta."
+            );
+        }
+
+        // Volver a consultar el estado vigente.
+        usuario =
+            usuarioRepositorio.consultarAdministrador();
+
+        String hashClaveAnterior =
+            usuario.conseguirClaveRecuperacionHash();
+
+        String hashNuevaContrasena =
             contrasenaServicio.generarHash(
                 nuevaContrasena
             );
 
-        /*
-         * El repositorio anterior permite
-         * actualizar la contraseña utilizando
-         * un código almacenado en SQLite.
-         *
-         * Como ahora el código solo está en RAM,
-         * necesitamos un método de repositorio
-         * que actualice directamente la contraseña.
-         */
-        usuarioRepositorio.actualizarContrasenaRecuperada(
-            usuario.conseguirId(),
-            nuevaContrasenaHash
-        );
+        String nuevaClave =
+            generarClaveAleatoria();
 
-        // Invalidar el código después de usarlo.
-        limpiarCodigo();
-    }
+        String hashNuevaClave =
+            contrasenaServicio.generarHash(
+                nuevaClave
+            );
 
-    // =====================================================
-    // LIMPIAR CÓDIGO
-    // =====================================================
+        boolean actualizado =
+            usuarioRepositorio.restablecerYRotarClaveEmergencia(
+                usuario.conseguirId(),
+                hashClaveAnterior,
+                hashNuevaContrasena,
+                hashNuevaClave
+            );
 
-    private static void limpiarCodigo() {
+        if (!actualizado) {
 
-        codigoRecuperacion = null;
-        correoRecuperacion = null;
-        vencimientoCodigo = null;
-        intentosFallidos = 0;
+            throw new IllegalStateException(
+                "No se pudo completar la recuperación. "
+                + "La clave podría haber sido utilizada "
+                + "o modificada anteriormente."
+            );
+        }
+
+        return nuevaClave;
     }
 }

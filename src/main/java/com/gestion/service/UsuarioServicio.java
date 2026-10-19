@@ -65,8 +65,7 @@ public class UsuarioServicio {
             return null;
         }
 
-        // Comprobar el bloqueo antes de verificar
-        // la contraseña.
+        // Comprobar bloqueo antes de verificar contraseña.
         if (usuario.estaBloqueado()) {
 
             long segundosRestantes =
@@ -89,8 +88,7 @@ public class UsuarioServicio {
             );
         }
 
-        // Si el bloqueo anterior ya terminó,
-        // reiniciar el contador.
+        // Reiniciar bloqueo cuando haya terminado.
         if (usuario.conseguirBloqueadoHasta() != null) {
 
             usuarioRepositorio.reiniciarIntentosFallidos(
@@ -100,7 +98,6 @@ public class UsuarioServicio {
             usuario.reiniciarIntentosFallidos();
         }
 
-        // Verificar la contraseña.
         boolean correcta =
             contrasenaServicio.verificar(
                 contrasena,
@@ -114,8 +111,7 @@ public class UsuarioServicio {
             return null;
         }
 
-        // Inicio de sesión correcto.
-        // Reiniciar cualquier intento fallido.
+        // Autenticación correcta.
         if (usuario.conseguirIntentosFallidos() > 0) {
 
             usuarioRepositorio.reiniciarIntentosFallidos(
@@ -205,7 +201,7 @@ public class UsuarioServicio {
     }
 
     // =====================================================
-    // COMPROBAR SI LA CUENTA ESTÁ BLOQUEADA
+    // COMPROBAR BLOQUEO
     // =====================================================
 
     public boolean estaCuentaBloqueada(
@@ -353,10 +349,18 @@ public class UsuarioServicio {
     }
 
     // =====================================================
-    // ACTUALIZAR CORREO DEL ADMINISTRADOR
+    // GUARDAR CORREO OPCIONAL
     // =====================================================
 
-    public void actualizarCorreoAdministrador(
+    /**
+     * Guarda el correo si se proporciona.
+     *
+     * La recuperación de contraseña ya no depende
+     * del correo electrónico.
+     *
+     * Si el campo está vacío, guarda NULL.
+     */
+    public void guardarCorreoOpcional(
             String correoElectronico) {
 
         Usuario usuario =
@@ -369,18 +373,14 @@ public class UsuarioServicio {
             );
         }
 
-        if (correoElectronico == null
-                || correoElectronico.isBlank()) {
+        String correo =
+            correoElectronico == null
+                ? ""
+                : correoElectronico.trim();
 
-            throw new IllegalArgumentException(
-                "El correo electrónico es obligatorio."
-            );
-        }
-
-        String correo = correoElectronico.trim();
-
-        if (!correo.matches(
-                "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+        if (!correo.isEmpty()
+                && !correo.matches(
+                    "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
 
             throw new IllegalArgumentException(
                 "El correo electrónico no es válido."
@@ -389,8 +389,30 @@ public class UsuarioServicio {
 
         usuarioRepositorio.actualizarCorreo(
             usuario.conseguirId(),
-            correo
+            correo.isEmpty() ? null : correo
         );
+    }
+
+    // =====================================================
+    // ACTUALIZAR CORREO DEL ADMINISTRADOR
+    // =====================================================
+
+    /**
+     * Se conserva por compatibilidad con otras
+     * partes de la aplicación.
+     */
+    public void actualizarCorreoAdministrador(
+            String correoElectronico) {
+
+        if (correoElectronico == null
+                || correoElectronico.isBlank()) {
+
+            throw new IllegalArgumentException(
+                "El correo electrónico es obligatorio."
+            );
+        }
+
+        guardarCorreoOpcional(correoElectronico);
     }
 
     // =====================================================
@@ -490,3 +512,4 @@ public class UsuarioServicio {
         }
     }
 }
+ 

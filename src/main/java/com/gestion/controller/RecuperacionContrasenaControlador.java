@@ -1,27 +1,30 @@
 
 package com.gestion.controller;
 
+import java.io.IOException;
+
 import com.gestion.service.RecuperacionContrasenaServicio;
 
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
 public class RecuperacionContrasenaControlador {
 
     // =====================================================
-    // SERVICIO DE RECUPERACIÓN
+    // SERVICIO
     // =====================================================
 
     private final RecuperacionContrasenaServicio
@@ -33,10 +36,7 @@ public class RecuperacionContrasenaControlador {
     // =====================================================
 
     @FXML
-    private TextField txtCorreo;
-
-    @FXML
-    private TextField txtCodigo;
+    private TextField txtClaveEmergencia;
 
     @FXML
     private PasswordField txtNuevaContrasena;
@@ -45,10 +45,7 @@ public class RecuperacionContrasenaControlador {
     private PasswordField txtConfirmarContrasena;
 
     @FXML
-    private VBox panelCorreo;
-
-    @FXML
-    private VBox panelCodigo;
+    private VBox panelClave;
 
     @FXML
     private VBox panelNuevaContrasena;
@@ -57,10 +54,7 @@ public class RecuperacionContrasenaControlador {
     private Label lblMensaje;
 
     @FXML
-    private Button btnEnviarCodigo;
-
-    @FXML
-    private Button btnVerificarCodigo;
+    private Button btnVerificarClave;
 
     @FXML
     private Button btnCambiarContrasena;
@@ -69,11 +63,9 @@ public class RecuperacionContrasenaControlador {
     // ESTADO DEL PROCESO
     // =====================================================
 
-    private String correoRecuperacion;
+    private String claveIngresada;
 
-    private String codigoVerificado;
-
-    private boolean codigoValidado = false;
+    private boolean claveVerificada = false;
 
     // =====================================================
     // INICIALIZACIÓN
@@ -82,184 +74,83 @@ public class RecuperacionContrasenaControlador {
     @FXML
     public void initialize() {
 
-        mostrarPanel(panelCorreo);
+        mostrarPanel(panelClave);
 
         lblMensaje.setText("");
 
         Platform.runLater(
-            () -> txtCorreo.requestFocus()
+            () -> txtClaveEmergencia.requestFocus()
         );
     }
 
     // =====================================================
-    // ENVIAR CÓDIGO POR CORREO
+    // VERIFICAR CLAVE DE EMERGENCIA
     // =====================================================
 
     @FXML
-    private void enviarCodigo() {
+    private void verificarClave() {
 
-        String correo = txtCorreo.getText();
+        String clave = txtClaveEmergencia.getText();
 
-        if (correo == null || correo.isBlank()) {
+        if (clave == null || clave.isBlank()) {
 
             mostrarError(
-                "Debe ingresar su correo electrónico."
+                "Debe ingresar su clave de emergencia."
             );
 
             return;
         }
 
-        correo = correo.trim();
-
-        if (!correo.matches(
-                "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-
-            mostrarError(
-                "Ingrese un correo electrónico válido."
-            );
-
-            return;
-        }
-
-        final String correoSolicitado = correo;
-
-        btnEnviarCodigo.setDisable(true);
-
-        mostrarInformacion(
-            "Procesando solicitud de recuperación..."
-        );
-
-        Task<Void> tarea = new Task<>() {
-
-            @Override
-            protected Void call() {
-
-                recuperacionServicio.solicitarCodigo(
-                    correoSolicitado
-                );
-
-                return null;
-            }
-        };
-
-        tarea.setOnSucceeded(evento -> {
-
-            btnEnviarCodigo.setDisable(false);
-
-            correoRecuperacion = correoSolicitado;
-
-            codigoVerificado = null;
-
-            codigoValidado = false;
-
-            txtCodigo.clear();
-
-            mostrarPanel(panelCodigo);
-
-            mostrarInformacion(
-                "Si el correo está registrado, "
-                + "recibirá un código de recuperación. "
-                + "Revise también la carpeta de spam."
-            );
-
-            txtCodigo.requestFocus();
-        });
-
-        tarea.setOnFailed(evento -> {
-
-            btnEnviarCodigo.setDisable(false);
-
-            mostrarError(
-                "No se pudo procesar la solicitud. "
-                + "Compruebe la conexión e inténtelo nuevamente."
-            );
-
-            tarea.getException().printStackTrace();
-        });
-
-        iniciarTarea(tarea);
-    }
-
-    // =====================================================
-    // VERIFICAR CÓDIGO
-    // =====================================================
-
-    @FXML
-    private void verificarCodigo() {
-
-        String codigo = txtCodigo.getText();
-
-        if (codigo == null || codigo.isBlank()) {
-
-            mostrarError(
-                "Debe ingresar el código de recuperación."
-            );
-
-            return;
-        }
-
-        codigo = codigo.trim();
-
-        if (!codigo.matches("^[0-9]{6}$")) {
-
-            mostrarError(
-                "El código debe contener 6 dígitos."
-            );
-
-            return;
-        }
-
-        btnVerificarCodigo.setDisable(true);
+        btnVerificarClave.setDisable(true);
 
         try {
 
-            boolean valido =
-                recuperacionServicio.verificarCodigo(
-                    correoRecuperacion,
-                    codigo
+            boolean correcta =
+                recuperacionServicio.verificarClaveEmergencia(
+                    clave
                 );
 
-            if (!valido) {
+            if (!correcta) {
 
-                codigoValidado = false;
+                claveVerificada = false;
+                claveIngresada = null;
 
-                codigoVerificado = null;
+                txtClaveEmergencia.clear();
 
                 mostrarError(
-                    "El código es incorrecto, ha expirado "
-                    + "o ya no está disponible."
+                    "La clave de emergencia es incorrecta."
                 );
-
-                txtCodigo.clear();
 
                 return;
             }
 
-            codigoVerificado = codigo;
+            claveIngresada = clave;
+            claveVerificada = true;
 
-            codigoValidado = true;
+            txtClaveEmergencia.clear();
 
             mostrarPanel(panelNuevaContrasena);
 
             mostrarInformacion(
-                "Código verificado. "
-                + "Ingrese su nueva contraseña."
+                "Clave verificada. Establezca una "
+                + "nueva contraseña segura."
             );
 
             txtNuevaContrasena.requestFocus();
 
+        } catch (IllegalStateException e) {
+
+            mostrarError(e.getMessage());
+
         } catch (RuntimeException e) {
 
-            e.printStackTrace();
-
             mostrarError(
-                "No se pudo verificar el código. "
-                + "Inténtelo nuevamente."
+                "No se pudo verificar la clave de emergencia."
             );
 
         } finally {
 
-            btnVerificarCodigo.setDisable(false);
+            btnVerificarClave.setDisable(false);
         }
     }
 
@@ -270,14 +161,13 @@ public class RecuperacionContrasenaControlador {
     @FXML
     private void cambiarContrasena() {
 
-        if (!codigoValidado
-                || codigoVerificado == null) {
+        if (!claveVerificada || claveIngresada == null) {
 
             mostrarError(
-                "Primero debe verificar el código."
+                "Primero debe verificar su clave de emergencia."
             );
 
-            mostrarPanel(panelCodigo);
+            mostrarPanel(panelClave);
 
             return;
         }
@@ -292,7 +182,7 @@ public class RecuperacionContrasenaControlador {
                 || nuevaContrasena.isBlank()) {
 
             mostrarError(
-                "Debe ingresar la nueva contraseña."
+                "Debe ingresar una nueva contraseña."
             );
 
             return;
@@ -308,8 +198,7 @@ public class RecuperacionContrasenaControlador {
             return;
         }
 
-        if (!nuevaContrasena.equals(
-                confirmarContrasena)) {
+        if (!nuevaContrasena.equals(confirmarContrasena)) {
 
             mostrarError(
                 "Las contraseñas no coinciden."
@@ -322,26 +211,30 @@ public class RecuperacionContrasenaControlador {
 
         try {
 
-            recuperacionServicio.restablecerContrasena(
-                correoRecuperacion,
-                codigoVerificado,
-                nuevaContrasena,
-                confirmarContrasena
-            );
+            /*
+             * El servicio deberá actualizar la contraseña,
+             * invalidar la clave anterior y guardar el hash
+             * de una nueva clave en una sola transacción.
+             *
+             * La clave nueva se devuelve para mostrarla
+             * una única vez al administrador.
+             */
+            String nuevaClave =
+                recuperacionServicio
+                    .restablecerYRenovarClave(
+                        claveIngresada,
+                        nuevaContrasena,
+                        confirmarContrasena
+                    );
 
-            codigoValidado = false;
+            claveIngresada = null;
+            claveVerificada = false;
 
-            codigoVerificado = null;
-
-            txtCodigo.clear();
-
+            txtClaveEmergencia.clear();
             txtNuevaContrasena.clear();
-
             txtConfirmarContrasena.clear();
 
-            mostrarInformacion(
-                "Contraseña actualizada correctamente."
-            );
+            mostrarNuevaClave(nuevaClave);
 
             regresarAcceso();
 
@@ -353,18 +246,15 @@ public class RecuperacionContrasenaControlador {
 
             mostrarError(e.getMessage());
 
-            codigoValidado = false;
+            claveIngresada = null;
+            claveVerificada = false;
 
-            codigoVerificado = null;
-
-            mostrarPanel(panelCodigo);
+            mostrarPanel(panelClave);
 
         } catch (RuntimeException e) {
 
-            e.printStackTrace();
-
             mostrarError(
-                "No se pudo actualizar la contraseña."
+                "No se pudo restablecer la contraseña."
             );
 
         } finally {
@@ -374,31 +264,72 @@ public class RecuperacionContrasenaControlador {
     }
 
     // =====================================================
-    // VOLVER AL FORMULARIO DE CORREO
+    // MOSTRAR NUEVA CLAVE DE EMERGENCIA
     // =====================================================
 
-    @FXML
-    private void volverCorreo() {
+    private void mostrarNuevaClave(String clave) {
 
-        correoRecuperacion = null;
+        Alert alerta = new Alert(
+            Alert.AlertType.INFORMATION
+        );
 
-        codigoVerificado = null;
+        alerta.setTitle("Nueva clave de emergencia");
 
-        codigoValidado = false;
+        alerta.setHeaderText(
+            "Contraseña restablecida correctamente"
+        );
 
-        txtCodigo.clear();
+        Label descripcion = new Label(
+            "La clave anterior ha sido invalidada.\n\n"
+            + "Guarde esta NUEVA clave de emergencia "
+            + "en un lugar seguro. La necesitará si "
+            + "vuelve a olvidar su contraseña.\n\n"
+            + "Esta clave no se volverá a mostrar."
+        );
 
-        txtNuevaContrasena.clear();
+        descripcion.setWrapText(true);
 
-        txtConfirmarContrasena.clear();
+        TextArea campoClave = new TextArea(clave);
 
-        mostrarPanel(panelCorreo);
+        campoClave.setEditable(false);
+        campoClave.setWrapText(true);
+        campoClave.setPrefRowCount(2);
+        campoClave.setPrefWidth(450);
 
-        lblMensaje.setText("");
+        CheckBox confirmacion = new CheckBox(
+            "Confirmo que guardé mi nueva clave."
+        );
+
+        VBox contenido = new VBox(
+            15,
+            descripcion,
+            campoClave,
+            confirmacion
+        );
+
+        alerta.getDialogPane().setContent(contenido);
+
+        ButtonType botonContinuar =
+            new ButtonType("Continuar");
+
+        alerta.getButtonTypes().setAll(
+            botonContinuar
+        );
+
+        javafx.scene.Node boton =
+            alerta.getDialogPane().lookupButton(
+                botonContinuar
+            );
+
+        boton.disableProperty().bind(
+            confirmacion.selectedProperty().not()
+        );
+
+        alerta.showAndWait();
     }
 
     // =====================================================
-    // REGRESAR AL INICIO DE SESIÓN
+    // REGRESAR AL LOGIN
     // =====================================================
 
     @FXML
@@ -432,8 +363,6 @@ public class RecuperacionContrasenaControlador {
 
         } catch (IOException e) {
 
-            e.printStackTrace();
-
             mostrarError(
                 "No se pudo regresar al inicio de sesión."
             );
@@ -441,19 +370,14 @@ public class RecuperacionContrasenaControlador {
     }
 
     // =====================================================
-    // MOSTRAR PANEL CORRESPONDIENTE
+    // MOSTRAR PANEL ACTIVO
     // =====================================================
 
     private void mostrarPanel(VBox panelActivo) {
 
         configurarPanel(
-            panelCorreo,
-            panelActivo == panelCorreo
-        );
-
-        configurarPanel(
-            panelCodigo,
-            panelActivo == panelCodigo
+            panelClave,
+            panelActivo == panelClave
         );
 
         configurarPanel(
@@ -467,12 +391,11 @@ public class RecuperacionContrasenaControlador {
             boolean visible) {
 
         panel.setVisible(visible);
-
         panel.setManaged(visible);
     }
 
     // =====================================================
-    // MOSTRAR MENSAJES
+    // MENSAJES
     // =====================================================
 
     private void mostrarError(String mensaje) {
@@ -493,18 +416,5 @@ public class RecuperacionContrasenaControlador {
         );
 
         lblMensaje.setText(mensaje);
-    }
-
-    // =====================================================
-    // EJECUTAR TAREA SIN BLOQUEAR JAVAFX
-    // =====================================================
-
-    private void iniciarTarea(Task<?> tarea) {
-
-        Thread hilo = new Thread(tarea);
-
-        hilo.setDaemon(true);
-
-        hilo.start();
     }
 }

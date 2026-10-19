@@ -767,4 +767,117 @@ public class UsuarioRepositorio {
             throw new IllegalStateException(mensaje);
         }
     }
+
+
+/**
+ * Restablece la contraseña del administrador y renueva
+ * su clave de emergencia mediante una única operación
+ * atómica en SQLite.
+ *
+ * La clave anterior debe seguir vigente para que
+ * la actualización se realice.
+ *
+ * @param idUsuario Identificador del administrador.
+ * @param hashClaveAnterior Hash de la clave utilizada.
+ * @param hashNuevaContrasena Hash de la nueva contraseña.
+ * @param hashNuevaClave Hash de la nueva clave de emergencia.
+ * @return true si se actualizó exactamente un usuario.
+*/
+
+/**
+ * Restablece la contraseña del administrador
+ * y renueva su clave de emergencia.
+ *
+ * Ambas modificaciones se realizan mediante
+ * una única sentencia UPDATE de SQLite.
+ */
+    public boolean restablecerYRotarClaveEmergencia(
+            int idUsuario,
+            String hashClaveAnterior,
+            String hashNuevaContrasena,
+            String hashNuevaClave) {
+
+        if (idUsuario <= 0
+                || hashClaveAnterior == null
+                || hashClaveAnterior.isBlank()
+                || hashNuevaContrasena == null
+                || hashNuevaContrasena.isBlank()
+                || hashNuevaClave == null
+                || hashNuevaClave.isBlank()) {
+
+            throw new IllegalArgumentException(
+                "Los datos para restablecer la contraseña "
+                + "no son válidos."
+            );
+        }
+
+        String sql = """
+            UPDATE usuario
+            SET
+                contrasena_hash = ?,
+                clave_recuperacion_hash = ?,
+                intentos_recuperacion_fallidos = 0,
+                recuperacion_bloqueada_hasta = NULL,
+                intentos_fallidos = 0,
+                bloqueado_hasta = NULL,
+                codigo_recuperacion_hash = NULL,
+                codigo_recuperacion_expira = NULL
+            WHERE
+                id = ?
+                AND clave_recuperacion_hash = ?
+                AND (
+                    recuperacion_bloqueada_hasta IS NULL
+                    OR recuperacion_bloqueada_hasta <= ?
+                )
+            """;
+
+        try (
+            Connection conexion =
+                ConexionBaseDatos.conectar();
+
+            PreparedStatement sentencia =
+                conexion.prepareStatement(sql)
+        ) {
+
+            sentencia.setString(
+                1,
+                hashNuevaContrasena
+            );
+
+            sentencia.setString(
+                2,
+                hashNuevaClave
+            );
+
+            sentencia.setInt(
+                3,
+                idUsuario
+            );
+
+            sentencia.setString(
+                4,
+                hashClaveAnterior
+            );
+
+            sentencia.setString(
+                5,
+                LocalDateTime.now().toString()
+            );
+
+            int filasActualizadas =
+                sentencia.executeUpdate();
+
+            return filasActualizadas == 1;
+
+        } catch (SQLException e) {
+
+            throw new IllegalStateException(
+                "No se pudo restablecer la contraseña "
+                + "y renovar la clave de emergencia.",
+                e
+            );
+        }
+    }
+
+
 }
